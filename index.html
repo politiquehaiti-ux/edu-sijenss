@@ -808,6 +808,23 @@
                             <label data-t="bannerColor" style="font-size:0.75rem;">Couleur des bandes</label>
                             <input type="color" id="paramBannerColor" value="#1e3a5f" onchange="applyParams()" style="padding:0;height:30px;" />
                         </div>
+                        <div class="form-group" style="margin-bottom:0.5rem;padding-top:0.4rem;border-top:1px solid var(--border);">
+                            <label style="font-size:0.75rem;font-weight:600;">🖨️ Reglaj enpresyon (endepandan pa fonksyonalite)</label>
+                            <select id="paramPrintTarget" onchange="onSelectPrintSettingsPage(this.value)" style="padding:0.2rem 0.4rem;font-size:0.75rem;width:100%;margin-top:0.2rem;">
+                                <option value="personnel">👔 Personnel</option>
+                                <option value="resultats">📈 Résultats / Décision</option>
+                                <option value="rezime-matiere">📊 Rezime Matyè</option>
+                                <option value="eleves">👨‍🎓 Élèves</option>
+                                <option value="classes">🏫 Classes</option>
+                                <option value="finance">💰 Finance</option>
+                                <option value="cantine">🍲 Cantine</option>
+                                <option value="emploi">📅 Emploi du Temps</option>
+                                <option value="presences">📋 Présences</option>
+                                <option value="comites">🤝 Comités</option>
+                                <option value="inventaire">📦 Inventaire</option>
+                                <option value="contacts">📇 Kontak</option>
+                            </select>
+                        </div>
                         <div class="form-group" style="margin-bottom:0.5rem;">
                             <label data-t="colWidth" style="font-size:0.75rem;">Lajè kolòn (px)</label>
                             <input type="range" id="paramColWidth" min="50" max="200" value="80" oninput="applyDisplayParams()" style="width:100%;" />
@@ -818,6 +835,7 @@
                             <input type="range" id="paramCellPadding" min="2" max="16" value="8" oninput="applyDisplayParams()" style="width:100%;" />
                             <span id="paramCellPaddingVal" style="font-size:0.75rem;">8px</span>
                         </div>
+                        <p class="text-sm text-muted" style="font-size:0.65rem;">Chak fonksyonalite (Personnel, Rezime Matyè, Résultats, elatriye) gen pwòp reglaj li — chanjman sou youn pa afekte lòt yo.</p>
                         <button class="btn btn-primary" onclick="applyParams()" data-t="apply" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Appliquer</button>
                     </div>
                     <div class="card" style="padding:0.8rem;">
@@ -2781,12 +2799,12 @@
 
         // --- === DISTRIBISYON KLAS & MATYE === ---
         function openClassDistribution() {
-            var personnel = STATE.personnel.filter(function(p) {
-                return p.role === 'enseignant' || p.role === 'Enseignant' || p.role === 'enseignant(e)' || p
-                    .role === 'Professeur';
+            // Tout pèsonèl parèt nan lis la (yon moun ka gen 2 wòl, tankou direktè ki anseye tou)
+            var personnel = STATE.personnel.slice().sort(function(a, b) {
+                return (a.nom || '').localeCompare(b.nom || '');
             });
             if (personnel.length === 0) {
-                alert('Pa gen anseyan nan lis la. Ajoute anseyan anvan.');
+                alert('Pa gen pèsonèl nan lis la. Ajoute pèsonèl anvan.');
                 return;
             }
             var allMatieres = STATE.matieres.map(function(m) { return m.code; });
@@ -3295,12 +3313,12 @@
                 html += "<div class=\"resume-matiere-card\" data-classe=\"" + classe +
                     "\">\n                <div class=\"classe-title\" style=\"font-weight:700;font-size:0.9rem;color:var(--primary);border-bottom:2px solid var(--border);padding-bottom:0.2rem;margin-bottom:0.3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.2rem;\">\n                    <span>\uD83D\uDCD8 " +
                     classe + " (" + students.length + " el\xE8v) - Diviz\xE8: " + div +
-                    "</span>\n                    <div class=\"controle-select\" style=\"display:flex;align-items:center;gap:0.2rem;\">\n                        <label style=\"font-size:0.6rem;\">Contr\xF4le:</label>\n                        <select class=\"controle-select-dropdown\" onchange=\"renderResumeControle('" +
+                    "</span>\n                    <div class=\"controle-select\" style=\"display:flex;align-items:center;gap:0.2rem;\">\n                        <label style=\"font-size:0.6rem;\">Contr\xF4le:</label>\n                        <select class=\"controle-select-dropdown\" onchange=\"onSelectResumeControle('" +
                     classe + "', this.value)\" style=\"padding:0.1rem 0.3rem;font-size:0.7rem;width:auto;border:1px solid var(--border);border-radius:4px;background:#fff;\">\n                            " +
                     controleLabels.map(function(label, idx) {
                         return "<option value=\"" + (idx + 1) + "\" " + (idx === 0 ? 'selected' : '') +
                             ">" + label + "</option>";
-                    }).join('') +
+                    }).join('') + "<option value=\"all\">TOUS (C1-C4)</option>" +
                     "\n                        </select>\n                    </div>\n                </div>\n                <div class=\"resume-notes-section\" id=\"resumeNotes_" +
                     classe +
                     "\">\n                    <div class=\"section-title\">\n                        <span>\uD83D\uDCDD Sezi Not - " +
@@ -3309,19 +3327,31 @@
                     classe +
                     "')\" style=\"padding:0.05rem 0.4rem;font-size:0.6rem;\">\uD83D\uDD0D Ale nan klas</button>\n                        </span>\n                    </div>\n                    <div class=\"resume-notes-content\" id=\"resumeNotesContent_" +
                     classe +
-                    "\">\n                        <p class=\"text-muted\" style=\"font-size:0.7rem;\">Chwazi yon kontw\xF2l anwo a pou w\xE8 not yo.</p>\n                    </div>\n                </div>\n                <div class=\"resume-controle-content\" id=\"resumeControle_" +
-                    classe + "_1\"></div>\n            </div>";
+                    "\">\n                        <p class=\"text-muted\" style=\"font-size:0.7rem;\">Chwazi yon kontw\xF2l anwo a pou w\xE8 not yo.</p>\n                    </div>\n                </div>\n                <div class=\"resume-controle-wrap\" id=\"resumeControleWrap_" + classe + "\">\n                    <div class=\"resume-controle-content\" id=\"resumeControle_" + classe + "_1\" style=\"display:block;\"></div>\n                    <div class=\"resume-controle-content\" id=\"resumeControle_" + classe + "_2\" style=\"display:none;\"></div>\n                    <div class=\"resume-controle-content\" id=\"resumeControle_" + classe + "_3\" style=\"display:none;\"></div>\n                    <div class=\"resume-controle-content\" id=\"resumeControle_" + classe + "_4\" style=\"display:none;\"></div>\n                </div>\n            </div>";
             });
             container.innerHTML = html ||
                 '<div class="card text-center text-muted" style="padding:1rem;font-size:0.85rem;">Pa gen elèv nan klas sa yo.</div>';
             filterClasses.forEach(function(classe) {
                 var students = getStudentsByClasse(classe);
                 if (students.length > 0) {
-                    renderResumeControle(classe, '1');
+                    ['1', '2', '3', '4'].forEach(function(c) { renderResumeControle(classe, c); });
                     renderResumeNotes(classe, '1');
                 }
             });
             applyTranslations();
+        }
+
+        function onSelectResumeControle(classe, value) {
+            ['1', '2', '3', '4'].forEach(function(c) {
+                var el = document.getElementById('resumeControle_' + classe + '_' + c);
+                if (el) el.style.display = (value === 'all' || value === c) ? 'block' : 'none';
+            });
+            if (value === 'all') {
+                var notesC = document.getElementById('resumeNotesContent_' + classe);
+                if (notesC) notesC.innerHTML = '<p class="text-muted" style="font-size:0.7rem;">Chwazi yon sèl kontwòl (C1-C4) nan lis anwo a pou modifye not yo.</p>';
+            } else {
+                renderResumeNotes(classe, value);
+            }
         }
 
         function renderResumeNotes(classe, controle) {
@@ -3436,7 +3466,7 @@
             var hideNotes = STATE.parametres.hideNotes && role !== 'admin';
             var html = "<h4 style=\"font-size:0.8rem;margin-top:0.5rem;padding-top:0.3rem;border-top:2px solid var(--border);\">\uD83D\uDCCA Rezime " +
                 label + " - " + classe +
-                "</h4>\n            <div class=\"table-wrap scroll-horizontal scroll-vertical\" style=\"max-height:none;\">\n            <table>\n                <thead>\n                    <tr>\n                        <th style=\"font-size:0.5rem;padding:0.08rem 0.12rem;\">NISU</th>\n                        <th style=\"font-size:0.5rem;padding:0.08rem 0.12rem;\">Kod</th>\n                        <th style=\"font-size:0.5rem;padding:0.08rem 0.12rem;\">El\xE8v</th>";
+                "</h4>\n            <div class=\"table-wrap scroll-horizontal scroll-vertical\" style=\"max-height:400px;\">\n            <table>\n                <thead>\n                    <tr>\n                        <th style=\"font-size:0.5rem;padding:0.08rem 0.12rem;\">NISU</th>\n                        <th style=\"font-size:0.5rem;padding:0.08rem 0.12rem;\">Kod</th>\n                        <th style=\"font-size:0.5rem;padding:0.08rem 0.12rem;\">El\xE8v</th>";
             matieres.forEach(function(m) {
                 html += "<th style=\"font-size:0.45rem;padding:0.06rem 0.1rem;\">" + m.code + "/" + m.maxPoints + "</th>";
             });
@@ -5753,10 +5783,7 @@
             document.getElementById('paramAngEsp1a6').checked = !!p.angEsp1a6;
             if (document.getElementById('paramAngEsp1a6')) document.getElementById('paramAngEsp1a6').checked = !!p.angEsp1a6;
             document.getElementById('paramLogoShape').value = p.logoShape || 'rond';
-            document.getElementById('paramColWidth').value = p.colWidth || 80;
-            document.getElementById('paramColWidthVal').textContent = (p.colWidth || 80) + 'px';
-            document.getElementById('paramCellPadding').value = p.cellPadding || 8;
-            document.getElementById('paramCellPaddingVal').textContent = (p.cellPadding || 8) + 'px';
+            if (document.getElementById('paramPrintTarget')) onSelectPrintSettingsPage(document.getElementById('paramPrintTarget').value);
             document.getElementById('paramYearColor').value = p.yearColors[getYear()] || p.bannerColor || '#1e3a5f';
             document.getElementById('paramBannerWidth').value = p.bannerWidth || 800;
             document.getElementById('paramBannerHeight').value = p.bannerHeight || 300;
@@ -6600,18 +6627,52 @@
             spawnHearts();
         }
 
-        // --- === AFICHÈ === ---
+        // --- === AFICHÈ (reglaj enpresyon endepandan pa fonksyonalite) === ---
+        var PRINT_SETTINGS_PAGES = ['personnel', 'resultats', 'rezime-matiere', 'eleves', 'classes',
+            'finance', 'cantine', 'emploi', 'presences', 'comites', 'inventaire', 'contacts'
+        ];
+
+        function getPrintSettings(pageId) {
+            if (!STATE.parametres.printSettings) STATE.parametres.printSettings = {};
+            if (!STATE.parametres.printSettings[pageId]) {
+                STATE.parametres.printSettings[pageId] = { colWidth: 80, cellPadding: 8 };
+            }
+            return STATE.parametres.printSettings[pageId];
+        }
+
+        function applyPrintSettingsToPage(pageId) {
+            var s = getPrintSettings(pageId);
+            var el = document.getElementById('page-' + pageId);
+            if (!el) return;
+            el.style.setProperty('--col-spacing', s.colWidth + 'px');
+            el.style.setProperty('--cell-padding', s.cellPadding + 'px');
+            el.style.setProperty('--table-font-size', Math.max(0.55, Math.min(0.85, 80 / s.colWidth *
+                0.75)) + 'rem');
+        }
+
+        function applyAllPrintSettings() {
+            PRINT_SETTINGS_PAGES.forEach(applyPrintSettingsToPage);
+        }
+
+        function onSelectPrintSettingsPage(pageId) {
+            var s = getPrintSettings(pageId);
+            document.getElementById('paramColWidth').value = s.colWidth;
+            document.getElementById('paramColWidthVal').textContent = s.colWidth + 'px';
+            document.getElementById('paramCellPadding').value = s.cellPadding;
+            document.getElementById('paramCellPaddingVal').textContent = s.cellPadding + 'px';
+        }
+
         function applyDisplayParams() {
-            var colWidth = document.getElementById('paramColWidth').value || 80;
-            var cellPad = document.getElementById('paramCellPadding').value || 8;
-            document.documentElement.style.setProperty('--col-spacing', colWidth + 'px');
-            document.documentElement.style.setProperty('--cell-padding', cellPad + 'px');
-            document.documentElement.style.setProperty('--table-font-size', Math.max(0.55, Math.min(0.85, 80 /
-                colWidth * 0.75)) + 'rem');
+            var pageSel = document.getElementById('paramPrintTarget');
+            var pageId = pageSel ? pageSel.value : 'personnel';
+            var colWidth = parseInt(document.getElementById('paramColWidth').value) || 80;
+            var cellPad = parseInt(document.getElementById('paramCellPadding').value) || 8;
             document.getElementById('paramColWidthVal').textContent = colWidth + 'px';
             document.getElementById('paramCellPaddingVal').textContent = cellPad + 'px';
-            STATE.parametres.colWidth = parseInt(colWidth);
-            STATE.parametres.cellPadding = parseInt(cellPad);
+            var s = getPrintSettings(pageId);
+            s.colWidth = colWidth;
+            s.cellPadding = cellPad;
+            applyPrintSettingsToPage(pageId);
             saveState();
         }
 
@@ -7356,6 +7417,7 @@
 
         function initApp() {
             loadExcellence();
+            safeCall(applyAllPrintSettings, 'applyAllPrintSettings');
             safeCall(renderAccueilMenu, 'renderAccueilMenu');
             safeCall(renderDashboard, 'renderDashboard');
             safeCall(renderStudents, 'renderStudents');
@@ -7564,6 +7626,8 @@
         window.importAccueilBanner = importAccueilBanner;
         window.removeAccueilBanner = removeAccueilBanner;
         window.applyDisplayParams = applyDisplayParams;
+        window.onSelectPrintSettingsPage = onSelectPrintSettingsPage;
+        window.applyAllPrintSettings = applyAllPrintSettings;
         window.applyYearColor = applyYearColor;
         window.openClassDistribution = openClassDistribution;
         window.saveClassDistribution = saveClassDistribution;
@@ -7606,6 +7670,7 @@
         window.renderSecuritePermissions = renderSecuritePermissions;
         window.renderProfile = renderProfile;
         window.renderResumeControle = renderResumeControle;
+        window.onSelectResumeControle = onSelectResumeControle;
         window.renderResumeNotes = renderResumeNotes;
         window.getStudentCode = getStudentCode;
         window.highlightStudentRow = highlightStudentRow;
