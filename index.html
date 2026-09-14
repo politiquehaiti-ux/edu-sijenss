@@ -844,6 +844,38 @@
                         <button class="btn btn-primary" onclick="applyParams()" data-t="apply" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Appliquer</button>
                     </div>
                     <div class="card" style="padding:0.8rem;">
+                        <h4 style="font-size:0.85rem;">✒️ Siyati Direktè & Sceau Lekòl</h4>
+                        <p class="text-sm text-muted" style="font-size:0.65rem;">Yo ap parèt pa defo sou tout dokiman (bilten, atestasyon, resi, elatriye).</p>
+                        <div class="grid grid-2" style="gap:0.5rem;">
+                            <div>
+                                <div id="signaturePreview" class="text-center" style="padding:0.3rem;border:1px dashed var(--border);border-radius:8px;margin-bottom:0.3rem;">
+                                    <img id="paramSignatureImg" src="" alt="Siyati" style="max-height:50px;max-width:100%;display:none;" />
+                                    <div id="paramSignaturePlaceholder" class="text-muted text-sm" style="font-size:0.7rem;">Okenn siyati</div>
+                                </div>
+                                <div class="flex gap-1" style="flex-wrap:wrap;">
+                                    <button class="btn" onclick="document.getElementById('paramSignatureFile').click()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">📁 Siyati</button>
+                                    <input type="file" id="paramSignatureFile" accept="image/*" style="display:none;" onchange="importDirectorSignature(event)" />
+                                    <button class="btn btn-danger" onclick="removeDirectorSignature()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div id="sealPreview" class="text-center" style="padding:0.3rem;border:1px dashed var(--border);border-radius:8px;margin-bottom:0.3rem;">
+                                    <img id="paramSealImg" src="" alt="Sceau" style="max-height:60px;max-width:100%;display:none;" />
+                                    <div id="paramSealPlaceholder" class="text-muted text-sm" style="font-size:0.7rem;">Okenn sceau</div>
+                                </div>
+                                <div class="flex gap-1" style="flex-wrap:wrap;">
+                                    <button class="btn" onclick="document.getElementById('paramSealFile').click()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">📁 Sceau</button>
+                                    <input type="file" id="paramSealFile" accept="image/*" style="display:none;" onchange="importSchoolSeal(event)" />
+                                    <button class="btn btn-danger" onclick="removeSchoolSeal()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mt-1">
+                            <label style="font-size:0.7rem;">Non Direktè (parèt anba siyati a)</label>
+                            <input type="text" id="paramDirectorNom" placeholder="CHARLES Joseph Mary" style="padding:0.2rem 0.4rem;font-size:0.75rem;" onchange="saveDirectorNom(this.value)" />
+                        </div>
+                    </div>
+                    <div class="card" style="padding:0.8rem;">
                         <h4 data-t="logo" style="font-size:0.85rem;">🖼 Logo</h4>
                         <div id="logoPreview" class="text-center" style="padding:0.3rem;border:1px dashed var(--border);border-radius:8px;margin-bottom:0.3rem;">
                             <img id="paramLogoImg" src="" alt="Logo" style="max-height:60px;max-width:100%;display:none;" />
@@ -1503,6 +1535,25 @@
             return getMatieresForClasse(classe).reduce(function(sum, m) { return sum + (m.maxPoints || 0); }, 0);
         }
 
+        // --- === SIYATI DIREKTÈ + SCEAU LEKÒL (pou tout dokiman) === ---
+        function buildSignatureBlockHtml(rightLabel) {
+            var sig = STATE.parametres.directorSignature || '';
+            var seal = STATE.parametres.schoolSeal || '';
+            var directorNom = STATE.parametres.directorNom || 'CHARLES Joseph Mary';
+            var sigImg = sig ?
+                ("<img src=\"" + sig +
+                    "\" style=\"max-height:45px;max-width:150px;display:block;margin:0 auto 0.1rem;\" />") :
+                '';
+            var sealImg = seal ?
+                ("<img src=\"" + seal + "\" style=\"max-height:70px;max-width:70px;opacity:0.9;\" />") : '';
+            return "<div class=\"signature\" style=\"display:flex;justify-content:space-between;align-items:flex-end;margin-top:1.2rem;\">" +
+                "<div style=\"text-align:center;\">" + sigImg +
+                "<div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.75rem;\">Signature : <strong>" +
+                directorNom + "</strong></span></div>" + "<div style=\"text-align:center;\">" + sealImg +
+                "</div>" + "<div style=\"text-align:center;\"><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.75rem;\">" +
+                (rightLabel || "Signature de l'Élève") + "</span></div>" + "</div>";
+        }
+
         function getDiviseur(classe) {
             var p = STATE.parametres;
             if (classe.startsWith('PRESCOLAIRE')) return 100;
@@ -1565,6 +1616,31 @@
                 user.accessClasses = p.accessClasses || [];
                 user.accessMatieres = p.accessMatieres || [];
             }
+        }
+
+        function extractClassNumber(classe) {
+            if (!classe) return '';
+            if (classe.indexOf('PRESCOLAIRE') === 0) {
+                var pm = classe.match(/(\d+)/);
+                return 'P' + (pm ? pm[1] : '1');
+            }
+            var m = classe.match(/(\d+)/);
+            return m ? m[1] : '';
+        }
+
+        function applyGeneratedPassword(index) {
+            var user = STATE.securite.users[index];
+            if (!user) return;
+            if (!user.accessClasses || user.accessClasses.length === 0) {
+                alert('Ansèyan sa a poko gen klas asiyen. Distribye klas/matyè li anvan.');
+                return;
+            }
+            var pwd = generateTeacherPassword(user.accessClasses, user.accessMatieres);
+            user.mdp = pwd;
+            saveState();
+            renderSecuriteUsers();
+            alert('Nouvo mo de pase: ' + pwd);
+            spawnHearts();
         }
 
         function syncAllUsersAccess() {
@@ -3307,13 +3383,13 @@
             } else if (niveau === '1-3') {
                 decision = sexe === 'F' ? 'ADMISE ET REMEDIATION' : 'ADMIS ET REMEDIATION';
             } else if (niveau === '4-6' || niveau === '7-9') {
-                if (finalRounded >= 5) {
+                if (finalRounded >= 50) {
                     decision = sexe === 'F' ? 'ADMISE' : 'ADMIS';
                 } else {
                     decision = sexe === 'F' ? 'ECHOUEE' : 'ECHOUÉ';
                 }
             } else {
-                decision = finalRounded >= 5 ? (sexe === 'F' ? 'ADMISE' : 'ADMIS') : (sexe === 'F' ? 'ECHOUEE' :
+                decision = finalRounded >= 50 ? (sexe === 'F' ? 'ADMISE' : 'ADMIS') : (sexe === 'F' ? 'ECHOUEE' :
                     'ECHOUÉ');
             }
             return { c1: m1, c2: m2, c3: m3, c4: m4, finale: finalRounded, decision: decision };
@@ -3710,7 +3786,8 @@
                 " pts | <strong>Moyenne:</strong> " + moy +
                 "</p>\n            <table><thead><tr><th style=\"font-size:0.7rem;\">Mati\xE8re</th><th style=\"font-size:0.7rem;\">Note</th></tr></thead><tbody>" +
                 rows +
-                "</tbody></table>\n            <div class=\"signature\">\n                <div><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.75rem;\">Signature : <strong>CHARLES Joseph Mary</strong></span></div>\n                <div><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.75rem;\">Signature de l'\xC9l\xE8ve</span></div>\n            </div>\n            <p style=\"margin-top:0.5rem;font-size:0.65rem;color:#777;\">Imprim\xE9 le " +
+                "</tbody></table>\n            " + buildSignatureBlockHtml() +
+                "\n            <p style=\"margin-top:0.5rem;font-size:0.65rem;color:#777;\">Imprim\xE9 le " +
                 new Date().toLocaleDateString() +
                 "</p>\n            <script>window.onload=function(){window.print();}<\/script>\n            </body></html>\n        ");
             win.document.close();
@@ -4287,7 +4364,8 @@
                 "</strong> | D\xE9cision: <strong>" + decision +
                 "</strong>\n            </div>\n            <p style=\"margin-top:0.5rem;font-size:0.6rem;color:#777;\">Imprim\xE9 le " +
                 new Date().toLocaleDateString() +
-                "</p>\n            <div style=\"margin-top:1.5rem;display:flex;justify-content:space-between;\">\n                <div><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.7rem;\">Signature : <strong>CHARLES Joseph Mary</strong></span></div>\n                <div><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.7rem;\">Signature de l'\xC9l\xE8ve</span></div>\n            </div>\n            <script>window.onload=function(){window.print();}<\/script>\n            </body></html>\n        ");
+                "</p>\n            " + buildSignatureBlockHtml() +
+                "\n            <script>window.onload=function(){window.print();}<\/script>\n            </body></html>\n        ");
             win.document.close();
         }
 
@@ -4388,7 +4466,7 @@
         function generateTeacherPassword(accessClasses, accessMatieres) {
             if (!accessClasses || accessClasses.length === 0) return 'ENSS2017';
             var firstClass = accessClasses[0];
-            var firstSubject = (accessMatieres && accessMatieres.length > 0) ? accessMatieres[0] : 'GEN';
+            var firstSubject = (accessMatieres && accessMatieres.length > 0) ? accessMatieres[0] : 'TLM';
 
             // Extraire le numéro de classe
             var numMatch = firstClass.match(/\d+/);
@@ -4396,19 +4474,19 @@
             var num = parseInt(numMatch[0]);
 
             // Déterminer si c'est préscolaire
-            var isPreschool = firstClass.startsWith('PRESCOLAIRE');
-            var isAf = firstClass.includes('AF');
+            var isPreschool = firstClass.indexOf('PRESCOLAIRE') === 0;
+            var isAf = firstClass.indexOf('AF') !== -1 || (!isPreschool && num >= 7 && num <= 9);
 
             if (isPreschool) {
-                // CLP{num}ENSS2017
-                return 'CLP' + num + 'ENSS2017';
-            } else if (isAf && num >= 1 && num <= 6) {
-                // CL{num}ENSS2017
-                return 'CL' + num + 'ENSS2017';
+                // CLP{num}TLM-ENSS2017
+                return 'CLP' + num + 'TLM-ENSS2017';
+            } else if (num >= 1 && num <= 6) {
+                // CL{num}TLM-ENSS2017
+                return 'CL' + num + 'TLM-ENSS2017';
             } else if (num >= 7 && num <= 9) {
-                // CL{num}{subjectCode}ENSS2017
+                // CL{num}{subjectCode}-ENSS2017
                 var code = firstSubject.replace(/\s/g, '').toUpperCase();
-                return 'CL' + num + code + 'ENSS2017';
+                return 'CL' + num + code + '-ENSS2017';
             }
             return 'ENSS2017';
         }
@@ -5508,7 +5586,8 @@
                 balance +
                 "</td></tr>\n            </table>\n            <p style=\"font-size:0.7rem;\">Date : " + new Date()
                 .toLocaleDateString() +
-                "</p>\n            <div class=\"signature\">\n                <div><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.7rem;\">Signature : <strong>CHARLES Joseph Mary</strong></span></div>\n                <div><div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.7rem;\">Signature de l'\xC9l\xE8ve / Parent</span></div>\n            </div>\n            <script>window.onload=function(){window.print();}<\/script>\n            </body></html>\n        ");
+                "</p>\n            " + buildSignatureBlockHtml("Signature de l'Élève / Parent") +
+                "\n            <script>window.onload=function(){window.print();}<\/script>\n            </body></html>\n        ");
             win.document.close();
         }
 
@@ -5835,6 +5914,7 @@
             var hideNotesBox = document.getElementById('paramHideNotes');
             if (hideNotesBox) hideNotesBox.checked = p.hideNotes || false;
             updateLogoDisplay();
+            updateSignatureSealDisplay();
             renderResultColumns();
             renderSecuriteUsers();
             renderSecuritePermissions();
@@ -5865,13 +5945,17 @@
             if (!showPasswords) {
                 pwdDisplay = '•'.repeat(Math.min((u.mdp && u.mdp.length) || 8, 12));
             }
+            var isTeacher = (u.role === 'enseignant' || u.role === 'Enseignant' || u.role === 'enseignant(e)');
+            var genBtn = isTeacher ? ("<button onclick=\"applyGeneratedPassword(" + i +
+                ")\" title=\"Jenere modpas otomatik (CL+klas+matyè-ENSS2017)\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\u2699\uFE0F</button>") : '';
             return "\n            <tr><td style=\"font-size:0.6rem;\">" + u.profil +
                 "<br><span class=\"text-muted\" style=\"font-size:0.55rem;\">" + (u.role || '') + (u
                     .personnelId ? ' 🔗' : '') + "</span></td>\n            <td style=\"font-size:0.6rem;\">\n                " +
                 pwdDisplay +
                 "\n            </td>\n            <td style=\"font-size:0.6rem;\">\n                <button onclick=\"togglePasswordVisibility()\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDC41</button>\n                <button onclick=\"changeUserPassword(" +
                 i +
-                ")\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDD11</button>\n                <button class=\"danger\" onclick=\"if(confirm('Supprimer ?')){STATE.securite.users.splice(" +
+                ")\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDD11</button>" + genBtn +
+                "\n                <button class=\"danger\" onclick=\"if(confirm('Supprimer ?')){STATE.securite.users.splice(" +
                 i +
                 ",1);saveState();renderParametres();}\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;color:#e74c3c;\">\uD83D\uDDD1\uFE0F</button>\n            </td>\n            </tr>\n        ";
         }
@@ -6265,6 +6349,76 @@
             updateLogoDisplay();
             renderAccueilMenu();
             spawnHearts();
+        }
+
+        function importDirectorSignature(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                STATE.parametres.directorSignature = e.target.result;
+                saveState();
+                updateSignatureSealDisplay();
+                alert('Siyati direktè a enpòte.');
+                spawnHearts();
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function removeDirectorSignature() {
+            STATE.parametres.directorSignature = '';
+            saveState();
+            updateSignatureSealDisplay();
+            spawnHearts();
+        }
+
+        function importSchoolSeal(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                STATE.parametres.schoolSeal = e.target.result;
+                saveState();
+                updateSignatureSealDisplay();
+                alert('Sceau lekòl la enpòte.');
+                spawnHearts();
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function removeSchoolSeal() {
+            STATE.parametres.schoolSeal = '';
+            saveState();
+            updateSignatureSealDisplay();
+            spawnHearts();
+        }
+
+        function saveDirectorNom(val) {
+            STATE.parametres.directorNom = val.trim();
+            saveState();
+        }
+
+        function updateSignatureSealDisplay() {
+            var sig = STATE.parametres.directorSignature || '';
+            var sigImg = document.getElementById('paramSignatureImg');
+            var sigPh = document.getElementById('paramSignaturePlaceholder');
+            if (sigImg && sigPh) {
+                if (sig) { sigImg.src = sig; sigImg.style.display = 'inline-block'; sigPh.style.display = 'none'; } else {
+                    sigImg.style.display = 'none'; sigPh.style.display = 'block';
+                }
+            }
+            var seal = STATE.parametres.schoolSeal || '';
+            var sealImg = document.getElementById('paramSealImg');
+            var sealPh = document.getElementById('paramSealPlaceholder');
+            if (sealImg && sealPh) {
+                if (seal) { sealImg.src = seal; sealImg.style.display = 'inline-block'; sealPh.style.display = 'none'; } else {
+                    sealImg.style.display = 'none'; sealPh.style.display = 'block';
+                }
+            }
+            var nomEl = document.getElementById('paramDirectorNom');
+            if (nomEl) nomEl.value = STATE.parametres.directorNom || 'CHARLES Joseph Mary';
         }
 
         function renderResultColumns() {
@@ -7781,6 +7935,7 @@
         window.exportInventaire = exportInventaire;
         window.changeUserPassword = changeUserPassword;
         window.changeUserPasswordByName = changeUserPasswordByName;
+        window.applyGeneratedPassword = applyGeneratedPassword;
         window.addSecUser = addSecUser;
         window.toggleAutoLogin = toggleAutoLogin;
         window.toggleMenuVisibility = toggleMenuVisibility;
@@ -7799,6 +7954,13 @@
         window.importLogo = importLogo;
         window.applyLogoShape = applyLogoShape;
         window.removeLogo = removeLogo;
+        window.importDirectorSignature = importDirectorSignature;
+        window.removeDirectorSignature = removeDirectorSignature;
+        window.importSchoolSeal = importSchoolSeal;
+        window.removeSchoolSeal = removeSchoolSeal;
+        window.saveDirectorNom = saveDirectorNom;
+        window.updateSignatureSealDisplay = updateSignatureSealDisplay;
+        window.buildSignatureBlockHtml = buildSignatureBlockHtml;
         window.updateLogoDisplay = updateLogoDisplay;
         window.openAddResultColumn = openAddResultColumn;
         window.openEditResultCol = openEditResultCol;
