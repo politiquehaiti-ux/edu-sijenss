@@ -295,6 +295,14 @@
                     <span id="inlineLoginMsg" style="font-size:0.7rem;color:#e74c3c;"></span>
                 </div>
 
+                <!-- VERIFIKASYON ELÈV -->
+                <div class="card" id="verificationCard" style="padding:0.5rem 0.7rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+                    <span style="font-size:0.75rem;font-weight:600;">🔎 Verifikasyon:</span>
+                    <input type="text" id="verifQuery" placeholder="NISU oswa Non ak Prenon" style="width:auto;flex:2;min-width:150px;padding:0.25rem 0.4rem;font-size:0.75rem;" onkeydown="if(event.key==='Enter')searchVerification();" />
+                    <button class="btn btn-primary" onclick="searchVerification()" style="padding:0.25rem 0.6rem;font-size:0.75rem;">🔎 Chèche</button>
+                    <span id="verifMsg" style="font-size:0.7rem;color:#e74c3c;"></span>
+                </div>
+
                 <!-- MENU DEFILANT AKÈY -->
                 <div class="accueil-menu" id="accueilMenu">
                     <div class="menu-item active" data-page="accueil" onclick="navigateTo('accueil')"><span class="icon">🏠</span> Akèy</div>
@@ -651,6 +659,58 @@
                 <div id="emploiGrid" class="edt-grid scroll-horizontal" style="display:grid;grid-template-columns:70px repeat(5,1fr);gap:2px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;font-size:0.7rem;"></div>
             </div>
 
+            <!-- ===== PAGE DEVOIRS (KACHE) ===== -->
+            <div class="page hidden" id="page-devoirs">
+                <div class="flex-between mb-1">
+                    <h2 style="font-size:1.1rem;">📝 Devwa</h2>
+                </div>
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <select id="devoirClasseSelect" onchange="loadDevoirForm()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;"></select>
+                        <select id="devoirMatiereSelect" onchange="loadDevoirForm()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;"></select>
+                        <select id="devoirControleSelect" onchange="loadDevoirForm()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;">
+                            <option value="1">Contrôle 1</option>
+                            <option value="2">Contrôle 2</option>
+                            <option value="3">Contrôle 3</option>
+                            <option value="4">Contrôle 4</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card mb-1" style="padding:0.6rem;">
+                    <label style="font-size:0.75rem;">📌 Kantite devwa pwòf la bay pou kontwòl sa a:</label>
+                    <input type="number" id="devoirTotalAssigned" min="0" style="width:100px;padding:0.2rem 0.4rem;font-size:0.8rem;" />
+                    <button class="btn btn-primary" onclick="saveDevoirData()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">💾 Sauvegarder</button>
+                </div>
+                <div id="devoirTable" class="card table-wrap scroll-horizontal scroll-vertical" style="padding:0.6rem;max-height:450px;"></div>
+            </div>
+
+            <!-- ===== PAGE PREZANS PÈSONÈL (KACHE) ===== -->
+            <div class="page hidden" id="page-personnelPresences">
+                <div class="flex-between mb-1">
+                    <h2 style="font-size:1.1rem;">🗓️ Prezans Pèsonèl</h2>
+                    <div class="flex gap-1">
+                        <input type="date" id="perPresDate" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;" onchange="loadPersonnelPresences()" />
+                        <button class="btn" onclick="document.getElementById('perPresDate').valueAsDate=new Date();loadPersonnelPresences();" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📅 Aujourd'hui</button>
+                    </div>
+                </div>
+                <div id="perPresAppel" class="card table-wrap scroll-horizontal scroll-vertical" style="padding:0.6rem;max-height:400px;"></div>
+                <div class="card mt-1" style="padding:0.6rem;">
+                    <div class="flex-between mb-1">
+                        <h4 style="font-size:0.85rem;">📊 Rapò Pèsonèl (semèn/mwa)</h4>
+                        <div class="flex gap-1" style="flex-wrap:wrap;">
+                            <select id="perPresPeriode" onchange="renderPersonnelPresenceReport()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">
+                                <option value="semaine">Semèn sa a</option>
+                                <option value="mois">Mwa sa a</option>
+                                <option value="annee">Tout ane a</option>
+                            </select>
+                            <button class="btn" onclick="printPersonnelPresenceReport()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">🖨️ PDF</button>
+                            <button class="btn" onclick="exportPersonnelPresenceWord()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">📄 Word</button>
+                        </div>
+                    </div>
+                    <div id="personnelPresenceReport" class="table-wrap scroll-horizontal scroll-vertical" style="max-height:400px;"></div>
+                </div>
+            </div>
+
             <!-- ===== PAGE PRÉSENCES ===== -->
             <div class="page" id="page-presences">
                 <div class="flex-between mb-1">
@@ -672,6 +732,19 @@
                 </div>
                 <div id="presSummary" class="card mb-1" style="padding:0.6rem;"></div>
                 <div id="presAppel" class="card scroll-horizontal scroll-vertical" style="padding:0.6rem;"></div>
+                <div class="card mt-1" style="padding:0.6rem;">
+                    <div class="flex-between mb-1">
+                        <h4 style="font-size:0.85rem;">📊 Rezime Prezans (pa klas / tout lekòl)</h4>
+                        <div class="flex gap-1" style="flex-wrap:wrap;">
+                            <button class="btn btn-primary" onclick="renderAttendanceSummaryReport()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">🔄 Jenere</button>
+                            <button class="btn" onclick="printAttendanceSummary()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">🖨️ PDF</button>
+                            <button class="btn" onclick="exportAttendanceSummaryWord()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">📄 Word</button>
+                            <button class="btn" onclick="exportAttendanceSummaryCSV()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">📊 CSV</button>
+                            <button class="btn" onclick="exportAttendanceSummaryExcel()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">📈 Excel</button>
+                        </div>
+                    </div>
+                    <div id="attendanceSummaryReport" class="table-wrap scroll-horizontal scroll-vertical" style="max-height:450px;"></div>
+                </div>
             </div>
 
             <!-- ===== PAGE FINANCE ===== -->
@@ -1413,6 +1486,8 @@
                     if (!STATE.notes) STATE.notes = {};
                     if (!STATE.notesDraft) STATE.notesDraft = {};
                     if (!STATE.presences) STATE.presences = {};
+                    if (!STATE.devoirsData) STATE.devoirsData = {};
+                    if (!STATE.personnelPresences) STATE.personnelPresences = {};
                     if (!STATE.personnel) STATE.personnel = [];
                     if (!STATE.matieres || STATE.matieres.length === 0) STATE.matieres = JSON.parse(JSON.stringify(
                     DEFAULT_MATIERES));
@@ -1517,6 +1592,118 @@
                 getYear(); }); }
 
         function getClasses() { return ALL_CLASSES; }
+
+        // --- === VERIFIKASYON ELÈV (dosye konplè miltip ane) === ---
+        function computeAttendanceSummaryForYear(nisu, classe, year) {
+            var parts = (year || '').split('-');
+            var y1 = parts[0],
+                y2 = parts[1];
+            var prefix = classe + '|';
+            var dateKeys = Object.keys(STATE.presences || {}).filter(function(k) {
+                if (k.indexOf(prefix) !== 0) return false;
+                var datePart = k.substring(prefix.length);
+                var dy = datePart.substring(0, 4);
+                return dy === y1 || dy === y2;
+            });
+            var totalDays = dateKeys.length,
+                present = 0,
+                absent = 0,
+                sove = 0;
+            dateKeys.forEach(function(k) {
+                var pres = STATE.presences[k];
+                var val = pres[nisu];
+                if (val === 'P' || val === 'R') present++;
+                else if (val === 'A') absent++;
+                if (pres[nisu + '_sove']) sove++;
+            });
+            return { totalDays: totalDays, present: present, absent: absent, sove: sove };
+        }
+
+        function searchVerification() {
+            var query = document.getElementById('verifQuery').value.trim();
+            var msgEl = document.getElementById('verifMsg');
+            if (!query) { msgEl.textContent = 'Antre yon NISU oswa yon non.'; return; }
+            var byNisu = STATE.students.filter(function(s) { return s.nisu === query; });
+            var nisus;
+            if (byNisu.length > 0) {
+                nisus = [query];
+            } else {
+                var q = query.toLowerCase();
+                var matches = STATE.students.filter(function(s) {
+                    var full1 = ((s.nom || '') + ' ' + (s.prenom || '')).toLowerCase();
+                    var full2 = ((s.prenom || '') + ' ' + (s.nom || '')).toLowerCase();
+                    return full1.indexOf(q) !== -1 || full2.indexOf(q) !== -1;
+                });
+                nisus = matches.reduce(function(acc, s) {
+                    if (acc.indexOf(s.nisu) === -1) acc.push(s.nisu);
+                    return acc;
+                }, []);
+            }
+            if (nisus.length === 0) {
+                msgEl.textContent = 'Okenn elèv jwenn.';
+                return;
+            }
+            msgEl.textContent = '';
+            if (nisus.length === 1) {
+                openVerificationDossier(nisus[0]);
+            } else {
+                var listHtml = "<div style=\"font-size:0.8rem;\">Plizyè el\xE8v jwenn, chwazi youn:</div><ul style=\"list-style:none;padding:0;\">" +
+                    nisus.map(function(n) {
+                        var rec = STATE.students.filter(function(s) { return s.nisu === n; }).sort(function(
+                        a, b) { return (b._YEAR || '').localeCompare(a._YEAR || ''); })[0];
+                        return "<li style=\"padding:0.3rem;border-bottom:1px solid var(--border);cursor:pointer;\" onclick=\"closeModal();openVerificationDossier('" +
+                            n + "')\">👤 <strong>" + rec.nom + " " + rec.prenom + "</strong> — NISU: " + n +
+                            " — Dènye klas: " + rec.classe + "</li>";
+                    }).join('') + "</ul>";
+                openModal('🔎 Plizyè Rezilta', listHtml);
+            }
+        }
+
+        function openVerificationDossier(nisu) {
+            var records = STATE.students.filter(function(s) { return s.nisu === nisu; }).sort(function(a, b) {
+                return (a._YEAR || '').localeCompare(b._YEAR || '');
+            });
+            if (records.length === 0) { alert('Okenn el\xE8v jwenn ak NISU sa a.'); return; }
+            var latest = records[records.length - 1];
+            var html = "<div style=\"font-size:0.8rem;\">" + "<div class=\"grid grid-2\" style=\"gap:0.3rem;margin-bottom:0.6rem;\">" +
+                "<div><strong>NISU:</strong> " + latest.nisu + "</div>" + "<div><strong>Non:</strong> " +
+                latest.nom + " " + latest.prenom + "</div>" + "<div><strong>S\xE8ks:</strong> " + (latest
+                    .sexe || '-') + "</div>" + "<div><strong>Dat Nesans:</strong> " + (latest.dateNaissance ||
+                    '-') + "</div>" + "<div><strong>Lye Nesans:</strong> " + (latest.lieuNaissance || '-') +
+                "</div>" + "<div><strong>Manman:</strong> " + (latest.prenomMere || '-') + "</div>" +
+                "<div><strong>Responsab:</strong> " + (latest.responsable || '-') + "</div>" +
+                "<div><strong>T\xE9l:</strong> " + cleanPhone(latest.telephone || latest
+                    .telPersResponsable) + "</div>" + "<div><strong>D\xE9ficience:</strong> " + (latest
+                    .deficience || 'Non') + "</div>" + "</div>";
+            records.forEach(function(rec) {
+                var matieres = getMatieresForClasse(rec.classe);
+                var m = getStudentMoyennes(rec);
+                var att = computeAttendanceSummaryForYear(nisu, rec.classe, rec._YEAR);
+                var dev = getStudentDevoirSummary(nisu, rec.classe, rec._YEAR);
+                html += "<div class=\"card\" style=\"padding:0.5rem;margin-bottom:0.5rem;border:1px solid var(--border);\">" +
+                    "<h5 style=\"font-size:0.8rem;margin:0 0 0.3rem 0;\">\uD83D\uDCC5 " + rec._YEAR +
+                    " \u2014 " + rec.classe + "</h5>" +
+                    "<table style=\"width:100%;border-collapse:collapse;margin-bottom:0.3rem;\"><thead><tr><th style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;\">Mati\xE8re</th><th style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;\">C1</th><th style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;\">C2</th><th style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;\">C3</th><th style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;\">C4</th></tr></thead><tbody>" +
+                    matieres.map(function(mat) {
+                        var cells = [1, 2, 3, 4].map(function(c) {
+                            var ctrl = (rec.controles && rec.controles[c]) || {};
+                            var v = ctrl[mat.code];
+                            return "<td style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;text-align:center;\">" +
+                                (v !== undefined && v !== null && v !== '' ? v : '-') + "</td>";
+                        }).join('');
+                        return "<tr><td style=\"font-size:0.55rem;border:1px solid #ccc;padding:0.1rem;\">" +
+                            mat.code + "</td>" + cells + "</tr>";
+                    }).join('') + "</tbody></table>" + "<div style=\"font-size:0.7rem;\">Moy. Finale: <strong>" +
+                    m.finale + "</strong> | D\xE9cision: <strong>" + (rec.decision || '-') + "</strong></div>" +
+                    "<div style=\"font-size:0.7rem;margin-top:0.2rem;\">\uD83D\uDCC5 Jou \xE9k\xF2l: " + att
+                    .totalDays + " | Pr\xE9sent: " + att.present + " | Absan: " + att.absent +
+                    " | \uD83C\uDFC3 Sove: " + att.sove + "</div>" +
+                    "<div style=\"font-size:0.7rem;\">\uD83D\uDCDD Devwa bay: " + dev.assigned + " | F\xE8: " +
+                    dev.done + " | Pa f\xE8: " + dev.missed + "</div>" + "</div>";
+            });
+            html += "</div>";
+            openModal("\uD83D\uDCC1 Dosye Konpl\xE8 \u2014 " + latest.nom + " " + latest.prenom, html);
+        }
 
         function getMatieres() { return STATE.matieres; }
 
@@ -1670,7 +1857,7 @@
             if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
                 var user = STATE.securite.users.find(function(u) { return u.profil === STATE.utilisateur; });
                 var accessPages = ['accueil', 'dashboard', 'classes', 'eleves', 'resultats', 'matieres', 'rezime-matiere',
-                    'emploi', 'presences'
+                    'emploi', 'presences', 'devoirs', 'personnelPresences'
                 ];
                 if (user && user.accessClasses && user.accessClasses.length > 0) {
                     return accessPages.includes(page);
@@ -1679,11 +1866,11 @@
             }
             var access = {
                 secretaire: ['accueil', 'dashboard', 'classes', 'eleves', 'resultats', 'matieres', 'rezime-matiere',
-                    'personnel', 'emploi', 'presences', 'finance', 'comites', 'cantine', 'cantinePresences',
+                    'personnel', 'emploi', 'presences', 'devoirs', 'personnelPresences', 'finance', 'comites', 'cantine', 'cantinePresences',
                     'inventaire', 'contacts'
                 ],
                 enseignant: ['accueil', 'dashboard', 'classes', 'eleves', 'resultats', 'matieres', 'rezime-matiere',
-                    'emploi', 'presences'
+                    'emploi', 'presences', 'devoirs'
                 ],
                 eleve: ['accueil', 'dashboard', 'resultats', 'emploi']
             };
@@ -1704,6 +1891,8 @@
                 { id: 'personnel', label: 'Personnel', icon: '👔' },
                 { id: 'emploi', label: 'Emploi du Temps', icon: '📅' },
                 { id: 'presences', label: 'Présences', icon: '📋' },
+                { id: 'devoirs', label: 'Devwa', icon: '📝' },
+                { id: 'personnelPresences', label: 'Prezans Pèsonèl', icon: '🗓️' },
                 { id: 'finance', label: 'Finance', icon: '💰' },
                 { id: 'comites', label: 'Comités', icon: '🤝' },
                 { id: 'cantine', label: 'Cantine', icon: '🍲' },
@@ -1811,6 +2000,12 @@
                 case 'presences':
                     loadPresences();
                     break;
+                case 'devoirs':
+                    loadDevoirForm();
+                    break;
+                case 'personnelPresences':
+                    loadPersonnelPresences();
+                    break;
                 case 'finance':
                     renderFinance();
                     break;
@@ -1838,7 +2033,7 @@
         // --- === MENU AKÈY === ---
         var HIDEABLE_MENU_PAGES = [
             'eleves', 'resultats', 'matieres', 'rezime-matiere', 'personnel',
-            'emploi', 'presences', 'finance', 'comites', 'cantine',
+            'emploi', 'presences', 'devoirs', 'personnelPresences', 'finance', 'comites', 'cantine',
             'cantinePresences', 'inventaire', 'contacts'
         ];
 
@@ -1891,6 +2086,8 @@
                 'personnel': '👔 Personnel',
                 'emploi': '📅 Emploi du Temps',
                 'presences': '📋 Présences',
+                'devoirs': '📝 Devwa',
+                'personnelPresences': '🗓️ Prezans Pèsonèl',
                 'finance': '💰 Finance',
                 'comites': '🤝 Comités',
                 'cantine': '🍲 Cantine',
@@ -3460,6 +3657,7 @@
             applyTranslations();
         }
 
+
         function onSelectResumeControle(classe, value) {
             ['1', '2', '3', '4'].forEach(function(c) {
                 var el = document.getElementById('resumeControle_' + classe + '_' + c);
@@ -4322,6 +4520,21 @@
             alert('Rezilta efase.');
         }
 
+        function buildAttendanceDevoirSummaryHtml(nisu, classe) {
+            var att = computeAttendanceSummary(classe).find(function(r) { return r.student.nisu === nisu; });
+            var dev = getStudentDevoirSummary(nisu, classe);
+            var attHtml = att ?
+                ("Jou lekòl: <strong>" + att.totalDays + "</strong> | Présent: <strong>" + att.present +
+                    "</strong> | Absan: <strong>" + att.absent + "</strong> | 🏃 Sove: <strong>" + att.sove +
+                    "</strong>") : "Pa gen done prezans ankò.";
+            var devHtml = "Devwa bay: <strong>" + dev.assigned + "</strong> | Fè: <strong>" + dev.done +
+                "</strong> | Pa fè: <strong>" + dev.missed + "</strong>";
+            return "<div class=\"card\" style=\"padding:0.4rem 0.6rem;margin:0.4rem 0;border:1px solid #ccc;border-radius:6px;font-size:0.7rem;\">" +
+                "<div>📅 <strong>Rezime Prezans:</strong> " + attHtml + "</div>" +
+                "<div style=\"margin-top:0.2rem;\">📝 <strong>Rezime Devwa:</strong> " + devHtml + "</div>" +
+                "</div>";
+        }
+
         function printResultatDossierPDF(nisu) {
             var s = getStudentByNISU(nisu);
             if (!s) return;
@@ -4357,7 +4570,8 @@
                 rows +
                 "\n                <tr class=\"total-row\"><td><strong>Moyenne</strong></td>\n                    <td>" +
                 m.c1 + "</td><td>" + m.c2 + "</td><td>" + m.c3 + "</td><td>" + m.c4 +
-                "</td>\n                </tr>\n                </tbody>\n            </table>\n            <div class=\"decision-box " +
+                "</td>\n                </tr>\n                </tbody>\n            </table>\n            " +
+                buildAttendanceDevoirSummaryHtml(nisu, s.classe) + "<div class=\"decision-box " +
                 (decision === 'ADMIS' || decision === 'ADMISE' ? 'admis' : decision === 'ECHOUÉ' ||
                     decision === 'ECHOUEE' ? 'echoue' : 'remediation') +
                 "\">\n                Moyenne G\xE9n\xE9rale: <strong>" + avgFinal +
@@ -4404,12 +4618,14 @@
                 rows +
                 "\n                <tr class=\"total-row\"><td><strong>Moyenne</strong></td>\n                    <td>" +
                 m.c1 + "</td><td>" + m.c2 + "</td><td>" + m.c3 + "</td><td>" + m.c4 +
-                "</td>\n                </tr>\n                </tbody>\n            </table>\n            <div class=\"decision-box " +
+                "</td>\n                </tr>\n                </tbody>\n            </table>\n            " +
+                buildAttendanceDevoirSummaryHtml(nisu, s.classe) + "<div class=\"decision-box " +
                 (decision === 'ADMIS' || decision === 'ADMISE' ? 'admis' : decision === 'ECHOUÉ' ||
                     decision === 'ECHOUEE' ? 'echoue' : 'remediation') +
                 "\">\n                Moyenne G\xE9n\xE9rale: <strong>" + avgFinal +
                 "</strong> | D\xE9cision: <strong>" + decision +
-                "</strong>\n            </div>\n            <p style=\"margin-top:0.5rem;font-style:italic;font-size:0.7rem;\">Signature: CHARLES Joseph Mary</p>\n            </body></html>\n        ";
+                "</strong>\n            </div>\n            " + buildSignatureBlockHtml() +
+                "\n            </body></html>\n        ";
             var blob = new Blob([html], { type: 'application/msword' });
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
@@ -4750,6 +4966,273 @@
         }
 
         // --- === PREZANS === ---
+        // --- === DEVWA (HOMEWORK) === ---
+        function getDevoirKey(classe, matiere, controle) {
+            return classe + '|' + matiere + '|' + controle + '|' + getYear();
+        }
+
+        function getDevoirData(classe, matiere, controle) {
+            if (!STATE.devoirsData) STATE.devoirsData = {};
+            var key = getDevoirKey(classe, matiere, controle);
+            if (!STATE.devoirsData[key]) STATE.devoirsData[key] = { totalAssigned: 0, completion: {} };
+            return STATE.devoirsData[key];
+        }
+
+        function loadDevoirForm() {
+            var classeSel = document.getElementById('devoirClasseSelect');
+            var matSel = document.getElementById('devoirMatiereSelect');
+            if (classeSel.options.length === 0) {
+                var filterClasses = ALL_CLASSES;
+                var role = getRole();
+                if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
+                    var user = STATE.securite.users.find(function(u) { return u.profil === STATE.utilisateur; });
+                    if (user && user.accessClasses) {
+                        filterClasses = ALL_CLASSES.filter(function(c) { return user.accessClasses.includes(
+                            c); });
+                    }
+                }
+                filterClasses.forEach(function(c) {
+                    var opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    classeSel.appendChild(opt);
+                });
+            }
+            var classe = classeSel.value;
+            if (!classe) return;
+            var matieres = getMatieresForClasse(classe);
+            var currentMat = matSel.value;
+            matSel.innerHTML = matieres.map(function(m) {
+                return "<option value=\"" + m.code + "\">" + m.nom + "</option>";
+            }).join('');
+            if (currentMat && matieres.some(function(m) { return m.code === currentMat; })) matSel.value =
+                currentMat;
+            var matiere = matSel.value;
+            var controle = document.getElementById('devoirControleSelect').value;
+            if (!matiere) return;
+            var data = getDevoirData(classe, matiere, controle);
+            document.getElementById('devoirTotalAssigned').value = data.totalAssigned || 0;
+            var students = getStudentsByClasse(classe);
+            var html =
+                "<table><thead><tr><th style=\"font-size:0.6rem;\">NISU</th><th style=\"font-size:0.6rem;\">Non</th><th style=\"font-size:0.6rem;\">Pr\xE9non</th><th style=\"font-size:0.6rem;\">Devwa Fè</th><th style=\"font-size:0.6rem;\">Devwa Pa Fè</th><th style=\"font-size:0.6rem;\">Alèt</th></tr></thead><tbody>";
+            students.forEach(function(s) {
+                var done = data.completion[s.nisu] || 0;
+                var total = data.totalAssigned || 0;
+                var missed = Math.max(0, total - done);
+                var alertBtns = missed > 0 ?
+                    ("<button onclick=\"sendDevoirAlert('" + s.nisu + "','" + classe +
+                        "','whatsapp')\" title=\"WhatsApp\" style=\"padding:0.05rem 0.2rem;font-size:0.55rem;\">\uD83D\uDCF2</button> <button onclick=\"sendDevoirAlert('" +
+                        s.nisu + "','" + classe +
+                        "','sms')\" title=\"SMS\" style=\"padding:0.05rem 0.2rem;font-size:0.55rem;\">\u2709\uFE0F</button>"
+                        ) : '';
+                html += "<tr><td style=\"font-size:0.6rem;\">" + s.nisu +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.nom + "</td><td style=\"font-size:0.6rem;\">" +
+                    s.prenom +
+                    "</td><td style=\"font-size:0.6rem;\"><input type=\"number\" min=\"0\" max=\"" + total +
+                    "\" value=\"" + done + "\" data-nisu=\"" + s.nisu +
+                    "\" class=\"devoir-done-input\" style=\"width:60px;padding:0.1rem;font-size:0.65rem;\" onchange=\"updateDevoirRow(this)\" /></td><td style=\"font-size:0.6rem;\" id=\"devoirMissed_" +
+                    s.nisu + "\">" + missed + "</td><td style=\"font-size:0.6rem;\">" + alertBtns +
+                    "</td></tr>";
+            });
+            html += "</tbody></table>";
+            document.getElementById('devoirTable').innerHTML = html ||
+                '<p class="text-muted" style="font-size:0.8rem;">Pa gen elèv nan klas sa a.</p>';
+        }
+
+        function updateDevoirRow(input) {
+            var total = parseInt(document.getElementById('devoirTotalAssigned').value) || 0;
+            var done = parseInt(input.value) || 0;
+            if (done > total) { done = total; input.value = total; }
+            var missed = Math.max(0, total - done);
+            document.getElementById('devoirMissed_' + input.dataset.nisu).textContent = missed;
+        }
+
+        function saveDevoirData() {
+            var classe = document.getElementById('devoirClasseSelect').value;
+            var matiere = document.getElementById('devoirMatiereSelect').value;
+            var controle = document.getElementById('devoirControleSelect').value;
+            if (!classe || !matiere) { alert('Chwazi yon klas ak yon matyè.'); return; }
+            var data = getDevoirData(classe, matiere, controle);
+            data.totalAssigned = parseInt(document.getElementById('devoirTotalAssigned').value) || 0;
+            document.querySelectorAll('.devoir-done-input').forEach(function(inp) {
+                var val = parseInt(inp.value) || 0;
+                if (val > data.totalAssigned) val = data.totalAssigned;
+                data.completion[inp.dataset.nisu] = val;
+            });
+            saveState();
+            loadDevoirForm();
+            alert('Devwa anrejistre.');
+            spawnHearts();
+        }
+
+        function getStudentDevoirSummary(nisu, classe, year) {
+            year = year || getYear();
+            var totalAssigned = 0,
+                totalDone = 0;
+            if (STATE.devoirsData) {
+                Object.keys(STATE.devoirsData).forEach(function(key) {
+                    var parts = key.split('|');
+                    if (parts[0] !== classe || parts[3] !== year) return;
+                    var d = STATE.devoirsData[key];
+                    totalAssigned += (d.totalAssigned || 0);
+                    totalDone += (d.completion[nisu] || 0);
+                });
+            }
+            return { assigned: totalAssigned, done: totalDone, missed: Math.max(0, totalAssigned - totalDone) };
+        }
+
+        // --- === PREZANS PÈSONÈL === ---
+        function loadPersonnelPresences() {
+            var dateEl = document.getElementById('perPresDate');
+            var date = dateEl.value || new Date().toISOString().split('T')[0];
+            dateEl.value = date;
+            if (!STATE.personnelPresences) STATE.personnelPresences = {};
+            var dayData = STATE.personnelPresences[date] || {};
+            var personnel = STATE.personnel.slice().sort(function(a, b) {
+                return (a.nom || '').localeCompare(b.nom || '');
+            });
+            var html =
+                "<div class=\"flex gap-1 mb-1\" style=\"margin-bottom:0.4rem;\"><button class=\"btn btn-primary\" onclick=\"savePersonnelPresences('" +
+                date +
+                "')\" style=\"padding:0.15rem 0.5rem;font-size:0.7rem;\">💾 Sauvegarder</button></div><table><thead><tr><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">Reta</th><th style=\"font-size:0.55rem;\">Motiv\xE9</th><th style=\"font-size:0.55rem;\">L\xE8 Rantre</th><th style=\"font-size:0.55rem;\">L\xE8 Soti</th></tr></thead><tbody>";
+            personnel.forEach(function(p) {
+                var rec = dayData[p.id] || { status: 'P', heureEntree: '', heureSortie: '' };
+                html += "<tr><td style=\"font-size:0.6rem;\">" + p.nom + " " + p.prenom +
+                    "</td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"perpres_" +
+                    p.id + "\" value=\"P\" " + (rec.status === 'P' ? 'checked' : '') +
+                    " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"perpres_" +
+                    p.id + "\" value=\"A\" " + (rec.status === 'A' ? 'checked' : '') +
+                    " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"perpres_" +
+                    p.id + "\" value=\"R\" " + (rec.status === 'R' ? 'checked' : '') +
+                    " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"perpres_" +
+                    p.id + "\" value=\"M\" " + (rec.status === 'M' ? 'checked' : '') +
+                    " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"time\" id=\"perpresIn_" +
+                    p.id + "\" value=\"" + (rec.heureEntree || '') +
+                    "\" style=\"padding:0.1rem;font-size:0.6rem;width:90px;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"time\" id=\"perpresOut_" +
+                    p.id + "\" value=\"" + (rec.heureSortie || '') +
+                    "\" style=\"padding:0.1rem;font-size:0.6rem;width:90px;\" /></td>\n            </tr>";
+            });
+            html += "</tbody></table>";
+            document.getElementById('perPresAppel').innerHTML = html ||
+                '<p class="text-muted" style="font-size:0.8rem;">Pa gen pèsonèl.</p>';
+            renderPersonnelPresenceReport();
+        }
+
+        function savePersonnelPresences(date) {
+            if (!STATE.personnelPresences) STATE.personnelPresences = {};
+            var dayData = {};
+            STATE.personnel.forEach(function(p) {
+                var el = document.querySelector("input[name=\"perpres_" + p.id + "\"]:checked");
+                var inEl = document.getElementById('perpresIn_' + p.id);
+                var outEl = document.getElementById('perpresOut_' + p.id);
+                dayData[p.id] = {
+                    status: el ? el.value : 'P',
+                    heureEntree: inEl ? inEl.value : '',
+                    heureSortie: outEl ? outEl.value : ''
+                };
+            });
+            STATE.personnelPresences[date] = dayData;
+            saveState();
+            renderPersonnelPresenceReport();
+            alert('Prezans pèsonèl anrejistre.');
+            spawnHearts();
+        }
+
+        function getPeriodeDateRange(periode) {
+            var today = new Date();
+            var start, end = today;
+            if (periode === 'semaine') {
+                start = new Date(today);
+                start.setDate(today.getDate() - today.getDay());
+            } else if (periode === 'mois') {
+                start = new Date(today.getFullYear(), today.getMonth(), 1);
+            } else {
+                start = new Date(today.getFullYear(), 0, 1);
+            }
+            return { start: start, end: end };
+        }
+
+        function computePersonnelPresenceSummary(personnelId, periode) {
+            var range = getPeriodeDateRange(periode);
+            var present = 0,
+                absent = 0,
+                retard = 0,
+                motive = 0,
+                totalDays = 0;
+            if (STATE.personnelPresences) {
+                Object.keys(STATE.personnelPresences).forEach(function(dateStr) {
+                    var d = new Date(dateStr);
+                    if (d < range.start || d > range.end) return;
+                    var rec = STATE.personnelPresences[dateStr][personnelId];
+                    if (!rec) return;
+                    totalDays++;
+                    if (rec.status === 'P') present++;
+                    else if (rec.status === 'A') absent++;
+                    else if (rec.status === 'R') { present++; retard++; } else if (rec.status === 'M') motive++;
+                });
+            }
+            var pct = totalDays > 0 ? Math.round((present / totalDays) * 1000) / 10 : 0;
+            return { totalDays: totalDays, present: present, absent: absent, retard: retard, motive: motive,
+                pct: pct
+            };
+        }
+
+        function buildPersonnelPresenceReportHtml(periode) {
+            var personnel = STATE.personnel.slice().sort(function(a, b) {
+                return (a.nom || '').localeCompare(b.nom || '');
+            });
+            var html =
+                "<table><thead><tr><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Jou</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">Reta</th><th style=\"font-size:0.55rem;\">Motiv\xE9</th><th style=\"font-size:0.55rem;\">%</th></tr></thead><tbody>";
+            personnel.forEach(function(p) {
+                var s = computePersonnelPresenceSummary(p.id, periode);
+                html += "<tr><td style=\"font-size:0.6rem;\">" + p.nom + " " + p.prenom +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.totalDays +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.present +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.absent +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.retard +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.motive +
+                    "</td><td style=\"font-size:0.6rem;\"><strong>" + s.pct + "%</strong></td></tr>";
+            });
+            html += "</tbody></table>";
+            return html;
+        }
+
+        function renderPersonnelPresenceReport() {
+            var container = document.getElementById('personnelPresenceReport');
+            if (!container) return;
+            var periode = document.getElementById('perPresPeriode') ? document.getElementById(
+                'perPresPeriode').value : 'semaine';
+            container.innerHTML = buildPersonnelPresenceReportHtml(periode);
+        }
+
+        function printPersonnelPresenceReport() {
+            var periode = document.getElementById('perPresPeriode').value;
+            var win = window.open('', '_blank');
+            win.document.write(
+                "<html><head><meta charset=\"UTF-8\"><title>Rapò Prezans Pèsonèl</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
+                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
+                " — Rapò Prezans Pèsonèl</h2>" + buildPersonnelPresenceReportHtml(periode) +
+                buildSignatureBlockHtml("Signature Direktè") +
+                "<script>window.onload=function(){window.print();}<\/script></body></html>");
+            win.document.close();
+        }
+
+        function exportPersonnelPresenceWord() {
+            var periode = document.getElementById('perPresPeriode').value;
+            var html =
+                "<html><head><meta charset=\"UTF-8\"><title>Rapò Prezans Pèsonèl</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
+                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
+                " — Rapò Prezans Pèsonèl</h2>" + buildPersonnelPresenceReportHtml(periode) +
+                buildSignatureBlockHtml("Signature Direktè") + "</body></html>";
+            var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'rapport_presence_personnel.doc';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         function loadPresences() {
             var date = document.getElementById('presDate').value || new Date().toISOString().split('T')[0];
             document.getElementById('presDate').value = date;
@@ -4788,9 +5271,10 @@
                 classe + "','" + date +
                 "','P')\" style=\"padding:0.15rem 0.5rem;font-size:0.7rem;\">\u2705 Tout Pr\xE9sent</button>\n                <button class=\"btn btn-primary\" onclick=\"savePresences('" +
                 classe + "','" + date +
-                "')\" style=\"padding:0.15rem 0.5rem;font-size:0.7rem;\">\uD83D\uDCBE Sauvegarder</button>\n            </div>\n            <div class=\"table-wrap scroll-horizontal scroll-vertical\"><table><thead><tr><th style=\"font-size:0.55rem;\">NISU</th><th style=\"font-size:0.55rem;\">Nom</th><th style=\"font-size:0.55rem;\">Pr\xE9nom</th><th style=\"font-size:0.55rem;\">Pr\xE9sent (P)</th><th style=\"font-size:0.55rem;\">Absent (A)</th><th style=\"font-size:0.55rem;\">Retard (R)</th></tr></thead><tbody>";
+                "')\" style=\"padding:0.15rem 0.5rem;font-size:0.7rem;\">\uD83D\uDCBE Sauvegarder</button>\n            </div>\n            <div class=\"table-wrap scroll-horizontal scroll-vertical\"><table><thead><tr><th style=\"font-size:0.55rem;\">NISU</th><th style=\"font-size:0.55rem;\">Nom</th><th style=\"font-size:0.55rem;\">Pr\xE9nom</th><th style=\"font-size:0.55rem;\">Pr\xE9sent (P)</th><th style=\"font-size:0.55rem;\">Absent (A)</th><th style=\"font-size:0.55rem;\">Retard (R)</th><th style=\"font-size:0.55rem;\">\uD83C\uDFC3 Sove</th></tr></thead><tbody>";
             students.forEach(function(s) {
                 var val = pres[s.nisu] || 'P';
+                var sove = pres[s.nisu + '_sove'] ? 'checked' : '';
                 html += "<tr>\n                <td style=\"font-size:0.6rem;\">" + s.nisu +
                     "</td><td style=\"font-size:0.6rem;\">" + s.nom +
                     "</td><td style=\"font-size:0.6rem;\">" + s.prenom +
@@ -4800,6 +5284,8 @@
                     s.nisu + "\" value=\"A\" " + (val === 'A' ? 'checked' : '') +
                     " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"pres_" +
                     s.nisu + "\" value=\"R\" " + (val === 'R' ? 'checked' : '') +
+                    " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"checkbox\" name=\"sove_" +
+                    s.nisu + "\" " + sove +
                     " style=\"width:auto;margin:0;\" /></td>\n            </tr>";
             });
             html += "</tbody></table></div>";
@@ -4873,6 +5359,8 @@
                     "\"]:checked");
                     pres[s.nisu] = el2 ? el2.value : 'P';
                 }
+                var soveEl = document.querySelector("input[name=\"sove_" + s.nisu + "\"]");
+                if (soveEl) pres[s.nisu + '_sove'] = soveEl.checked;
             });
             STATE.presences[key] = pres;
             saveState();
@@ -4926,6 +5414,156 @@
             html += "</tbody></table></div>";
             container.innerHTML = html;
             applyTranslations();
+        }
+
+        // --- === REZIME PREZANS PA ELÈV (jou école, présent, absent, sove) === ---
+        function computeAttendanceSummary(classe) {
+            var students = getStudentsByClasse(classe);
+            var prefix = classe + '|';
+            var dateKeys = Object.keys(STATE.presences).filter(function(k) { return k.indexOf(prefix) === 0; });
+            var totalDays = dateKeys.length;
+            return students.map(function(s) {
+                var present = 0,
+                    absent = 0,
+                    sove = 0;
+                dateKeys.forEach(function(k) {
+                    var pres = STATE.presences[k];
+                    var val = pres[s.nisu];
+                    if (val === 'P' || val === 'R') present++;
+                    else if (val === 'A') absent++;
+                    if (pres[s.nisu + '_sove']) sove++;
+                });
+                return {
+                    student: s,
+                    phone: cleanPhone(s.telephone || s.telPersResponsable),
+                    totalDays: totalDays,
+                    present: present,
+                    absent: absent,
+                    sove: sove
+                };
+            });
+        }
+
+        function buildAttendanceSummaryTableHtml(classe, forPrint) {
+            var rows = computeAttendanceSummary(classe);
+            var alertHeader = forPrint ? '' :
+                "<th style=\"font-size:0.55rem;\">Alèt</th>";
+            var html = "<h5 style=\"font-size:0.8rem;margin-top:0.4rem;\">" + classe +
+                "</h5><table><thead><tr><th style=\"font-size:0.55rem;\">T\xE9l. Responsab</th><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Pr\xE9non</th><th style=\"font-size:0.55rem;\">NISU</th><th style=\"font-size:0.55rem;\">S\xE8ks</th><th style=\"font-size:0.55rem;\">Jou \xC9kòl</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">\uD83C\uDFC3 Sove</th>" +
+                alertHeader + "</tr></thead><tbody>";
+            rows.forEach(function(r) {
+                var alertCell = forPrint ? '' : ("<td style=\"font-size:0.6rem;\">" + (r.absent > 0 ?
+                    ("<button onclick=\"sendAbsenceAlert('" + r.student.nisu + "','" + classe +
+                        "','whatsapp')\" title=\"WhatsApp\" style=\"padding:0.05rem 0.2rem;font-size:0.55rem;\">\uD83D\uDCF2</button> <button onclick=\"sendAbsenceAlert('" +
+                        r.student.nisu + "','" + classe +
+                        "','sms')\" title=\"SMS\" style=\"padding:0.05rem 0.2rem;font-size:0.55rem;\">\u2709\uFE0F</button>"
+                        ) : '') + "</td>");
+                html += "<tr><td style=\"font-size:0.6rem;\">" + r.phone + "</td><td style=\"font-size:0.6rem;\">" +
+                    r.student.nom + "</td><td style=\"font-size:0.6rem;\">" + r.student.prenom +
+                    "</td><td style=\"font-size:0.6rem;\">" + r.student.nisu +
+                    "</td><td style=\"font-size:0.6rem;\">" + (r.student.sexe || '') +
+                    "</td><td style=\"font-size:0.6rem;\">" + r.totalDays +
+                    "</td><td style=\"font-size:0.6rem;\">" + r.present +
+                    "</td><td style=\"font-size:0.6rem;\">" + r.absent + "</td><td style=\"font-size:0.6rem;\">" +
+                    r.sove + "</td>" + alertCell + "</tr>";
+            });
+            html += "</tbody></table>";
+            return html;
+        }
+
+        function getAttendanceReportClasses() {
+            var sel = document.getElementById('presClasseSelect');
+            var classe = sel ? sel.value : '';
+            if (classe) return [classe];
+            var filterClasses = ALL_CLASSES;
+            var role = getRole();
+            if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
+                var user = STATE.securite.users.find(function(u) { return u.profil === STATE.utilisateur; });
+                if (user && user.accessClasses) {
+                    filterClasses = ALL_CLASSES.filter(function(c) { return user.accessClasses.includes(c); });
+                }
+            }
+            return filterClasses.filter(function(c) { return getStudentsByClasse(c).length > 0; });
+        }
+
+        function renderAttendanceSummaryReport() {
+            var container = document.getElementById('attendanceSummaryReport');
+            if (!container) return;
+            var classes = getAttendanceReportClasses();
+            var html = classes.map(buildAttendanceSummaryTableHtml).join('');
+            container.innerHTML = html ||
+                '<p class="text-muted" style="font-size:0.8rem;">Pa gen done prezans ankò.</p>';
+        }
+
+        function printAttendanceSummary() {
+            var classes = getAttendanceReportClasses();
+            var bodyHtml = classes.map(function(c) { return buildAttendanceSummaryTableHtml(c, true); }).join(
+                '');
+            var win = window.open('', '_blank');
+            win.document.write(
+                "<html><head><meta charset=\"UTF-8\"><title>Rezime Prezans</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;margin-bottom:1rem;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
+                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
+                " — Rezime Prezans</h2>" + bodyHtml + buildSignatureBlockHtml() +
+                "<script>window.onload=function(){window.print();}<\/script></body></html>");
+            win.document.close();
+        }
+
+        function exportAttendanceSummaryWord() {
+            var classes = getAttendanceReportClasses();
+            var bodyHtml = classes.map(function(c) { return buildAttendanceSummaryTableHtml(c, true); }).join(
+                '');
+            var html =
+                "<html><head><meta charset=\"UTF-8\"><title>Rezime Prezans</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;margin-bottom:1rem;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
+                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
+                " — Rezime Prezans</h2>" + bodyHtml + buildSignatureBlockHtml() + "</body></html>";
+            var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'rezime_prezans.doc';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAttendanceSummaryCSV() {
+            var classes = getAttendanceReportClasses();
+            var csv = 'Classe;Tel Responsab;Nom;Prenom;NISU;Sexe;Jours Ecole;Present;Absent;Sove\n';
+            classes.forEach(function(cl) {
+                computeAttendanceSummary(cl).forEach(function(r) {
+                    csv += [cl, r.phone, r.student.nom, r.student.prenom, r.student.nisu, r.student.sexe ||
+                        '', r.totalDays, r.present, r.absent, r.sove
+                    ].join(';') + '\n';
+                });
+            });
+            var blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'rezime_prezans.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAttendanceSummaryExcel() {
+            var classes = getAttendanceReportClasses();
+            var html =
+                '<table><tr><th>Classe</th><th>Tel Responsab</th><th>Nom</th><th>Prenom</th><th>NISU</th><th>Sexe</th><th>Jours Ecole</th><th>Present</th><th>Absent</th><th>Sove</th></tr>';
+            classes.forEach(function(cl) {
+                computeAttendanceSummary(cl).forEach(function(r) {
+                    html += '<tr><td>' + cl + '</td><td>' + r.phone + '</td><td>' + r.student.nom +
+                        '</td><td>' + r.student.prenom + '</td><td>' + r.student.nisu + '</td><td>' + (r
+                            .student.sexe || '') + '</td><td>' + r.totalDays + '</td><td>' + r.present +
+                        '</td><td>' + r.absent + '</td><td>' + r.sove + '</td></tr>';
+                });
+            });
+            html += '</table>';
+            var blob = new Blob(["\uFEFF" + html], { type: 'application/vnd.ms-excel' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'rezime_prezans.xls';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         // --- === CANTINE PREZANS === ---
@@ -7410,6 +8048,35 @@
             window.open('sms:' + clean, '_blank');
         }
 
+        // --- === ALÈT SIBLE (absans / devwa pa fè) === ---
+        function sendAbsenceAlert(nisu, classe, via) {
+            var s = STATE.students.find(function(x) { return x.nisu === nisu && x._YEAR === getYear(); });
+            if (!s) return;
+            var phone = cleanPhone(s.telephone || s.telPersResponsable);
+            var att = computeAttendanceSummaryForYear(nisu, classe, getYear());
+            var msg = "Bonjou, " + s.nom + " " + s.prenom + " (NISU " + nisu + ", " + classe +
+                ") gen " + att.absent + " jou absans sou " + att.totalDays +
+                " jou lekòl jiskaprezan. Tanpri kontakte " + (STATE.parametres.ecoleNom || 'ENSS') +
+                " pou plis enfòmasyon.";
+            var clean = phone.replace(/\D/g, '');
+            if (via === 'sms') window.open('sms:' + clean + '?body=' + encodeURIComponent(msg), '_blank');
+            else window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(msg), '_blank');
+        }
+
+        function sendDevoirAlert(nisu, classe, via) {
+            var s = getStudentsByClasse(classe).find(function(x) { return x.nisu === nisu; });
+            if (!s) return;
+            var phone = cleanPhone(s.telephone || s.telPersResponsable);
+            var dev = getStudentDevoirSummary(nisu, classe);
+            var msg = "Bonjou, " + s.nom + " " + s.prenom + " (NISU " + nisu + ", " + classe +
+                ") gen " + dev.missed + " devwa li poko fè sou " + dev.assigned +
+                " ki te bay pou lane a. Tanpri ede l konplete yo. - " + (STATE.parametres.ecoleNom ||
+                    'ENSS');
+            var clean = phone.replace(/\D/g, '');
+            if (via === 'sms') window.open('sms:' + clean + '?body=' + encodeURIComponent(msg), '_blank');
+            else window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(msg), '_blank');
+        }
+
         function sendWhatsAppContacts() {
             var phones = [];
             var students = getStudents();
@@ -7870,9 +8537,25 @@
         window.renderPersonnel = renderPersonnel;
         window.renderEmploi = renderEmploi;
         window.loadPresences = loadPresences;
+        window.loadDevoirForm = loadDevoirForm;
+        window.updateDevoirRow = updateDevoirRow;
+        window.saveDevoirData = saveDevoirData;
+        window.getStudentDevoirSummary = getStudentDevoirSummary;
+        window.loadPersonnelPresences = loadPersonnelPresences;
+        window.savePersonnelPresences = savePersonnelPresences;
+        window.renderPersonnelPresenceReport = renderPersonnelPresenceReport;
+        window.printPersonnelPresenceReport = printPersonnelPresenceReport;
+        window.exportPersonnelPresenceWord = exportPersonnelPresenceWord;
+        window.computePersonnelPresenceSummary = computePersonnelPresenceSummary;
         window.savePresences = savePresences;
         window.setAllPresence = setAllPresence;
         window.updatePresenceSummary = updatePresenceSummary;
+        window.renderAttendanceSummaryReport = renderAttendanceSummaryReport;
+        window.printAttendanceSummary = printAttendanceSummary;
+        window.exportAttendanceSummaryWord = exportAttendanceSummaryWord;
+        window.exportAttendanceSummaryCSV = exportAttendanceSummaryCSV;
+        window.exportAttendanceSummaryExcel = exportAttendanceSummaryExcel;
+        window.computeAttendanceSummary = computeAttendanceSummary;
         window.renderFinance = renderFinance;
         window.renderFrais = renderFrais;
         window.enregistrerPaiement = enregistrerPaiement;
@@ -7972,6 +8655,10 @@
         window.toggleSelectAllContacts = toggleSelectAllContacts;
         window.sendWhatsAppContact = sendWhatsAppContact;
         window.sendSMSContact = sendSMSContact;
+        window.sendAbsenceAlert = sendAbsenceAlert;
+        window.sendDevoirAlert = sendDevoirAlert;
+        window.searchVerification = searchVerification;
+        window.openVerificationDossier = openVerificationDossier;
         window.sendWhatsAppContacts = sendWhatsAppContacts;
         window.sendSMSContacts = sendSMSContacts;
         window.exportContactsCSV = exportContactsCSV;
