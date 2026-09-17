@@ -202,9 +202,9 @@
         .accueil-multimedia .media-item img { max-width: 100%; max-height: 80px; border-radius: 6px; }
         .accueil-multimedia .media-item .title { font-size: 0.7rem; display: block; }
         .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; }
-        .quick-actions .action-card { background: var(--card); border-radius: var(--radius-sm); padding: 0.6rem; text-align: center; cursor: pointer; box-shadow: var(--shadow); transition: 0.15s; font-size: 0.8rem; }
+        .quick-actions .action-card { background: var(--card); border-radius: var(--radius-sm); padding: 0.35rem; text-align: center; cursor: pointer; box-shadow: var(--shadow); transition: 0.15s; font-size: 0.68rem; }
         .quick-actions .action-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-        .quick-actions .action-card .icon { font-size: 1.5rem; display: block; margin-bottom: 0.2rem; }
+        .quick-actions .action-card .icon { font-size: 1rem; display: block; margin-bottom: 0.1rem; }
 
         /* ===== CODE ELEV ===== */
         .elev-code { font-weight: 600; font-size: 0.6rem; color: var(--primary); background: var(--bg); padding: 0.05rem 0.25rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); transition: 0.15s; display: inline-block; }
@@ -699,6 +699,12 @@
                         <button class="btn btn-primary" onclick="refreshResumeMatieres()" data-t="refresh" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🔄 Mete ajou</button>
                     </div>
                 </div>
+                <div class="toolbar mb-1">
+                    <div class="toolbar-group">
+                        <label style="font-size:0.7rem;">Klas:</label>
+                        <select id="rezimeClasseFilter" onchange="renderResumeMatieres()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;"></select>
+                    </div>
+                </div>
                 <div id="rezimeMatieresContainer"></div>
             </div>
 
@@ -707,6 +713,7 @@
                 <div class="flex-between mb-1">
                     <h2 data-t="staff" style="font-size:1.1rem;">👔 Personnel</h2>
                     <div class="flex gap-1">
+                        <button class="btn btn-primary" onclick="navigateTo('personnelPresences')" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🗓️ Prezans Pèsonèl</button>
                         <button class="btn btn-primary" onclick="openAddPersonnel()" data-t="add" style="padding:0.2rem 0.6rem;font-size:0.75rem;">+ Ajouter</button>
                         <button class="btn btn-success" onclick="exportPersonnelCSV()" data-t="exportCSV" style="padding:0.2rem 0.6rem;font-size:0.75rem;">⬇ Exporter CSV</button>
                         <button class="btn" onclick="printPersonnel()" data-t="print" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨 Imprimer</button>
@@ -746,12 +753,15 @@
             <!-- ===== PAGE DEVOIRS (KACHE) ===== -->
             <div class="page hidden" id="page-devoirs">
                 <div class="flex-between mb-1">
-                    <h2 style="font-size:1.1rem;">📝 Devwa</h2>
+                    <h2 style="font-size:1.1rem;">📝 Devwa pa Klas</h2>
+                    <div class="flex gap-1" style="flex-wrap:wrap;">
+                        <button class="btn" onclick="printDevoirsDossier()" style="padding:0.2rem 0.5rem;font-size:0.7rem;">🖨️ PDF</button>
+                        <button class="btn" onclick="exportDevoirsWord()" style="padding:0.2rem 0.5rem;font-size:0.7rem;">📄 Word</button>
+                    </div>
                 </div>
                 <div class="toolbar">
                     <div class="toolbar-group">
                         <select id="devoirClasseSelect" onchange="loadDevoirForm()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;"></select>
-                        <select id="devoirMatiereSelect" onchange="loadDevoirForm()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;"></select>
                         <select id="devoirControleSelect" onchange="loadDevoirForm()" style="width:auto;padding:0.2rem 0.4rem;font-size:0.75rem;">
                             <option value="1">Contrôle 1</option>
                             <option value="2">Contrôle 2</option>
@@ -761,11 +771,15 @@
                     </div>
                 </div>
                 <div class="card mb-1" style="padding:0.6rem;">
-                    <label style="font-size:0.75rem;">📌 Kantite devwa pwòf la bay pou kontwòl sa a:</label>
-                    <input type="number" id="devoirTotalAssigned" min="0" style="width:100px;padding:0.2rem 0.4rem;font-size:0.8rem;" />
-                    <button class="btn btn-primary" onclick="saveDevoirData()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">💾 Sauvegarder</button>
+                    <h5 style="font-size:0.8rem;margin-bottom:0.3rem;">➕ Ajoute yon devwa</h5>
+                    <div class="flex gap-1" style="flex-wrap:wrap;align-items:flex-end;">
+                        <div><label style="font-size:0.68rem;">Dat</label><input type="date" id="devoirNewDate" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div>
+                        <div><label style="font-size:0.68rem;">Matyè</label><select id="devoirNewMatiere" style="padding:0.2rem 0.35rem;font-size:0.72rem;"></select></div>
+                        <div style="flex:1;min-width:160px;"><label style="font-size:0.68rem;">Nosyon / Sijè</label><input type="text" id="devoirNewNotion" placeholder="Egzanp: Adisyon ak retni" style="width:100%;padding:0.2rem 0.35rem;font-size:0.72rem;" /></div>
+                        <button class="btn btn-primary" onclick="addDevoir()" style="padding:0.25rem 0.6rem;font-size:0.72rem;">+ Ajoute</button>
+                    </div>
                 </div>
-                <div id="devoirTable" class="card table-wrap scroll-horizontal scroll-vertical" style="padding:0.6rem;max-height:450px;"></div>
+                <div id="devoirTable" class="card" style="padding:0.6rem;"></div>
             </div>
 
             <!-- ===== PAGE PREZANS PÈSONÈL (KACHE) ===== -->
@@ -786,7 +800,12 @@
                                 <option value="semaine">Semèn sa a</option>
                                 <option value="mois">Mwa sa a</option>
                                 <option value="annee">Tout ane a</option>
+                                <option value="perso">Peryòd pèsonalize (du...au...)</option>
                             </select>
+                            <label style="font-size:0.65rem;">Du</label>
+                            <input type="date" id="perPresDu" onchange="renderPersonnelPresenceReport()" style="padding:0.15rem 0.3rem;font-size:0.7rem;" />
+                            <label style="font-size:0.65rem;">Au</label>
+                            <input type="date" id="perPresAu" onchange="renderPersonnelPresenceReport()" style="padding:0.15rem 0.3rem;font-size:0.7rem;" />
                             <button class="btn" onclick="printPersonnelPresenceReport()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">🖨️ PDF</button>
                             <button class="btn" onclick="exportPersonnelPresenceWord()" style="padding:0.15rem 0.5rem;font-size:0.7rem;">📄 Word</button>
                         </div>
@@ -1003,7 +1022,20 @@
                     <div class="card" style="padding:0.8rem;">
                         <h4 style="font-size:0.85rem;">✒️ Siyati Direktè & Sceau Lekòl</h4>
                         <p class="text-sm text-muted" style="font-size:0.65rem;">Yo ap parèt pa defo sou tout dokiman (bilten, atestasyon, resi, elatriye).</p>
-                        <div class="grid grid-2" style="gap:0.5rem;">
+                        <div class="grid grid-3" style="gap:0.5rem;">
+                            <div>
+                                <div id="emblemPreview" class="text-center" style="padding:0.3rem;border:1px dashed var(--border);border-radius:8px;margin-bottom:0.3rem;">
+                                    <img id="paramEmblemImg" src="" alt="Armoiries" style="max-height:60px;max-width:100%;display:none;" />
+                                    <div id="paramEmblemPlaceholder" class="text-muted text-sm" style="font-size:0.7rem;">Okenn amwari</div>
+                                </div>
+                                <div class="flex gap-1" style="flex-wrap:wrap;">
+                                    <button class="btn" onclick="document.getElementById('paramEmblemFile').click()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">📁 Amwari</button>
+                                    <input type="file" id="paramEmblemFile" accept="image/*" style="display:none;" onchange="importOfficialEmblem(event)" />
+                                    <button class="btn btn-danger" onclick="removeOfficialEmblem()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
+                                </div>
+                                <label style="font-size:0.62rem;">Gwosè: <span id="embSizeVal">70</span>px</label>
+                                <input type="range" id="paramEmblemSize" min="30" max="160" value="70" oninput="setImgSize('emblem', this.value)" style="width:100%;" />
+                            </div>
                             <div>
                                 <div id="signaturePreview" class="text-center" style="padding:0.3rem;border:1px dashed var(--border);border-radius:8px;margin-bottom:0.3rem;">
                                     <img id="paramSignatureImg" src="" alt="Siyati" style="max-height:50px;max-width:100%;display:none;" />
@@ -1014,6 +1046,8 @@
                                     <input type="file" id="paramSignatureFile" accept="image/*" style="display:none;" onchange="importDirectorSignature(event)" />
                                     <button class="btn btn-danger" onclick="removeDirectorSignature()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
                                 </div>
+                                <label style="font-size:0.62rem;">Gwosè: <span id="sigSizeVal">45</span>px</label>
+                                <input type="range" id="paramSignatureSize" min="20" max="120" value="45" oninput="setImgSize('signature', this.value)" style="width:100%;" />
                             </div>
                             <div>
                                 <div id="sealPreview" class="text-center" style="padding:0.3rem;border:1px dashed var(--border);border-radius:8px;margin-bottom:0.3rem;">
@@ -1025,6 +1059,8 @@
                                     <input type="file" id="paramSealFile" accept="image/*" style="display:none;" onchange="importSchoolSeal(event)" />
                                     <button class="btn btn-danger" onclick="removeSchoolSeal()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
                                 </div>
+                                <label style="font-size:0.62rem;">Gwosè: <span id="sealSizeVal">70</span>px</label>
+                                <input type="range" id="paramSealSize" min="30" max="160" value="70" oninput="setImgSize('seal', this.value)" style="width:100%;" />
                             </div>
                         </div>
                         <div class="form-group mt-1">
@@ -1278,11 +1314,13 @@
 
         function importENSSRealData(force) {
             var year = '2025-2026';
+            var DATA_VERSION = 'enss-bds-v2';
             var existing = STATE.students.filter(function(s) { return s._YEAR === year; });
-            if (existing.length > 0 && !force) return 0;
-            if (force) {
-                STATE.students = STATE.students.filter(function(s) { return s._YEAR !== year; });
-            }
+            var upToDate = (STATE.enssDataVersion === DATA_VERSION) && existing.length >= ENSS_REAL_DATA.rows
+                .length;
+            if (upToDate && !force) return 0;
+            // Retire ansyen done ane sa a (demo oswa vèsyon anvan) epi mete vre done yo
+            STATE.students = STATE.students.filter(function(s) { return s._YEAR !== year; });
             var codes = ENSS_REAL_DATA.codes;
             var added = 0;
             ENSS_REAL_DATA.rows.forEach(function(r) {
@@ -1303,6 +1341,7 @@
                 });
                 added++;
             });
+            STATE.enssDataVersion = DATA_VERSION;
             saveState();
             recalcAllDecisions();
             saveState();
@@ -1558,10 +1597,24 @@
                 personnel: [],
                 matieres: JSON.parse(JSON.stringify(DEFAULT_MATIERES)),
                 matieresPrescolaire: [
-                    { id: 'mp-fr', nom: 'Français', code: 'FRC' },
-                    { id: 'mp-cre', nom: 'Créole', code: 'CRE' },
-                    { id: 'mp-mat', nom: 'Mathématiques', code: 'MAT' },
-                    { id: 'mp-eveil', nom: 'Éveil / Graphisme', code: 'EVEIL' }
+                    { id: 'mp-cfrc', nom: "Com Française", code: 'CFRC' },
+                    { id: 'mp-ccre', nom: "Com Créole", code: 'CCRE' },
+                    { id: 'mp-obs', nom: "Observation", code: 'OBS' },
+                    { id: 'mp-chan', nom: "Chant", code: 'CHAN' },
+                    { id: 'mp-poe', nom: "Poesie", code: 'POE' },
+                    { id: 'mp-prec', nom: "Pre-Ecriture", code: 'PREC' },
+                    { id: 'mp-prlec', nom: "Pre-Lecture", code: 'PRLEC' },
+                    { id: 'mp-prcal', nom: "Pre-Calcul", code: 'PRCAL' },
+                    { id: 'mp-raisl', nom: "Raisonnement logique", code: 'RAISL' },
+                    { id: 'mp-grap', nom: "Graphisme", code: 'GRAP' },
+                    { id: 'mp-oriet', nom: "Orientation temporelle", code: 'ORIET' },
+                    { id: 'mp-exers', nom: "Exercices sensoriels", code: 'EXERS' },
+                    { id: 'mp-travm', nom: "Travaux Manuel", code: 'TRAVM' },
+                    { id: 'mp-desin', nom: "Dessins", code: 'DESIN' },
+                    { id: 'mp-jeury', nom: "Jeux / Rythmes", code: 'JEURY' },
+                    { id: 'mp-cond', nom: "Conduite", code: 'COND' },
+                    { id: 'mp-reta', nom: "Retard", code: 'RETA' },
+                    { id: 'mp-abs', nom: "Absences", code: 'ABS' }
                 ],
                 prescolaireNotes: {},
                 presences: {},
@@ -1722,12 +1775,27 @@
             if (!STATE.parametres.visitorCount) STATE.parametres.visitorCount = 0;
             if (STATE.parametres.autoLogin === undefined) STATE.parametres.autoLogin = true;
             if (STATE.parametres.angEsp1a6 === undefined) STATE.parametres.angEsp1a6 = false;
-            if (!STATE.matieresPrescolaire || STATE.matieresPrescolaire.length === 0) {
+            if (!STATE.matieresPrescolaire || STATE.matieresPrescolaire.length === 0 || STATE.prescolaireMatVersion !== 'v2') {
+                STATE.prescolaireMatVersion = 'v2';
                 STATE.matieresPrescolaire = [
-                    { id: 'mp-fr', nom: 'Français', code: 'FRC' },
-                    { id: 'mp-cre', nom: 'Créole', code: 'CRE' },
-                    { id: 'mp-mat', nom: 'Mathématiques', code: 'MAT' },
-                    { id: 'mp-eveil', nom: 'Éveil / Graphisme', code: 'EVEIL' }
+                    { id: 'mp-cfrc', nom: "Com Française", code: 'CFRC' },
+                    { id: 'mp-ccre', nom: "Com Créole", code: 'CCRE' },
+                    { id: 'mp-obs', nom: "Observation", code: 'OBS' },
+                    { id: 'mp-chan', nom: "Chant", code: 'CHAN' },
+                    { id: 'mp-poe', nom: "Poesie", code: 'POE' },
+                    { id: 'mp-prec', nom: "Pre-Ecriture", code: 'PREC' },
+                    { id: 'mp-prlec', nom: "Pre-Lecture", code: 'PRLEC' },
+                    { id: 'mp-prcal', nom: "Pre-Calcul", code: 'PRCAL' },
+                    { id: 'mp-raisl', nom: "Raisonnement logique", code: 'RAISL' },
+                    { id: 'mp-grap', nom: "Graphisme", code: 'GRAP' },
+                    { id: 'mp-oriet', nom: "Orientation temporelle", code: 'ORIET' },
+                    { id: 'mp-exers', nom: "Exercices sensoriels", code: 'EXERS' },
+                    { id: 'mp-travm', nom: "Travaux Manuel", code: 'TRAVM' },
+                    { id: 'mp-desin', nom: "Dessins", code: 'DESIN' },
+                    { id: 'mp-jeury', nom: "Jeux / Rythmes", code: 'JEURY' },
+                    { id: 'mp-cond', nom: "Conduite", code: 'COND' },
+                    { id: 'mp-reta', nom: "Retard", code: 'RETA' },
+                    { id: 'mp-abs', nom: "Absences", code: 'ABS' }
                 ];
             }
             if (!STATE.prescolaireNotes) STATE.prescolaireNotes = {};
@@ -1883,16 +1951,39 @@
         }
 
         // --- === SIYATI DIREKTÈ + SCEAU LEKÒL (pou tout dokiman) === ---
+        function getImgSize(key, defVal) {
+            var v = (STATE.parametres.imageSizes || {})[key];
+            return v ? parseInt(v) : defVal;
+        }
+
+        function buildOfficialHeaderHtml() {
+            var p = STATE.parametres;
+            var emb = p.officialEmblem || '';
+            var embSize = getImgSize('emblem', 70);
+            var embImg = emb ? ('<img src="' + emb + '" style="height:' + embSize +
+                'px;display:block;margin:0 auto 0.15rem;" />') : '';
+            return '<div style="text-align:center;line-height:1.25;margin-bottom:0.5rem;">' + embImg +
+                '<div style="font-weight:700;font-size:0.8rem;">RÉPUBLIQUE D\'HAÏTI</div>' +
+                '<div style="font-size:0.7rem;">MINISTÈRE DE L\'ÉDUCATION NATIONALE ET DE LA FORMATION PROFESSIONNELLE (MENFP)</div>' +
+                '<div style="font-size:0.7rem;">DIRECTION DÉPARTEMENTALE DU NORD\'EST / INSPECTION DU FONDAMENTAL</div>' +
+                '<div style="font-weight:700;font-size:0.78rem;">' + (p.ecoleNom || 'ENSS') + '</div>' +
+                '<div style="font-size:0.65rem;">' + (p.ecoleAdresse || '') +
+                (p.ecoleTel ? ' — Tél: ' + p.ecoleTel : '') + '</div>' +
+                '<hr style="border:none;border-top:2px solid #333;margin:0.3rem 0;" /></div>';
+        }
+
         function buildSignatureBlockHtml(rightLabel) {
             var sig = STATE.parametres.directorSignature || '';
             var seal = STATE.parametres.schoolSeal || '';
             var directorNom = STATE.parametres.directorNom || 'CHARLES Joseph Mary';
+            var sigSize = getImgSize('signature', 45);
+            var sealSize = getImgSize('seal', 70);
             var sigImg = sig ?
-                ("<img src=\"" + sig +
-                    "\" style=\"max-height:45px;max-width:150px;display:block;margin:0 auto 0.1rem;\" />") :
-                '';
+                ("<img src=\"" + sig + "\" style=\"height:" + sigSize +
+                    "px;display:block;margin:0 auto 0.1rem;\" />") : '';
             var sealImg = seal ?
-                ("<img src=\"" + seal + "\" style=\"max-height:70px;max-width:70px;opacity:0.9;\" />") : '';
+                ("<img src=\"" + seal + "\" style=\"height:" + sealSize +
+                    "px;opacity:0.9;\" />") : '';
             return "<div class=\"signature\" style=\"display:flex;justify-content:space-between;align-items:flex-end;margin-top:1.2rem;\">" +
                 "<div style=\"text-align:center;\">" + sigImg +
                 "<div style=\"border-bottom:1px solid #333;width:180px;display:inline-block;\"></div><br/><span style=\"font-size:0.75rem;\">Signature : <strong>" +
@@ -4107,6 +4198,21 @@
             var controles = ['1', '2', '3', '4'];
             var controleLabels = ['C1', 'C2', 'C3', 'C4'];
             var hideNotes = STATE.parametres.hideNotes && role !== 'admin';
+            // Filtè klas: afiche yon sèl klas alafwa
+            var fsel = document.getElementById('rezimeClasseFilter');
+            if (fsel) {
+                var withStudents = filterClasses.filter(function(c) { return getStudentsByClasse(c).length > 0; });
+                var cur = fsel.value;
+                if (fsel.options.length === 0 || fsel.dataset.count !== String(withStudents.length)) {
+                    fsel.innerHTML = withStudents.map(function(c) {
+                        return '<option value="' + c + '">' + c + '</option>';
+                    }).join('');
+                    fsel.dataset.count = String(withStudents.length);
+                    if (cur && withStudents.indexOf(cur) !== -1) fsel.value = cur;
+                }
+                if (fsel.value) filterClasses = [fsel.value];
+                else if (withStudents.length > 0) filterClasses = [withStudents[0]];
+            }
             var html = '';
             filterClasses.forEach(function(classe) {
                 var students = getStudentsByClasse(classe);
@@ -5583,108 +5689,231 @@
             return STATE.devoirsData[key];
         }
 
-        function loadDevoirForm() {
+        function getDevoirsList() {
+            if (!STATE.devoirsList) STATE.devoirsList = [];
+            return STATE.devoirsList;
+        }
+
+        function getDevoirsFor(classe, controle, year) {
+            year = year || getYear();
+            return getDevoirsList().filter(function(d) {
+                return d.classe === classe && String(d.controle) === String(controle) && d._YEAR === year;
+            });
+        }
+
+        function fillDevoirSelectors() {
             var classeSel = document.getElementById('devoirClasseSelect');
-            var matSel = document.getElementById('devoirMatiereSelect');
             if (classeSel.options.length === 0) {
                 var filterClasses = ALL_CLASSES;
                 var role = getRole();
                 if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
                     var user = STATE.securite.users.find(function(u) { return u.profil === STATE.utilisateur; });
-                    if (user && user.accessClasses) {
-                        filterClasses = ALL_CLASSES.filter(function(c) { return user.accessClasses.includes(
-                            c); });
+                    if (user && user.accessClasses && user.accessClasses.length > 0) {
+                        filterClasses = ALL_CLASSES.filter(function(c) { return user.accessClasses.includes(c); });
                     }
                 }
                 filterClasses.forEach(function(c) {
                     var opt = document.createElement('option');
-                    opt.value = c;
-                    opt.textContent = c;
+                    opt.value = c; opt.textContent = c;
                     classeSel.appendChild(opt);
                 });
             }
             var classe = classeSel.value;
-            if (!classe) return;
-            var matieres = getMatieresForClasse(classe);
-            var currentMat = matSel.value;
-            matSel.innerHTML = matieres.map(function(m) {
-                return "<option value=\"" + m.code + "\">" + m.nom + "</option>";
-            }).join('');
-            if (currentMat && matieres.some(function(m) { return m.code === currentMat; })) matSel.value =
-                currentMat;
-            var matiere = matSel.value;
-            var controle = document.getElementById('devoirControleSelect').value;
-            if (!matiere) return;
-            var data = getDevoirData(classe, matiere, controle);
-            document.getElementById('devoirTotalAssigned').value = data.totalAssigned || 0;
-            var students = getStudentsByClasse(classe);
-            var html =
-                "<table><thead><tr><th style=\"font-size:0.6rem;\">NISU</th><th style=\"font-size:0.6rem;\">Non</th><th style=\"font-size:0.6rem;\">Pr\xE9non</th><th style=\"font-size:0.6rem;\">Devwa Fè</th><th style=\"font-size:0.6rem;\">Devwa Pa Fè</th><th style=\"font-size:0.6rem;\">Alèt</th></tr></thead><tbody>";
-            students.forEach(function(s) {
-                var done = data.completion[s.nisu] || 0;
-                var total = data.totalAssigned || 0;
-                var missed = Math.max(0, total - done);
-                var alertBtns = missed > 0 ?
-                    ("<button onclick=\"sendDevoirAlert('" + s.nisu + "','" + classe +
-                        "','whatsapp')\" title=\"WhatsApp\" style=\"padding:0.05rem 0.2rem;font-size:0.55rem;\">\uD83D\uDCF2</button> <button onclick=\"sendDevoirAlert('" +
-                        s.nisu + "','" + classe +
-                        "','sms')\" title=\"SMS\" style=\"padding:0.05rem 0.2rem;font-size:0.55rem;\">\u2709\uFE0F</button>"
-                        ) : '';
-                html += "<tr><td style=\"font-size:0.6rem;\">" + s.nisu +
-                    "</td><td style=\"font-size:0.6rem;\">" + s.nom + "</td><td style=\"font-size:0.6rem;\">" +
-                    s.prenom +
-                    "</td><td style=\"font-size:0.6rem;\"><input type=\"number\" min=\"0\" max=\"" + total +
-                    "\" value=\"" + done + "\" data-nisu=\"" + s.nisu +
-                    "\" class=\"devoir-done-input\" style=\"width:60px;padding:0.1rem;font-size:0.65rem;\" onchange=\"updateDevoirRow(this)\" /></td><td style=\"font-size:0.6rem;\" id=\"devoirMissed_" +
-                    s.nisu + "\">" + missed + "</td><td style=\"font-size:0.6rem;\">" + alertBtns +
-                    "</td></tr>";
-            });
-            html += "</tbody></table>";
-            document.getElementById('devoirTable').innerHTML = html ||
-                '<p class="text-muted" style="font-size:0.8rem;">Pa gen elèv nan klas sa a.</p>';
+            var matSel = document.getElementById('devoirNewMatiere');
+            if (classe && matSel) {
+                var mats = isPrescolaire(classe) ? STATE.matieresPrescolaire : getMatieresForClasse(classe);
+                var cur = matSel.value;
+                matSel.innerHTML = mats.map(function(m) {
+                    return '<option value="' + m.code + '">' + m.nom + '</option>';
+                }).join('');
+                if (cur && mats.some(function(m) { return m.code === cur; })) matSel.value = cur;
+            }
+            return classe;
         }
 
-        function updateDevoirRow(input) {
-            var total = parseInt(document.getElementById('devoirTotalAssigned').value) || 0;
-            var done = parseInt(input.value) || 0;
-            if (done > total) { done = total; input.value = total; }
-            var missed = Math.max(0, total - done);
-            document.getElementById('devoirMissed_' + input.dataset.nisu).textContent = missed;
-        }
-
-        function saveDevoirData() {
-            if (!canModifyData('devoirs')) return requireLogin('modifye done sa yo', 'devoirs');
+        function addDevoir() {
+            if (!canModifyData('devoirs')) return requireLogin('ajoute yon devwa', 'devoirs');
             var classe = document.getElementById('devoirClasseSelect').value;
-            var matiere = document.getElementById('devoirMatiereSelect').value;
             var controle = document.getElementById('devoirControleSelect').value;
-            if (!classe || !matiere) { alert('Chwazi yon klas ak yon matyè.'); return; }
-            var data = getDevoirData(classe, matiere, controle);
-            data.totalAssigned = parseInt(document.getElementById('devoirTotalAssigned').value) || 0;
-            document.querySelectorAll('.devoir-done-input').forEach(function(inp) {
-                var val = parseInt(inp.value) || 0;
-                if (val > data.totalAssigned) val = data.totalAssigned;
-                data.completion[inp.dataset.nisu] = val;
+            var date = document.getElementById('devoirNewDate').value;
+            var matiere = document.getElementById('devoirNewMatiere').value;
+            var notion = document.getElementById('devoirNewNotion').value.trim();
+            if (!classe) { alert('Chwazi yon klas.'); return; }
+            if (!date) { alert('Chwazi dat devwa a.'); return; }
+            if (!matiere) { alert('Chwazi yon matyè.'); return; }
+            if (!notion) { alert('Antre nosyon / sijè devwa a.'); return; }
+            getDevoirsList().push({
+                id: 'dv-' + Date.now() + '-' + Math.floor(Math.random() * 999),
+                classe: classe, controle: String(controle), date: date,
+                matiere: matiere, notion: notion, done: {}, _YEAR: getYear()
             });
             saveState();
+            document.getElementById('devoirNewNotion').value = '';
             loadDevoirForm();
-            alert('Devwa anrejistre.');
             spawnHearts();
+        }
+
+        function deleteDevoir(id) {
+            if (!canModifyData('devoirs')) return requireLogin('efase yon devwa', 'devoirs');
+            if (!confirm('Efase devwa sa a ?')) return;
+            STATE.devoirsList = getDevoirsList().filter(function(d) { return d.id !== id; });
+            saveState();
+            loadDevoirForm();
+        }
+
+        function updateDevoirNotion(id, field, val) {
+            if (!canModifyData('devoirs')) return requireLogin('modifye yon devwa', 'devoirs');
+            var d = getDevoirsList().find(function(x) { return x.id === id; });
+            if (!d) return;
+            d[field] = val;
+            saveState();
+        }
+
+        function toggleDevoirDone(id, nisu, checked) {
+            if (!canModifyData('devoirs')) return requireLogin('modifye devwa yo', 'devoirs');
+            var d = getDevoirsList().find(function(x) { return x.id === id; });
+            if (!d) return;
+            if (!d.done) d.done = {};
+            if (checked) d.done[nisu] = true; else delete d.done[nisu];
+            saveState();
+            loadDevoirForm();
+        }
+
+        function setAllDevoirDone(id, checked) {
+            if (!canModifyData('devoirs')) return requireLogin('modifye devwa yo', 'devoirs');
+            var d = getDevoirsList().find(function(x) { return x.id === id; });
+            if (!d) return;
+            d.done = {};
+            if (checked) {
+                getStudentsByClasse(d.classe).forEach(function(s) { d.done[s.nisu] = true; });
+            }
+            saveState();
+            loadDevoirForm();
+        }
+
+        function buildDevoirsTableHtml(classe, controle, forPrint) {
+            var devoirs = getDevoirsFor(classe, controle).sort(function(a, b) {
+                return (a.date || '').localeCompare(b.date || '');
+            });
+            var students = getStudentsByClasse(classe);
+            if (devoirs.length === 0) {
+                return '<p class="text-muted" style="font-size:0.75rem;">Pa gen devwa anrejistre pou Kontwòl ' +
+                    controle + ' nan ' + classe + '.</p>';
+            }
+            var matName = function(code) {
+                var mats = isPrescolaire(classe) ? STATE.matieresPrescolaire : getMatieresForClasse(classe);
+                var m = mats.find(function(x) { return x.code === code; });
+                return m ? m.nom : code;
+            };
+            var html = '';
+            devoirs.forEach(function(d) {
+                var nbDone = students.filter(function(s) { return d.done && d.done[s.nisu]; }).length;
+                var pct = students.length > 0 ? Math.round(nbDone / students.length * 100) : 0;
+                html += '<div class="card" style="padding:0.5rem;margin-bottom:0.5rem;">';
+                if (forPrint) {
+                    html += '<div style="font-weight:700;font-size:0.8rem;margin-bottom:0.2rem;">📅 ' + d.date +
+                        ' — ' + matName(d.matiere) + ' — ' + d.notion + '</div>';
+                } else {
+                    html += '<div class="flex gap-1" style="flex-wrap:wrap;align-items:center;margin-bottom:0.3rem;">' +
+                        '<input type="date" value="' + d.date + '" onchange="updateDevoirNotion(\'' + d.id +
+                        '\',\'date\',this.value)" style="padding:0.15rem 0.3rem;font-size:0.7rem;" />' +
+                        '<span class="badge badge-primary" style="font-size:0.65rem;">' + matName(d.matiere) + '</span>' +
+                        '<input type="text" value="' + (d.notion || '').replace(/"/g, '&quot;') +
+                        '" onchange="updateDevoirNotion(\'' + d.id +
+                        '\',\'notion\',this.value)" style="flex:1;min-width:140px;padding:0.15rem 0.3rem;font-size:0.7rem;" />' +
+                        '<button class="btn btn-danger" onclick="deleteDevoir(\'' + d.id +
+                        '\')" style="padding:0.1rem 0.4rem;font-size:0.65rem;">🗑</button>' +
+                        '</div>';
+                }
+                html += '<div style="font-size:0.68rem;margin-bottom:0.2rem;">✅ Fè: <strong>' + nbDone +
+                    '</strong> / ' + students.length + ' (' + pct + '%) — ❌ Pa fè: <strong>' +
+                    (students.length - nbDone) + '</strong></div>';
+                html += '<div class="table-wrap scroll-horizontal scroll-vertical" style="max-height:260px;"><table><thead><tr>' +
+                    '<th style="font-size:0.55rem;">NISU</th><th style="font-size:0.55rem;">Elèv</th>' +
+                    '<th style="font-size:0.55rem;">Fè l ?' +
+                    (forPrint ? '' : ' <input type="checkbox" onchange="setAllDevoirDone(\'' + d.id +
+                        '\', this.checked)" style="width:auto;margin:0;" title="Tout" />') +
+                    '</th>' + (forPrint ? '' : '<th style="font-size:0.55rem;">Alèt</th>') + '</tr></thead><tbody>';
+                students.forEach(function(s) {
+                    var isDone = !!(d.done && d.done[s.nisu]);
+                    html += '<tr><td style="font-size:0.6rem;">' + s.nisu + '</td><td style="font-size:0.6rem;">' +
+                        s.nom + ' ' + s.prenom + '</td>';
+                    if (forPrint) {
+                        html += '<td style="font-size:0.6rem;">' + (isDone ? 'OUI' : 'NON') + '</td>';
+                    } else {
+                        html += '<td style="font-size:0.6rem;text-align:center;"><input type="checkbox" ' +
+                            (isDone ? 'checked' : '') + ' onchange="toggleDevoirDone(\'' + d.id + '\',\'' +
+                            s.nisu + '\', this.checked)" style="width:auto;margin:0;" /></td>' +
+                            '<td style="font-size:0.6rem;">' + (!isDone ?
+                                '<button onclick="sendDevoirAlert(\'' + s.nisu + '\',\'' + classe +
+                                '\',\'whatsapp\')" style="padding:0.05rem 0.2rem;font-size:0.55rem;">📲</button>' : '') +
+                            '</td>';
+                    }
+                    html += '</tr>';
+                });
+                html += '</tbody></table></div></div>';
+            });
+            return html;
+        }
+
+        function loadDevoirForm() {
+            var classe = fillDevoirSelectors();
+            if (!classe) return;
+            var controle = document.getElementById('devoirControleSelect').value;
+            document.getElementById('devoirTable').innerHTML = buildDevoirsTableHtml(classe, controle, false);
+        }
+
+        function printDevoirsDossier() {
+            if (!canPrintOrExport('devoirs')) return requireLogin('enprime dosye devwa a', 'devoirs');
+            var classe = document.getElementById('devoirClasseSelect').value;
+            var controle = document.getElementById('devoirControleSelect').value;
+            var body = buildDevoirsTableHtml(classe, controle, true);
+            var win = window.open('', '_blank');
+            win.document.write('<html><head><meta charset="UTF-8"><title>Devwa ' + classe +
+                '</title><style>body{font-family:sans-serif;padding:1.2rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;margin:0.3rem 0;}th,td{border:1px solid #333;padding:0.2rem 0.3rem;text-align:center;}th{background:#1e3a5f;color:#fff;}.card{border:1px solid #999;padding:0.4rem;margin-bottom:0.5rem;}</style></head><body>' +
+                buildOfficialHeaderHtml() + '<h3 style="text-align:center;">Dosye Devwa — ' + classe +
+                ' — Kontwòl ' + controle + '</h3>' + body + buildSignatureBlockHtml('Signature Enseignant') +
+                '<script>window.onload=function(){window.print();}<\/script></body></html>');
+            win.document.close();
+        }
+
+        function exportDevoirsWord() {
+            if (!canPrintOrExport('devoirs')) return requireLogin('telechaje dosye devwa a', 'devoirs');
+            var classe = document.getElementById('devoirClasseSelect').value;
+            var controle = document.getElementById('devoirControleSelect').value;
+            var body = buildDevoirsTableHtml(classe, controle, true);
+            var html = '<html><head><meta charset="UTF-8"><title>Devwa ' + classe +
+                '</title><style>body{font-family:sans-serif;padding:1.2rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;margin:0.3rem 0;}th,td{border:1px solid #333;padding:0.2rem 0.3rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>' +
+                buildOfficialHeaderHtml() + '<h3 style="text-align:center;">Dosye Devwa — ' + classe +
+                ' — Kontwòl ' + controle + '</h3>' + body + buildSignatureBlockHtml('Signature Enseignant') +
+                '</body></html>';
+            var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'devwa_' + classe.replace(/\s+/g, '_') + '_C' + controle + '.doc';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function getStudentDevoirSummary(nisu, classe, year) {
             year = year || getYear();
-            var totalAssigned = 0,
-                totalDone = 0;
-            if (STATE.devoirsData) {
+            var assigned = 0, done = 0;
+            (STATE.devoirsList || []).forEach(function(d) {
+                if (d.classe !== classe || d._YEAR !== year) return;
+                assigned++;
+                if (d.done && d.done[nisu]) done++;
+            });
+            if (assigned === 0 && STATE.devoirsData) {
                 Object.keys(STATE.devoirsData).forEach(function(key) {
                     var parts = key.split('|');
                     if (parts[0] !== classe || parts[3] !== year) return;
                     var d = STATE.devoirsData[key];
-                    totalAssigned += (d.totalAssigned || 0);
-                    totalDone += (d.completion[nisu] || 0);
+                    assigned += (d.totalAssigned || 0);
+                    done += (d.completion[nisu] || 0);
                 });
             }
-            return { assigned: totalAssigned, done: totalDone, missed: Math.max(0, totalAssigned - totalDone) };
+            return { assigned: assigned, done: done, missed: Math.max(0, assigned - done) };
         }
 
         // --- === PREZANS PÈSONÈL === ---
@@ -5700,7 +5929,7 @@
             var html =
                 "<div class=\"flex gap-1 mb-1\" style=\"margin-bottom:0.4rem;\"><button class=\"btn btn-primary\" onclick=\"savePersonnelPresences('" +
                 date +
-                "')\" style=\"padding:0.15rem 0.5rem;font-size:0.7rem;\">💾 Sauvegarder</button></div><table><thead><tr><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">Reta</th><th style=\"font-size:0.55rem;\">Motiv\xE9</th><th style=\"font-size:0.55rem;\">L\xE8 Rantre</th><th style=\"font-size:0.55rem;\">L\xE8 Soti</th></tr></thead><tbody>";
+                "')\" style=\"padding:0.15rem 0.5rem;font-size:0.7rem;\">💾 Sauvegarder</button></div><table><thead><tr><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">Reta</th><th style=\"font-size:0.55rem;\">Motiv\xE9</th><th style=\"font-size:0.55rem;\">Konje</th><th style=\"font-size:0.55rem;\">L\xE8 Rantre</th><th style=\"font-size:0.55rem;\">L\xE8 Soti</th></tr></thead><tbody>";
             personnel.forEach(function(p) {
                 var rec = dayData[p.id] || { status: 'P', heureEntree: '', heureSortie: '' };
                 html += "<tr><td style=\"font-size:0.6rem;\">" + p.nom + " " + p.prenom +
@@ -5712,6 +5941,8 @@
                     p.id + "\" value=\"R\" " + (rec.status === 'R' ? 'checked' : '') +
                     " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"perpres_" +
                     p.id + "\" value=\"M\" " + (rec.status === 'M' ? 'checked' : '') +
+                    " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"radio\" name=\"perpres_" +
+                    p.id + "\" value=\"C\" " + (rec.status === 'C' ? 'checked' : '') +
                     " style=\"width:auto;margin:0;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"time\" id=\"perpresIn_" +
                     p.id + "\" value=\"" + (rec.heureEntree || '') +
                     "\" style=\"padding:0.1rem;font-size:0.6rem;width:90px;\" /></td>\n                <td style=\"font-size:0.6rem;\"><input type=\"time\" id=\"perpresOut_" +
@@ -5748,6 +5979,13 @@
         function getPeriodeDateRange(periode) {
             var today = new Date();
             var start, end = today;
+            if (periode === 'perso') {
+                var d1 = document.getElementById('perPresDu');
+                var d2 = document.getElementById('perPresAu');
+                if (d1 && d1.value && d2 && d2.value) {
+                    return { start: new Date(d1.value), end: new Date(d2.value) };
+                }
+            }
             if (periode === 'semaine') {
                 start = new Date(today);
                 start.setDate(today.getDate() - today.getDay());
@@ -5765,6 +6003,7 @@
                 absent = 0,
                 retard = 0,
                 motive = 0,
+                conge = 0,
                 totalDays = 0;
             if (STATE.personnelPresences) {
                 Object.keys(STATE.personnelPresences).forEach(function(dateStr) {
@@ -5772,6 +6011,7 @@
                     if (d < range.start || d > range.end) return;
                     var rec = STATE.personnelPresences[dateStr][personnelId];
                     if (!rec) return;
+                    if (rec.status === 'C') { conge++; return; }
                     totalDays++;
                     if (rec.status === 'P') present++;
                     else if (rec.status === 'A') absent++;
@@ -5780,7 +6020,7 @@
             }
             var pct = totalDays > 0 ? Math.round((present / totalDays) * 1000) / 10 : 0;
             return { totalDays: totalDays, present: present, absent: absent, retard: retard, motive: motive,
-                pct: pct
+                conge: conge, pct: pct
             };
         }
 
@@ -5789,7 +6029,7 @@
                 return (a.nom || '').localeCompare(b.nom || '');
             });
             var html =
-                "<table><thead><tr><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Jou</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">Reta</th><th style=\"font-size:0.55rem;\">Motiv\xE9</th><th style=\"font-size:0.55rem;\">%</th></tr></thead><tbody>";
+                "<table><thead><tr><th style=\"font-size:0.55rem;\">Non</th><th style=\"font-size:0.55rem;\">Jou</th><th style=\"font-size:0.55rem;\">Pr\xE9sent</th><th style=\"font-size:0.55rem;\">Absan</th><th style=\"font-size:0.55rem;\">Reta</th><th style=\"font-size:0.55rem;\">Motiv\xE9</th><th style=\"font-size:0.55rem;\">Konje</th><th style=\"font-size:0.55rem;\">% Prezans</th></tr></thead><tbody>";
             personnel.forEach(function(p) {
                 var s = computePersonnelPresenceSummary(p.id, periode);
                 html += "<tr><td style=\"font-size:0.6rem;\">" + p.nom + " " + p.prenom +
@@ -5798,6 +6038,7 @@
                     "</td><td style=\"font-size:0.6rem;\">" + s.absent +
                     "</td><td style=\"font-size:0.6rem;\">" + s.retard +
                     "</td><td style=\"font-size:0.6rem;\">" + s.motive +
+                    "</td><td style=\"font-size:0.6rem;\">" + s.conge +
                     "</td><td style=\"font-size:0.6rem;\"><strong>" + s.pct + "%</strong></td></tr>";
             });
             html += "</tbody></table>";
@@ -5818,8 +6059,8 @@
             var win = window.open('', '_blank');
             win.document.write(
                 "<html><head><meta charset=\"UTF-8\"><title>Rapò Prezans Pèsonèl</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
-                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
-                " — Rapò Prezans Pèsonèl</h2>" + buildPersonnelPresenceReportHtml(periode) +
+                buildOfficialHeaderHtml() + "<h2 style=\"text-align:center;\">Rapò Prezans Pèsonèl</h2>" +
+                buildPersonnelPresenceReportHtml(periode) +
                 buildSignatureBlockHtml("Signature Direktè") +
                 "<script>window.onload=function(){window.print();}<\/script></body></html>");
             win.document.close();
@@ -5830,8 +6071,8 @@
             var periode = document.getElementById('perPresPeriode').value;
             var html =
                 "<html><head><meta charset=\"UTF-8\"><title>Rapò Prezans Pèsonèl</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
-                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
-                " — Rapò Prezans Pèsonèl</h2>" + buildPersonnelPresenceReportHtml(periode) +
+                buildOfficialHeaderHtml() + "<h2 style=\"text-align:center;\">Rapò Prezans Pèsonèl</h2>" +
+                buildPersonnelPresenceReportHtml(periode) +
                 buildSignatureBlockHtml("Signature Direktè") + "</body></html>";
             var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
             var url = URL.createObjectURL(blob);
@@ -6113,7 +6354,7 @@
             var win = window.open('', '_blank');
             win.document.write(
                 "<html><head><meta charset=\"UTF-8\"><title>Rezime Prezans</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;margin-bottom:1rem;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
-                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
+                buildOfficialHeaderHtml() + "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
                 " — Rezime Prezans</h2>" + bodyHtml + buildSignatureBlockHtml() +
                 "<script>window.onload=function(){window.print();}<\/script></body></html>");
             win.document.close();
@@ -6126,7 +6367,7 @@
                 '');
             var html =
                 "<html><head><meta charset=\"UTF-8\"><title>Rezime Prezans</title><style>body{font-family:sans-serif;padding:1.5rem;font-size:0.8rem;}table{width:100%;border-collapse:collapse;margin-bottom:1rem;}th,td{border:1px solid #333;padding:0.25rem 0.35rem;text-align:center;}th{background:#1e3a5f;color:#fff;}</style></head><body>" +
-                "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
+                buildOfficialHeaderHtml() + "<h2 style=\"text-align:center;\">" + (STATE.parametres.ecoleNom || 'ENSS') +
                 " — Rezime Prezans</h2>" + bodyHtml + buildSignatureBlockHtml() + "</body></html>";
             var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
             var url = URL.createObjectURL(blob);
@@ -7674,6 +7915,38 @@
             spawnHearts();
         }
 
+        function importOfficialEmblem(event) {
+            if (!requireAdmin('Modifye paramèt yo')) return;
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                STATE.parametres.officialEmblem = e.target.result;
+                saveState();
+                updateSignatureSealDisplay();
+                spawnHearts();
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function removeOfficialEmblem() {
+            if (!requireAdmin('Modifye paramèt yo')) return;
+            STATE.parametres.officialEmblem = '';
+            saveState();
+            updateSignatureSealDisplay();
+        }
+
+        function setImgSize(key, val) {
+            if (!requireAdmin('Modifye paramèt yo')) return;
+            if (!STATE.parametres.imageSizes) STATE.parametres.imageSizes = {};
+            STATE.parametres.imageSizes[key] = parseInt(val);
+            saveState();
+            var map = { emblem: 'embSizeVal', signature: 'sigSizeVal', seal: 'sealSizeVal' };
+            var el = document.getElementById(map[key]);
+            if (el) el.textContent = val;
+        }
+
         function saveDirectorNom(val) {
             if (!requireAdmin('Modifye paramèt yo')) return;
             STATE.parametres.directorNom = val.trim();
@@ -7699,6 +7972,21 @@
             }
             var nomEl = document.getElementById('paramDirectorNom');
             if (nomEl) nomEl.value = STATE.parametres.directorNom || 'CHARLES Joseph Mary';
+            var emb = STATE.parametres.officialEmblem || '';
+            var embImg = document.getElementById('paramEmblemImg');
+            var embPh = document.getElementById('paramEmblemPlaceholder');
+            if (embImg && embPh) {
+                if (emb) { embImg.src = emb; embImg.style.display = 'inline-block'; embPh.style.display = 'none'; }
+                else { embImg.style.display = 'none'; embPh.style.display = 'block'; }
+            }
+            var sizes = STATE.parametres.imageSizes || {};
+            var setRange = function(id, valId, v, def) {
+                var r = document.getElementById(id); var t = document.getElementById(valId);
+                if (r) r.value = v || def; if (t) t.textContent = v || def;
+            };
+            setRange('paramEmblemSize', 'embSizeVal', sizes.emblem, 70);
+            setRange('paramSignatureSize', 'sigSizeVal', sizes.signature, 45);
+            setRange('paramSealSize', 'sealSizeVal', sizes.seal, 70);
         }
 
         function renderResultColumns() {
@@ -9196,11 +9484,13 @@
         }
 
         try {
-            // Demaraj an mòd VIZITÈ PIBLIK: pa gen koneksyon otomatik kòm admin.
-            // Yon moun dwe konekte ak pwofil + mo de pase pou jwenn aksè kominote lekòl la.
-            if (STATE.utilisateur && !STATE.securite.users.find(function(u) { return u.profil === STATE
+            // Koneksyon otomatik kòm admin pou travay chak jou.
+            // Sistèm aksè piblik la rete aktif: peze "✕" (Dekonekte) pou wè sa piblik la wè.
+            if (!STATE.utilisateur || !STATE.securite.users.find(function(u) { return u.profil === STATE
                     .utilisateur; })) {
-                STATE.utilisateur = null;
+                var adminUser = STATE.securite.users.find(function(u) { return u.role === 'admin'; }) ||
+                    STATE.securite.users[0];
+                if (adminUser) STATE.utilisateur = adminUser.profil;
             }
             saveState();
             initApp();
@@ -9237,8 +9527,6 @@
         window.renderEmploi = renderEmploi;
         window.loadPresences = loadPresences;
         window.loadDevoirForm = loadDevoirForm;
-        window.updateDevoirRow = updateDevoirRow;
-        window.saveDevoirData = saveDevoirData;
         window.getStudentDevoirSummary = getStudentDevoirSummary;
         window.loadPersonnelPresences = loadPersonnelPresences;
         window.savePersonnelPresences = savePersonnelPresences;
@@ -9346,6 +9634,17 @@
         window.importSchoolSeal = importSchoolSeal;
         window.removeSchoolSeal = removeSchoolSeal;
         window.saveDirectorNom = saveDirectorNom;
+        window.importOfficialEmblem = importOfficialEmblem;
+        window.removeOfficialEmblem = removeOfficialEmblem;
+        window.setImgSize = setImgSize;
+        window.buildOfficialHeaderHtml = buildOfficialHeaderHtml;
+        window.addDevoir = addDevoir;
+        window.deleteDevoir = deleteDevoir;
+        window.updateDevoirNotion = updateDevoirNotion;
+        window.toggleDevoirDone = toggleDevoirDone;
+        window.setAllDevoirDone = setAllDevoirDone;
+        window.printDevoirsDossier = printDevoirsDossier;
+        window.exportDevoirsWord = exportDevoirsWord;
         window.updateSignatureSealDisplay = updateSignatureSealDisplay;
         window.buildSignatureBlockHtml = buildSignatureBlockHtml;
         window.updateLogoDisplay = updateLogoDisplay;
