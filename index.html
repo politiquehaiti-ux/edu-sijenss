@@ -307,21 +307,8 @@
                 <div class="accueil-menu" id="accueilMenu">
                     <div class="menu-item active" data-page="accueil" onclick="navigateTo('accueil')"><span class="icon">🏠</span> Akèy</div>
                     <div class="menu-item" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="icon">📊</span> Tableau de Bord</div>
-                    <div class="menu-item" data-page="direction" onclick="navigateTo('direction')"><span class="icon">🏛️</span> Direction</div>
                     <div class="menu-item" data-page="classes" onclick="navigateTo('classes')"><span class="icon">🏫</span> Classes</div>
-                    <div class="menu-item" data-page="eleves" onclick="navigateTo('eleves')"><span class="icon">👨‍🎓</span> Élèves</div>
-                    <div class="menu-item" data-page="resultats" onclick="navigateTo('resultats')"><span class="icon">📈</span> Résultats</div>
-                    <div class="menu-item" data-page="matieres" onclick="navigateTo('matieres')"><span class="icon">📚</span> Matières</div>
-                    <div class="menu-item" data-page="rezime-matiere" onclick="navigateTo('rezime-matiere')"><span class="icon">📊</span> Rezime Matyè</div>
-                    <div class="menu-item" data-page="personnel" onclick="navigateTo('personnel')"><span class="icon">👔</span> Personnel</div>
-                    <div class="menu-item" data-page="emploi" onclick="navigateTo('emploi')"><span class="icon">📅</span> Emploi du Temps</div>
-                    <div class="menu-item" data-page="presences" onclick="navigateTo('presences')"><span class="icon">📋</span> Présences</div>
-                    <div class="menu-item" data-page="finance" onclick="navigateTo('finance')"><span class="icon">💰</span> Finance</div>
-                    <div class="menu-item" data-page="comites" onclick="navigateTo('comites')"><span class="icon">🤝</span> Comités</div>
-                    <div class="menu-item" data-page="cantine" onclick="navigateTo('cantine')"><span class="icon">🍲</span> Cantine</div>
-                    <div class="menu-item" data-page="cantinePresences" onclick="navigateTo('cantinePresences')"><span class="icon">📋</span> Présences Cantine</div>
-                    <div class="menu-item" data-page="inventaire" onclick="navigateTo('inventaire')"><span class="icon">📦</span> Inventaire</div>
-                    <div class="menu-item" data-page="contacts" onclick="navigateTo('contacts')"><span class="icon">📇</span> Kontak Responsab</div>
+                    <div class="menu-item" data-page="direction" onclick="navigateTo('direction')"><span class="icon">🏛️</span> Direction</div>
                     <div class="menu-item" data-page="parametres" onclick="navigateTo('parametres')"><span class="icon">⚙️</span> Paramètres</div>
                 </div>
 
@@ -437,6 +424,16 @@
 
             <!-- ===== PAGE DIRECTION (NOUVO) ===== -->
             <div class="page" id="page-direction">
+                <div class="card" style="padding:0.8rem;margin:0.6rem 0;border-left:4px solid var(--primary);">
+                    <h3 style="font-size:0.95rem;margin-bottom:0.5rem;">🏛 Gestion de la Direction</h3>
+                    <div class="grid grid-4" style="gap:0.5rem;">
+                        <button class="btn" onclick="navigateTo('cantine')">🍲 Dossiers Cantine</button>
+                        <button class="btn" onclick="navigateTo('finance')">💰 Finance</button>
+                        <button class="btn" onclick="navigateTo('comites');setTimeout(function(){viewComite('central')},50)">🏛 Comité Central</button>
+                        <button class="btn" onclick="navigateTo('comites');setTimeout(function(){viewComite('conseil')},50)">🏫 Conseil d'École</button>
+                    </div>
+                </div>
+
                 <div class="flex-between mb-1">
                     <h2 style="font-size:1.1rem;">🏛️ Direction - Enfòmasyon Jeneral</h2>
                     <div class="flex gap-1" style="align-items:center;">
@@ -569,6 +566,10 @@
 
             <!-- ===== PAGE CLASSE DÉTAIL ===== -->
             <div class="page" id="page-classe-detail">
+                <div class="card" style="padding:0.6rem;margin:0.5rem 0;">
+                    <button class="btn btn-primary" onclick="navigateTo('comites');setTimeout(function(){viewComite('classe')},50)">🤝 Comité de Classe</button>
+                </div>
+
                 <h2 class="mb-1" id="classeDetailTitle" style="font-size:1.1rem;">Classe Détail</h2>
                 <div id="classeDetailStats" class="grid grid-4 mb-1" style="gap:0.5rem;"></div>
                 <div class="flex gap-1 mb-1" id="classeDetailActions"></div>
@@ -854,10 +855,7 @@
             <div class="page" id="page-finance">
                 <div class="flex-between mb-1">
                     <h2 data-t="finance" style="font-size:1.1rem;">💰 Finance</h2>
-                    <div class="flex gap-1">
-                        <button class="btn btn-success" onclick="openAddTransaction('entree')" data-t="income" style="padding:0.2rem 0.6rem;font-size:0.75rem;">+ Entrée</button>
-                        <button class="btn btn-danger" onclick="openAddTransaction('sortie')" data-t="expense" style="padding:0.2rem 0.6rem;font-size:0.75rem;">- Sortie</button>
-                    </div>
+
                 </div>
                 <div id="financeStats" class="grid grid-3 mb-1" style="gap:0.5rem;"></div>
                 <div class="table-wrap scroll-horizontal scroll-vertical" id="financeTransactionTable">
@@ -876,8 +874,23 @@
                             <button class="btn btn-primary" onclick="recalcAllFrais()" data-t="recalculate" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🔄 Recalculer tous</button>
                         </div>
                     </div>
+                    <div id="fraisTotalsBand" class="grid grid-4" style="gap:0.45rem;margin:0.45rem 0 0.6rem 0;"></div>
+                    <div id="fraisRubriqueDetails" class="card" style="padding:0.55rem;margin:0 0 0.6rem 0;border:1px solid var(--border);"></div>
+                    <div class="card" style="padding:0.55rem;margin-bottom:0.6rem;border:1px solid #dc2626;background:#fff7f7;">
+                        <div class="flex-between mb-1" style="gap:0.5rem;flex-wrap:wrap;">
+                            <div><strong style="font-size:0.78rem;">💸 Dépenses par rubrique des frais</strong><div style="font-size:0.58rem;color:var(--muted);">Choisissez la rubrique concernée, saisissez la dépense et le montant. Le total est calculé séparément pour chaque rubrique.</div></div>
+                            <button class="btn btn-danger" onclick="ajouterDepenseFraisRubrique()" style="padding:0.2rem 0.55rem;font-size:0.65rem;">+ Enregistrer la dépense</button>
+                        </div>
+                        <div class="grid grid-4" style="gap:0.4rem;align-items:end;">
+                            <div><label style="font-size:0.62rem;">Rubrique</label><select id="fraisDepenseRubrique" style="width:100%;padding:0.2rem;font-size:0.68rem;"><option value="inscription">Inscription</option><option value="scolarite">Scolarité</option><option value="cantine">Cantine</option><option value="gratuite">Gratuité</option></select></div>
+                            <div><label style="font-size:0.62rem;">Montant dépensé (HTG)</label><input id="fraisDepenseMontant" type="number" min="0" step="1" placeholder="0" style="width:100%;padding:0.2rem;font-size:0.68rem;"></div>
+                            <div><label style="font-size:0.62rem;">Description</label><input id="fraisDepenseDescription" type="text" placeholder="Motif de la dépense" style="width:100%;padding:0.2rem;font-size:0.68rem;"></div>
+                            <div><label style="font-size:0.62rem;">Date</label><input id="fraisDepenseDate" type="date" style="width:100%;padding:0.2rem;font-size:0.68rem;"></div>
+                        </div>
+                        <div id="fraisDepensesTable" class="table-wrap scroll-horizontal scroll-vertical" style="margin-top:0.5rem;max-height:240px;"></div>
+                    </div>
                     <div class="table-wrap scroll-horizontal scroll-vertical" id="fraisTableWrap">
-                        <table><thead><tr><th style="font-size:0.6rem;">NISU</th><th style="font-size:0.6rem;">Nom</th><th style="font-size:0.6rem;">Classe</th><th style="font-size:0.6rem;">Inscription</th><th style="font-size:0.6rem;">Scolarité</th><th style="font-size:0.6rem;">Cantine</th><th style="font-size:0.6rem;">Gratuite</th><th style="font-size:0.6rem;">Total Dû</th><th style="font-size:0.6rem;">Avance</th><th style="font-size:0.6rem;">Balance</th><th style="font-size:0.6rem;">Paiement</th><th style="font-size:0.6rem;">Actions</th></tr></thead><tbody id="fraisTableBody"></tbody></table>
+                        <table><thead><tr><th style="font-size:0.6rem;">NISU</th><th style="font-size:0.6rem;">Nom</th><th style="font-size:0.6rem;">Classe</th><th style="font-size:0.6rem;">Inscription</th><th style="font-size:0.6rem;">Scolarité</th><th style="font-size:0.6rem;">Cantine</th><th style="font-size:0.6rem;">Gratuite</th><th style="font-size:0.6rem;">Total prévu</th><th style="font-size:0.6rem;">Total perçu</th><th style="font-size:0.6rem;">Balance</th><th style="font-size:0.6rem;">Avance</th><th style="font-size:0.6rem;">Actions</th></tr></thead><tbody id="fraisTableBody"></tbody></table>
                     </div>
                 </div>
                 <div class="finance-section" id="budgetSection" style="border-top:2px solid var(--border);padding-top:1rem;margin-top:1rem;">
@@ -922,6 +935,11 @@
                     <button class="btn btn-primary mt-1" onclick="saveCantineProduitsJour()" data-t="saveSelection" style="padding:0.2rem 0.6rem;font-size:0.75rem;">💾 Enregistrer sélection</button>
                 </div>
                 <div class="card" style="padding:0.6rem;">
+                    <h4 style="font-size:0.85rem;">🍽️ Ration prévue par élève</h4>
+                    <p style="font-size:0.68rem;color:var(--text-light);margin:0 0 0.35rem;">Ration individuelle utilisée pour calculer automatiquement les sorties selon le nombre d'élèves présents.</p>
+                    <div class="table-wrap scroll-horizontal scroll-vertical"><table><thead><tr><th style="font-size:0.6rem;">Produit</th><th style="font-size:0.6rem;">Ration / élève (kg)</th><th style="font-size:0.6rem;">Élèves présents</th><th style="font-size:0.6rem;">Quantité prévue (kg)</th></tr></thead><tbody id="cantineRationTable"></tbody></table></div><button class="btn btn-primary mt-1" onclick="saveCantineRations()" style="padding:0.25rem 0.7rem;font-size:0.72rem;">💾 Enregistrer les rations</button>
+                </div>
+                <div class="card mt-1" style="padding:0.6rem;">
                     <h4 data-t="stockSummary" style="font-size:0.85rem;">📊 Synthèse des stocks</h4>
                     <div class="table-wrap scroll-horizontal scroll-vertical"><table><thead><tr><th style="font-size:0.6rem;">Produit</th><th style="font-size:0.6rem;">Entrées totales</th><th style="font-size:0.6rem;">Sorties totales</th><th style="font-size:0.6rem;">Solde (kg)</th><th style="font-size:0.6rem;">Solde (sacs)</th></tr></thead><tbody id="cantineSynthTable"></tbody></table></div>
                 </div>
@@ -1260,6 +1278,10 @@
 
             <!-- ===== PAGE KONTAK RESPONSAB ===== -->
             <div class="page" id="page-contacts">
+                <div class="card" style="padding:0.6rem;margin:0.5rem 0;">
+                    <button class="btn" onclick="navigateTo('comites');setTimeout(function(){viewComite('parent')},50)">👨‍👩‍👧‍👦 Comité des Parents</button>
+                </div>
+
                 <div class="flex-between mb-1">
                     <h2 data-t="contacts" style="font-size:1.1rem;">📇 Kontak Responsab</h2>
                     <div class="flex gap-1">
@@ -1623,9 +1645,9 @@
                 devoirs: [],
                 lecons: [],
                 documents: {},
-                finance: { transactions: [], frais: {}, budget: [] },
+                finance: { transactions: [], frais: {}, fraisDepenses: [], budget: [] },
                 comites: { classe: [], central: [], parent: [], conseil: [] },
-                cantine: { stocks: {}, produitsJour: [], mouvements: [] },
+                cantine: { stocks: {}, produitsJour: [], mouvements: [], rations: { Riz: 0.12, Blé: 0.12, Haricot: 0.05, Lentille: 0.05, Huile: 0.01, Sel: 0.003 } },
                 inventaire: [],
                 securite: { users: JSON.parse(JSON.stringify(DEFAULT_USERS)), permissions: {} },
                 parametres: {
@@ -6444,7 +6466,7 @@
             var produits = STATE.cantine.produitsJour || ['Riz', 'Blé', 'Haricot', 'Lentille', 'Huile', 'Sel'];
             var mouvements = STATE.cantine.mouvements || [];
             produits.forEach(function(prod) {
-                var quota = CANTINE_QUOTAS[prod] || 0;
+                var quota = getCantineRation(prod);
                 var qty = Math.round(quota * totalPresent * 1000) / 1000;
                 if (qty > 0) {
                     mouvements.push({ date: date, produit: prod, type: 'sortie', quantite: qty,
@@ -6458,6 +6480,42 @@
         }
 
         // --- === CANTINE === ---
+        function getCantineRationsState() {
+            if (!STATE.cantine) STATE.cantine = { stocks: {}, produitsJour: [], mouvements: [] };
+            if (!STATE.cantine.rations || typeof STATE.cantine.rations !== 'object') STATE.cantine.rations = {};
+            CANTINE_PRODUITS.forEach(function(p) {
+                var v = Number(STATE.cantine.rations[p]);
+                if (!Number.isFinite(v) || v < 0) STATE.cantine.rations[p] = Number(CANTINE_QUOTAS[p] || 0);
+            });
+            return STATE.cantine.rations;
+        }
+
+        function getCantineRation(produit) {
+            var rations = getCantineRationsState();
+            var v = Number(rations[produit]);
+            return Number.isFinite(v) && v >= 0 ? v : Number(CANTINE_QUOTAS[produit] || 0);
+        }
+
+        function saveCantineRations() {
+            if (!canModifyData('cantine')) return requireLogin('modifye rasyon Cantine yo', 'cantine');
+            var rations = getCantineRationsState();
+            CANTINE_PRODUITS.forEach(function(p) {
+                var el = document.getElementById('ration_' + p.replace(/[^a-zA-Z0-9]/g, '_'));
+                if (!el) return;
+                var v = Number(el.value);
+                if (!Number.isFinite(v) || v < 0) {
+                    alert('Ration invalide pour ' + p + '.');
+                    throw new Error('Ration invalide: ' + p);
+                }
+                rations[p] = Math.round(v * 1000) / 1000;
+            });
+            STATE.cantine.rations = rations;
+            saveState();
+            renderCantineSynth();
+            alert('Rations Cantine enregistrées avec succès.');
+            spawnHearts();
+        }
+
         function renderCantine() {
             updateCantineStocks();
             renderCantineStockGrid();
@@ -6522,6 +6580,29 @@
                 if (m.type === 'entree') entries[m.produit] = (entries[m.produit] || 0) + (m.quantite || 0);
                 else if (m.type === 'sortie') exits[m.produit] = (exits[m.produit] || 0) + (m.quantite || 0);
             });
+
+            // Ration individuelle : toujours visible dans la cantine.
+            // Les valeurs proviennent de CANTINE_QUOTAS et servent aussi au calcul des sorties.
+            var rationBody = document.getElementById('cantineRationTable');
+            if (rationBody) {
+                var totalPresent = 0;
+                var seen = {};
+                mouvements.forEach(function(m) {
+                    if (m.type === 'sortie' && m.totalPresent && !seen[m.date]) {
+                        totalPresent = Math.max(totalPresent, Number(m.totalPresent) || 0);
+                        seen[m.date] = true;
+                    }
+                });
+                rationBody.innerHTML = CANTINE_PRODUITS.map(function(p) {
+                    var quota = getCantineRation(p);
+                    var qty = quota * totalPresent;
+                    var rid = 'ration_' + p.replace(/[^a-zA-Z0-9]/g, '_');
+                    return "<tr><td style=\"font-size:0.6rem;font-weight:700;\">" + p +
+                        "</td><td style=\"font-size:0.65rem;font-weight:800;\"><input id=\"" + rid + "\" type=\"number\" min=\"0\" step=\"0.001\" value=\"" + quota.toFixed(3) + "\" style=\"width:90px;padding:0.2rem;font-weight:800;\"> kg</td><td style=\"font-size:0.6rem;\">" + totalPresent +
+                        "</td><td style=\"font-size:0.6rem;\">" + qty.toFixed(3) + " kg</td></tr>";
+                }).join('');
+            }
+
             var body = document.getElementById('cantineSynthTable');
             body.innerHTML = CANTINE_PRODUITS.map(function(p) {
                 var stock = stocks[p] || 0;
@@ -6849,6 +6930,44 @@
             applyTranslations();
         }
 
+        function ensureFraisRecord(nisu, student) {
+            if (!STATE.finance.frais) STATE.finance.frais = {};
+            var f = STATE.finance.frais[nisu];
+            if (!f) {
+                var niveau = getClasseNiveau(student.classe);
+                var is3eCycle = niveau === '7-9';
+                var scolarite = is3eCycle ? 1500 : 0;
+                var cantine = 1500;
+                var gratuite = (niveau === 'preschool' || niveau === '1-3' || niveau === '4-6') ? 1000 : 0;
+                f = STATE.finance.frais[nisu] = { inscription: 500, scolarite: scolarite, cantine: cantine,
+                    gratuite: gratuite, avance: 0, paidAmounts: { inscription: 0, scolarite: 0, cantine: 0, gratuite: 0 },
+                    validated: { inscription: false, scolarite: false, cantine: false, gratuite: false }, transactionIds: {} };
+            }
+            if (typeof f.inscription !== 'number' || f.inscription <= 0) f.inscription = 500;
+            var niveauActuel = getClasseNiveau(student.classe);
+            var gratuiteAutorisee = niveauActuel === 'preschool' || niveauActuel === '1-3' || niveauActuel === '4-6';
+            f.gratuite = gratuiteAutorisee ? 1000 : 0;
+            if (!f.paidAmounts) f.paidAmounts = { inscription: 0, scolarite: 0, cantine: 0, gratuite: 0 };
+            if (!f.validated) f.validated = { inscription: false, scolarite: false, cantine: false, gratuite: false };
+            if (!f.transactionIds) f.transactionIds = {};
+            ['inscription','scolarite','cantine','gratuite'].forEach(function(k){
+                if (typeof f.paidAmounts[k] !== 'number') f.paidAmounts[k] = 0;
+                if (typeof f.validated[k] !== 'boolean') f.validated[k] = f.paidAmounts[k] > 0;
+            });
+            return f;
+        }
+
+        function fraisRubriqueCell(nisu, rubrique, montant, validated, disabled) {
+            var bg = validated ? '#d1fae5' : '#fef3c7';
+            var border = validated ? '#16a34a' : '#eab308';
+            var label = validated ? 'PAYÉ' : 'À PAYER';
+            var dis = disabled ? 'disabled' : '';
+            return '<div style="background:'+bg+';border:1px solid '+border+';border-radius:4px;padding:2px 3px;min-width:62px;">' +
+                '<div style="font-weight:700;font-size:0.55rem;">'+Number(montant||0).toLocaleString('fr-FR')+'</div>' +
+                '<label style="font-size:0.48rem;display:flex;align-items:center;justify-content:center;gap:2px;cursor:pointer;white-space:nowrap;">' +
+                '<input type="checkbox" '+(validated?'checked ':'')+dis+' onclick="event.stopPropagation();" onchange="toggleFraisRubrique(&quot;'+nisu+'&quot;,&quot;'+rubrique+'&quot;,this.checked)" style="width:11px;height:11px;margin:0;"> '+label+'</label></div>';
+        }
+
         function renderFrais() {
             var classe = document.getElementById('fraisClasseFilter').value || '';
             var students = getStudents();
@@ -6860,63 +6979,132 @@
             var role = getRole();
             if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
                 var user = STATE.securite.users.find(function(u) { return u.profil === STATE.utilisateur; });
-                if (user && user.accessClasses) {
-                    filterClasses = ALL_CLASSES.filter(function(c) { return user.accessClasses.includes(c); });
-                }
+                if (user && user.accessClasses) filterClasses = ALL_CLASSES.filter(function(c) { return user.accessClasses.includes(c); });
             }
             filterClasses.forEach(function(c) {
-                var opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                if (c === currentVal) opt.selected = true;
-                sel.appendChild(opt);
+                var opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+                if (c === currentVal) opt.selected = true; sel.appendChild(opt);
             });
-            if (!STATE.finance.frais) STATE.finance.frais = {};
-            students.forEach(function(s) {
-                if (!STATE.finance.frais[s.nisu]) {
-                    var niveau = getClasseNiveau(s.classe);
-                    var is3eCycle = niveau === '7-9';
-                    var scolarite = is3eCycle ? 1500 : 0;
-                    var cantine = 1500;
-                    var gratuite = (niveau === 'preschool' || niveau === '1-3' || niveau === '4-6') ? 1000 : 0;
-                    STATE.finance.frais[s.nisu] = { inscription: 0, scolarite: scolarite, cantine: cantine,
-                        gratuite: gratuite, avance: 0 };
-                }
-            });
+            var totals = {prevu:0, percu:0, balance:0, inscription:0, scolarite:0, cantine:0, gratuite:0};
+            students.forEach(function(s) { ensureFraisRecord(s.nisu, s); });
             saveState();
             var body = document.getElementById('fraisTableBody');
             body.innerHTML = students.map(function(s) {
-                var f = STATE.finance.frais[s.nisu] || { inscription: 0, scolarite: 0, cantine: 0,
-                    gratuite: 0, avance: 0 };
+                var f = ensureFraisRecord(s.nisu, s);
                 var niveau = getClasseNiveau(s.classe);
                 var eligible = niveau === 'preschool' || niveau === '1-3' || niveau === '4-6';
-                var gratuiteEffectif = s.gratuite && eligible ? f.gratuite : 0;
-                var total = (f.inscription || 0) + (f.scolarite || 0) + (f.cantine || 0) - gratuiteEffectif;
-                var balance = total - (f.avance || 0);
-                return "<tr onclick=\"openFraisModal('" + s.nisu +
-                    "')\" style=\"cursor:pointer;\">\n                <td style=\"font-size:0.55rem;\">" +
-                    s.nisu +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + s.nom + " " + s.prenom +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + s.classe +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + (f.inscription || 0) +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + (f.scolarite || 0) +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + (f.cantine || 0) +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + gratuiteEffectif +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + total +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + (f.avance || 0) +
-                    "</td>\n                <td style=\"font-size:0.55rem;\">" + balance +
-                    "</td>\n                <td onclick=\"event.stopPropagation();\" style=\"font-size:0.55rem;\">\n                    <div style=\"display:flex;gap:0.1rem;flex-wrap:nowrap;\">\n                        <input type=\"number\" id=\"paiement_" +
-                    s.nisu +
-                    "\" placeholder=\"Montant\" style=\"width:60px;padding:0.05rem;font-size:0.55rem;min:0;step:10;\" />\n                        <button class=\"btn btn-success\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\" onclick=\"enregistrerPaiement('" +
-                    s.nisu +
-                    "')\">\u2705</button>\n                    </div>\n                </td>\n                <td onclick=\"event.stopPropagation();\" style=\"font-size:0.55rem;\">\n                    <button onclick=\"openFraisModal('" +
-                    s.nisu +
-                    "')\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\u270F\uFE0F</button>\n                    <button onclick=\"printQuittance('" +
-                    s.nisu +
-                    "')\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDDA8\uFE0F</button>\n                </td>\n            </tr>";
-            }).join('') ||
-            '<tr><td colspan="12" class="text-center text-muted" style="font-size:0.8rem;">Aucun élève</td></tr>';
+                var gratuiteActive = eligible;
+                var gratuiteEffectif = gratuiteActive ? 1000 : 0;
+                var prevu = (f.inscription||0)+(f.scolarite||0)+(f.cantine||0)-gratuiteEffectif;
+                var percuRubriques = (f.paidAmounts.inscription||0)+(f.paidAmounts.scolarite||0)+(f.paidAmounts.cantine||0);
+                var percu = percuRubriques + (f.avance||0);
+                var balance = Math.max(0, prevu-percu);
+                totals.prevu += prevu; totals.percu += percu; totals.balance += balance;
+                totals.inscription += f.inscription||0; totals.scolarite += f.scolarite||0; totals.cantine += f.cantine||0; totals.gratuite += gratuiteEffectif;
+                return '<tr onclick="openFraisModal(&quot;'+s.nisu+'&quot;)" style="cursor:pointer;">' +
+                    '<td style="font-size:0.55rem;">'+s.nisu+'</td><td style="font-size:0.55rem;">'+s.nom+' '+s.prenom+'</td><td style="font-size:0.55rem;">'+s.classe+'</td>' +
+                    '<td style="font-size:0.55rem;text-align:center;">'+fraisRubriqueCell(s.nisu,'inscription',f.inscription,f.validated.inscription,false)+'</td>' +
+                    '<td style="font-size:0.55rem;text-align:center;">'+fraisRubriqueCell(s.nisu,'scolarite',f.scolarite,f.validated.scolarite,false)+'</td>' +
+                    '<td style="font-size:0.55rem;text-align:center;">'+fraisRubriqueCell(s.nisu,'cantine',f.cantine,f.validated.cantine,false)+'</td>' +
+                    '<td style="font-size:0.55rem;text-align:center;">'+fraisRubriqueCell(s.nisu,'gratuite',gratuiteEffectif,gratuiteActive && f.validated.gratuite,!eligible)+'</td>' +
+                    '<td style="font-size:0.6rem;font-weight:700;background:#fef3c7;">'+prevu.toLocaleString('fr-FR')+'</td>' +
+                    '<td style="font-size:0.6rem;font-weight:700;background:#d1fae5;">'+percu.toLocaleString('fr-FR')+'</td>' +
+                    '<td style="font-size:0.6rem;font-weight:700;">'+balance.toLocaleString('fr-FR')+'</td>' +
+                    '<td style="font-size:0.55rem;">'+(f.avance||0).toLocaleString('fr-FR')+'</td>' +
+                    '<td onclick="event.stopPropagation();" style="font-size:0.55rem;white-space:nowrap;"><button onclick="openFraisModal(&quot;'+s.nisu+'&quot;)" style="padding:0.05rem 0.2rem;font-size:0.5rem;">✏️</button> <button onclick="printQuittance(&quot;'+s.nisu+'&quot;)" style="padding:0.05rem 0.2rem;font-size:0.5rem;">🖨️</button></td></tr>';
+            }).join('') || '<tr><td colspan="12" class="text-center text-muted" style="font-size:0.8rem;">Aucun élève</td></tr>';
+            var band = document.getElementById('fraisTotalsBand');
+            if (band) band.innerHTML =
+                '<div class="card text-center" style="padding:0.35rem;background:#fef3c7;border:1px solid #eab308;"><div style="font-size:0.55rem;">TOTAL PRÉVU</div><strong style="font-size:0.9rem;">'+totals.prevu.toLocaleString('fr-FR')+' HTG</strong></div>' +
+                '<div class="card text-center" style="padding:0.35rem;background:#d1fae5;border:1px solid #16a34a;"><div style="font-size:0.55rem;">TOTAL PERÇU</div><strong style="font-size:0.9rem;">'+totals.percu.toLocaleString('fr-FR')+' HTG</strong></div>' +
+                '<div class="card text-center" style="padding:0.35rem;background:#fee2e2;border:1px solid #dc2626;"><div style="font-size:0.55rem;">BALANCE À PERCEVOIR</div><strong style="font-size:0.9rem;">'+totals.balance.toLocaleString('fr-FR')+' HTG</strong></div>' +
+                '<div class="card text-center" style="padding:0.35rem;background:#eef2ff;border:1px solid #6366f1;"><div style="font-size:0.55rem;">TOTAL DÉPENSÉ</div><strong id="fraisDepensesTotalGeneral" style="font-size:0.9rem;">0 HTG</strong></div>';
+            renderFraisRubriqueDetails(totals);
+            renderFraisDepenses();
             applyTranslations();
+        }
+
+        function renderFraisRubriqueDetails(totals) {
+            var el = document.getElementById('fraisRubriqueDetails');
+            if (!el) return;
+            var dep = {inscription:0,scolarite:0,cantine:0,gratuite:0};
+            (STATE.finance.fraisDepenses || []).forEach(function(d){ if (dep[d.rubrique] !== undefined) dep[d.rubrique] += Number(d.montant)||0; });
+            var rows = [
+                ['inscription','Inscription',totals.inscription],
+                ['scolarite','Scolarité',totals.scolarite],
+                ['cantine','Cantine',totals.cantine],
+                ['gratuite','Gratuité',totals.gratuite]
+            ];
+            el.innerHTML = '<div style="font-weight:700;font-size:0.72rem;margin-bottom:0.4rem;">📊 Totaux par rubrique</div>' +
+                '<div class="table-wrap scroll-horizontal"><table><thead><tr><th style="font-size:0.58rem;">Rubrique</th><th style="font-size:0.58rem;background:#fef3c7;">1. Prévision</th><th style="font-size:0.58rem;background:#d1fae5;">2. Perçu</th><th style="font-size:0.58rem;background:#fee2e2;">3. Dépenses</th><th style="font-size:0.58rem;">Solde après dépenses</th></tr></thead><tbody>' +
+                rows.map(function(r){
+                    var percu = r[0]==='gratuite' ? 0 : (function(){ var v=0; getStudents().forEach(function(s){ var f=STATE.finance.frais&&STATE.finance.frais[s.nisu]; if(f&&f.paidAmounts) v += Number(f.paidAmounts[r[0]])||0; }); return v; })();
+                    var net = percu - dep[r[0]];
+                    return '<tr><td style="font-size:0.6rem;font-weight:700;">'+r[1]+'</td><td style="font-size:0.6rem;background:#fef3c7;font-weight:700;">'+Number(r[2]||0).toLocaleString('fr-FR')+' HTG</td><td style="font-size:0.6rem;background:#d1fae5;font-weight:700;">'+percu.toLocaleString('fr-FR')+' HTG</td><td style="font-size:0.6rem;background:#fee2e2;font-weight:700;">'+dep[r[0]].toLocaleString('fr-FR')+' HTG</td><td style="font-size:0.6rem;font-weight:700;">'+net.toLocaleString('fr-FR')+' HTG</td></tr>';
+                }).join('') + '</tbody></table></div>';
+        }
+
+        function renderFraisDepenses() {
+            var wrap = document.getElementById('fraisDepensesTable');
+            if (!wrap) return;
+            var arr = STATE.finance.fraisDepenses || [];
+            var dateInput = document.getElementById('fraisDepenseDate'); if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+            var labels = {inscription:'Inscription',scolarite:'Scolarité',cantine:'Cantine',gratuite:'Gratuité'};
+            var total = arr.reduce(function(a,d){return a+(Number(d.montant)||0);},0);
+            var totalEl = document.getElementById('fraisDepensesTotalGeneral'); if(totalEl) totalEl.textContent = total.toLocaleString('fr-FR')+' HTG';
+            wrap.innerHTML = '<table><thead><tr><th style="font-size:0.58rem;">Date</th><th style="font-size:0.58rem;">Rubrique</th><th style="font-size:0.58rem;">Description</th><th style="font-size:0.58rem;">Montant</th><th style="font-size:0.58rem;">Action</th></tr></thead><tbody>' +
+                (arr.length ? arr.slice().reverse().map(function(d,ri){ var realIndex=arr.length-1-ri; return '<tr><td style="font-size:0.58rem;">'+(d.date||'')+'</td><td style="font-size:0.58rem;font-weight:700;">'+(labels[d.rubrique]||d.rubrique)+'</td><td style="font-size:0.58rem;">'+(d.description||'')+'</td><td style="font-size:0.58rem;font-weight:700;color:#dc2626;">'+(Number(d.montant)||0).toLocaleString('fr-FR')+' HTG</td><td><button class="btn btn-danger" onclick="supprimerDepenseFraisRubrique('+realIndex+')" style="padding:0.05rem 0.25rem;font-size:0.55rem;">🗑️</button></td></tr>'; }).join('') : '<tr><td colspan="5" class="text-center text-muted" style="font-size:0.65rem;">Aucune dépense enregistrée par rubrique.</td></tr>') + '</tbody></table>';
+        }
+
+        function ajouterDepenseFraisRubrique() {
+            if (!canModifyData('finance')) return requireLogin('enregistre depans sou rubrik la', 'finance');
+            var rubrique = document.getElementById('fraisDepenseRubrique').value;
+            var montant = parseFloat(document.getElementById('fraisDepenseMontant').value) || 0;
+            var description = (document.getElementById('fraisDepenseDescription').value || '').trim();
+            var date = document.getElementById('fraisDepenseDate').value || new Date().toISOString().split('T')[0];
+            if (montant <= 0) return alert('Veuillez saisir un montant de dépense valide.');
+            if (!description) return alert('Veuillez saisir la description de la dépense.');
+            if (!STATE.finance.fraisDepenses) STATE.finance.fraisDepenses = [];
+            var id = 'FD-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+            STATE.finance.fraisDepenses.push({id:id,date:date,rubrique:rubrique,montant:montant,description:description});
+            if (!STATE.finance.transactions) STATE.finance.transactions = [];
+            STATE.finance.transactions.push({id:id,date:date,description:'Dépense '+rubrique+' - '+description,type:'sortie',montant:montant,source:'frais-rubrique-depense',fraisDepenseId:id,rubrique:rubrique});
+            saveState();
+            document.getElementById('fraisDepenseMontant').value='';
+            document.getElementById('fraisDepenseDescription').value='';
+            renderFinance();
+        }
+
+        function supprimerDepenseFraisRubrique(index) {
+            if (!canModifyData('finance')) return requireLogin('siprime depans sou rubrik la', 'finance');
+            var arr = STATE.finance.fraisDepenses || [];
+            var d = arr[index]; if (!d) return;
+            if (!confirm('Supprimer cette dépense de la rubrique ?')) return;
+            arr.splice(index,1);
+            STATE.finance.transactions = (STATE.finance.transactions||[]).filter(function(t){ return t.fraisDepenseId !== d.id; });
+            saveState(); renderFinance();
+        }
+
+        function toggleFraisRubrique(nisu, rubrique, checked) {
+            if (!canModifyData('finance')) { renderFrais(); return requireLogin('valide peman frè sa a', 'finance'); }
+            var s = getStudentByNISU(nisu); if (!s) return;
+            var f = ensureFraisRecord(nisu, s);
+            var niveau = getClasseNiveau(s.classe);
+            var eligible = niveau === 'preschool' || niveau === '1-3' || niveau === '4-6';
+            if (rubrique === 'gratuite' && !eligible) return;
+            var amount = rubrique === 'gratuite' ? (f.gratuite||0) : (f[rubrique]||0);
+            f.validated[rubrique] = !!checked;
+            f.paidAmounts[rubrique] = checked && rubrique !== 'gratuite' ? amount : 0;
+            if (checked && rubrique !== 'gratuite' && amount > 0 && !f.transactionIds[rubrique]) {
+                STATE.finance.transactions.push({date:new Date().toISOString().split('T')[0],description:'Frais '+rubrique+' - '+s.nom+' '+s.prenom+' ('+s.nisu+')',type:'entree',montant:amount,source:'frais-eleve',nisu:nisu,rubrique:rubrique});
+                f.transactionIds[rubrique] = STATE.finance.transactions.length-1;
+            } else if (!checked && f.transactionIds[rubrique] != null) {
+                var idx = f.transactionIds[rubrique];
+                if (STATE.finance.transactions[idx] && STATE.finance.transactions[idx].source === 'frais-eleve') STATE.finance.transactions.splice(idx,1);
+                delete f.transactionIds[rubrique];
+                Object.keys(STATE.finance.frais).forEach(function(id){ var ff=STATE.finance.frais[id]; if(ff.transactionIds){ Object.keys(ff.transactionIds).forEach(function(k){ if(ff.transactionIds[k]>idx) ff.transactionIds[k]--; }); }});
+            }
+            saveState(); renderFrais(); spawnHearts();
         }
 
         function enregistrerPaiement(nisu) {
@@ -6936,8 +7124,8 @@
                 var scolarite = is3eCycle ? 1500 : 0;
                 var cantine = 1500;
                 var gratuite = (niveau === 'preschool' || niveau === '1-3' || niveau === '4-6') ? 1000 : 0;
-                STATE.finance.frais[nisu] = { inscription: 0, scolarite: scolarite, cantine: cantine,
-                    gratuite: gratuite, avance: 0 };
+                STATE.finance.frais[nisu] = { inscription: 500, scolarite: scolarite, cantine: cantine,
+                    gratuite: gratuite, avance: 0, paidAmounts: {inscription:0,scolarite:0,cantine:0,gratuite:0}, validated: {inscription:false,scolarite:false,cantine:false,gratuite:false}, transactionIds: {} };
             }
             STATE.finance.frais[nisu].avance = (STATE.finance.frais[nisu].avance || 0) + montant;
             saveState();
@@ -6956,13 +7144,13 @@
                 var scolarite = is3eCycle ? 1500 : 0;
                 var cantine = 1500;
                 var gratuite = (niveau === 'preschool' || niveau === '1-3' || niveau === '4-6') ? 1000 : 0;
-                STATE.finance.frais[nisu] = { inscription: 0, scolarite: scolarite, cantine: cantine,
-                    gratuite: gratuite, avance: 0 };
+                STATE.finance.frais[nisu] = { inscription: 500, scolarite: scolarite, cantine: cantine,
+                    gratuite: gratuite, avance: 0, paidAmounts: {inscription:0,scolarite:0,cantine:0,gratuite:0}, validated: {inscription:false,scolarite:false,cantine:false,gratuite:false}, transactionIds: {} };
             }
             var f = STATE.finance.frais[nisu];
             var eligible = getClasseNiveau(s.classe) === 'preschool' || getClasseNiveau(s.classe) === '1-3' ||
                 getClasseNiveau(s.classe) === '4-6';
-            var gratuiteChecked = s.gratuite && eligible;
+            var gratuiteChecked = eligible;
             var html = "\n            <div class=\"frais-grid\" style=\"display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;\">\n                <div class=\"frais-item\" style=\"display:flex;align-items:center;gap:0.2rem;\"><label style=\"font-size:0.7rem;min-width:80px;\">Inscription</label><input type=\"number\" id=\"fIns\" value=\"" +
                 (f.inscription || 0) +
                 "\" step=\"10\" style=\"padding:0.1rem 0.2rem;font-size:0.7rem;width:100px;\" /></div>\n                <div class=\"frais-item\" style=\"display:flex;align-items:center;gap:0.2rem;\"><label style=\"font-size:0.7rem;min-width:80px;\">Scolarit\xE9</label><input type=\"number\" id=\"fSco\" value=\"" +
@@ -7021,9 +7209,11 @@
             var av = parseFloat(document.getElementById('fAv').value) || 0;
             var gratuiteCheck = document.getElementById('fGratuiteCheck').checked;
             if (!STATE.finance.frais) STATE.finance.frais = {};
+            var oldF = ensureFraisRecord(nisu, s);
             STATE.finance.frais[nisu] = { inscription: ins, scolarite: sco, cantine: can, gratuite: grat,
-            avance: av };
-            s.gratuite = gratuiteCheck;
+            avance: av, paidAmounts: oldF.paidAmounts || {inscription:0,scolarite:0,cantine:0,gratuite:0},
+            validated: oldF.validated || {inscription:false,scolarite:false,cantine:false,gratuite:false}, transactionIds: oldF.transactionIds || {} };
+            s.gratuite = eligible && gratuiteCheck;
             saveState();
             renderFrais();
             closeModal();
@@ -7034,15 +7224,17 @@
             var students = getStudents();
             students.forEach(function(s) {
                 if (!STATE.finance.frais) STATE.finance.frais = {};
-                if (!STATE.finance.frais[s.nisu]) {
-                    var niveau = getClasseNiveau(s.classe);
-                    var is3eCycle = niveau === '7-9';
-                    var scolarite = is3eCycle ? 1500 : 0;
-                    var cantine = 1500;
-                    var gratuite = (niveau === 'preschool' || niveau === '1-3' || niveau === '4-6') ? 1000 : 0;
-                    STATE.finance.frais[s.nisu] = { inscription: 0, scolarite: scolarite, cantine: cantine,
-                        gratuite: gratuite, avance: 0 };
-                }
+                var niveau = getClasseNiveau(s.classe);
+                var is3eCycle = niveau === '7-9';
+                var scolarite = is3eCycle ? 1500 : 0;
+                var cantine = 1500;
+                var gratuite = is3eCycle ? 0 : 1000;
+                var rec = ensureFraisRecord(s.nisu, s);
+                rec.inscription = 500;
+                rec.scolarite = scolarite;
+                rec.cantine = cantine;
+                rec.gratuite = gratuite;
+                if (is3eCycle) { rec.validated.gratuite = false; rec.paidAmounts.gratuite = 0; }
             });
             saveState();
             renderFrais();
@@ -7057,7 +7249,7 @@
                 cantine: 0, gratuite: 0, avance: 0 };
             var niveau = getClasseNiveau(s.classe);
             var eligible = niveau === 'preschool' || niveau === '1-3' || niveau === '4-6';
-            var gratuiteEffectif = s.gratuite && eligible ? f.gratuite : 0;
+            var gratuiteEffectif = eligible ? 1000 : 0;
             var total = (f.inscription || 0) + (f.scolarite || 0) + (f.cantine || 0) - gratuiteEffectif;
             var balance = total - (f.avance || 0);
             var win = window.open('', '_blank');
@@ -7159,10 +7351,10 @@
             currentComiteType = type;
             var members = STATE.comites[type] || [];
             var labels = {
-                classe: 'Comité de Classe (5 manm)',
-                central: 'Comité Central (7 manm)',
-                parent: 'Comité Parent (5 manm)',
-                conseil: 'Conseil d\'École (7 manm)'
+                classe: 'Comité de Classe (5 membres)',
+                central: 'Comité Central (7 membres)',
+                parent: 'Comité des Parents (5 membres)',
+                conseil: 'Conseil d\'École (7 membres)'
             };
             var html = "\n            <div class=\"flex-between mb-1\" style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;\">\n                <h4 style=\"font-size:0.9rem;\">" + (labels[type] || type) +
                 "</h4>\n                <button class=\"btn btn-primary\" onclick=\"openAddComiteMember('" + type +
