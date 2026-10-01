@@ -15737,5 +15737,145 @@
   },ms);});
 })();
 </script>
+
+<script>
+/* V88 — RÉSUMÉ GÉNÉRAL + GLOBAL ANNUEL + BILAN MATIÈRE/ENSEIGNANT RELIÉS AUX AFFECTATIONS
+   - La source des enseignants est désormais STATE.classAssignments via getClasseTeacherAssignments().
+   - Chaque classe affiche ses enseignants affectés + leurs matières.
+   - Le bilan matière/enseignant reprend exactement les mêmes affectations dynamiques.
+   - Aucun enseignant non affecté n'est ajouté artificiellement depuis STATE.personnel.
+*/
+(function(){
+  'use strict';
+  function norm(v){
+    return String(v==null?'':v).trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,' ');
+  }
+  function esc(v){ return typeof escapeHtml==='function' ? escapeHtml(v) : String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function assignedForClass(classe){
+    try{
+      if(typeof window.getClasseTeacherAssignments==='function') return window.getClasseTeacherAssignments(classe)||[];
+    }catch(e){ console.warn('Affectations non disponibles',e); }
+    return [];
+  }
+  function matKey(v){ return norm(v).replace(/^matiere\s+/,''); }
+  function teacherNamesForSubject(classe,mat){
+    var target=norm(mat&&((mat.code||mat.nom||mat.id)||mat)||'');
+    if(!target) return [];
+    return assignedForClass(classe).filter(function(a){
+      var ss=Array.isArray(a.subjects)?a.subjects.slice():[];
+      if(!ss.length && a.subject) ss=String(a.subject).split('/').map(function(x){return x.trim();});
+      return ss.some(function(s){
+        var k=norm(s);
+        return k==='tlm' || k===target || (mat && (k===norm(mat.code)||k===norm(mat.nom)));
+      });
+    }).map(function(a){ return a.teacher||''; }).filter(Boolean);
+  }
+  function teacherSummaryForClass(classe){
+    return assignedForClass(classe).map(function(a){
+      var name=String(a.teacher||'').trim();
+      var ss=Array.isArray(a.subjects)?a.subjects.filter(Boolean):[];
+      if(!ss.length && a.subject) ss=String(a.subject).split('/').map(function(x){return x.trim();}).filter(Boolean);
+      return name + (ss.length ? ' — ' + ss.join(' / ') : '');
+    }).filter(Boolean);
+  }
+  function render(){
+    var container1=document.getElementById('directionSummaryContent');
+    var container2=document.getElementById('directionSummaryContent2');
+    var students=typeof getStudents==='function' ? getStudents() : [];
+    var classData={};
+    (window.ALL_CLASSES||[]).forEach(function(c){
+      var st=typeof getStudentsByClasse==='function'?getStudentsByClasse(c):[];
+      var annual=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssIsAdmis(s);}):{total:st.length,pass:0,rate:0,rateM:0,rateF:0};
+      var controls={};
+      ['1','2','3','4'].forEach(function(k){ controls[k]=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssControlPassed(s,c,k);}):{pass:0,total:st.length,rate:0,rateM:0,rateF:0}; });
+      classData[c]={total:st.length,annual:annual,controls:controls,teachers:teacherSummaryForClass(c)};
+    });
+
+    var globalAnnual=typeof enssRateLine==='function'?enssRateLine(students,function(s){return enssIsAdmis(s);}):{total:students.length,pass:0,rate:0,rateM:0,rateF:0};
+    var globalControl={};
+    ['1','2','3','4'].forEach(function(k){
+      var filtered=students.filter(function(s){return !(typeof isPrescolaire==='function'&&isPrescolaire(s.classe));});
+      globalControl[k]=typeof enssRateLine==='function'?enssRateLine(filtered,function(s){return enssControlPassed(s,s.classe,k);}):{pass:0,total:filtered.length,rate:0,rateM:0,rateF:0};
+    });
+
+    /* Une seule source pour le bilan matière : les affectations réellement enregistrées. */
+    var subjectRows='';
+    var subjectGlobalRows='';
+    var overallSubjectMap={};
+    (window.ALL_CLASSES||[]).forEach(function(classe){
+      if(typeof isPrescolaire==='function' && isPrescolaire(classe)) return;
+      var st=typeof getStudentsByClasse==='function'?getStudentsByClasse(classe):[];
+      var mats=typeof getMatieresForClasse==='function'?getMatieresForClasse(classe):[];
+      mats.forEach(function(mat){
+        var annual=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssSubjectPassed(s,mat);}):{pass:0,total:st.length,rate:0,rateM:0,rateF:0};
+        var c1=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssSubjectPassedControl(s,mat,'1');}):{rate:0};
+        var c2=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssSubjectPassedControl(s,mat,'2');}):{rate:0};
+        var c3=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssSubjectPassedControl(s,mat,'3');}):{rate:0};
+        var c4=typeof enssRateLine==='function'?enssRateLine(st,function(s){return enssSubjectPassedControl(s,mat,'4');}):{rate:0};
+        var teachers=teacherNamesForSubject(classe,mat);
+        var teacherText=teachers.join(', ')||'—';
+        subjectRows += '<tr data-summary-class="'+esc(classe)+'" data-summary-subject="'+esc(mat.code||mat.nom||'')+'">'
+          +'<td>'+esc(classe)+'</td>'
+          +'<td><b>'+esc(mat.code||'')+'</b> / '+esc(mat.maxPoints==null?'':mat.maxPoints)+'</td>'
+          +'<td>'+esc(mat.nom||mat.code||'')+'</td>'
+          +'<td>'+esc(teacherText)+'</td>'
+          +'<td>'+annual.pass+'/'+annual.total+' — <b>'+enssFormatRate(annual.rate)+'</b><br><small>G '+enssFormatRate(annual.rateM)+' / F '+enssFormatRate(annual.rateF)+'</small></td>'
+          +'<td>'+enssFormatRate(c1.rate)+'</td><td>'+enssFormatRate(c2.rate)+'</td><td>'+enssFormatRate(c3.rate)+'</td><td>'+enssFormatRate(c4.rate)+'</td></tr>';
+        var key=classe+'|'+(mat.code||mat.nom||'');
+        overallSubjectMap[key]={classe:classe,mat:mat,teachers:teachers,st:st};
+      });
+    });
+
+    var overallKeys=Object.keys(overallSubjectMap);
+    overallKeys.forEach(function(k){
+      var g=overallSubjectMap[k];
+      var r=typeof enssRateLine==='function'?enssRateLine(g.st,function(s){return enssSubjectPassed(s,g.mat);}):{pass:0,total:g.st.length,rate:0,passM:0,m:0,passF:0,f:0,rateM:0,rateF:0};
+      subjectGlobalRows += '<tr><td>'+esc(g.classe)+'</td><td>'+esc(g.mat.nom||g.mat.code||'')+'</td><td>'+esc(g.mat.code||'')+'</td><td>'+esc(g.teachers.join(', ')||'—')+'</td><td>'+r.pass+'/'+r.total+'</td><td><b>'+enssFormatRate(r.rate)+'</b></td><td>G '+r.passM+'/'+r.m+' — '+enssFormatRate(r.rateM)+'</td><td>F '+r.passF+'/'+r.f+' — '+enssFormatRate(r.rateF)+'</td></tr>';
+    });
+
+    var rows='';
+    (window.ALL_CLASSES||[]).forEach(function(c){
+      var d=classData[c]||{total:0,annual:{rate:0,rateM:0,rateF:0,pass:0,m:0,f:0},controls:{},teachers:[]};
+      var teacherHtml=d.teachers.length?d.teachers.map(function(t){return esc(t);}).join('<br>'):'<span style="color:#94a3b8">—</span>';
+      rows += '<tr>'
+        +'<td><b>'+esc(c)+'</b></td><td>'+d.total+'</td>'
+        +'<td>'+d.annual.pass+'/'+d.annual.total+' — <b>'+enssFormatRate(d.annual.rate)+'</b></td>'
+        +'<td>G '+enssFormatRate(d.annual.rateM)+' / F '+enssFormatRate(d.annual.rateF)+'</td>'
+        +'<td>'+teacherHtml+'</td>'
+        +['1','2','3','4'].map(function(k){var x=d.controls[k]||{pass:0,total:d.total,rate:0,rateM:0,rateF:0};return '<td>'+((typeof isPrescolaire==='function'&&isPrescolaire(c))?'N/A':x.pass+'/'+x.total+' — '+enssFormatRate(x.rate)+'<br><small>G '+enssFormatRate(x.rateM)+' / F '+enssFormatRate(x.rateF)+'</small>')+'</td>';}).join('')
+        +'</tr>';
+    });
+
+    var globalBlock='<div id="enssGlobalAnnualBlock" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.45rem;margin-bottom:.5rem;">'
+      +'<div class="card" style="padding:.45rem;background:#eefcf1;border-top:3px solid #16a34a;"><strong>Global annuel</strong><br>'+globalAnnual.pass+'/'+globalAnnual.total+' admis = <b>'+enssFormatRate(globalAnnual.rate)+'</b><br><small>G '+enssFormatRate(globalAnnual.rateM)+' / F '+enssFormatRate(globalAnnual.rateF)+'</small></div>'
+      +['1','2','3','4'].map(function(k){var x=globalControl[k];return '<div class="card" style="padding:.45rem;background:#fff8e1;"><strong>C'+k+'</strong><br>'+x.pass+'/'+x.total+' réussis = <b>'+enssFormatRate(x.rate)+'</b><br><small>G '+enssFormatRate(x.rateM)+' / F '+enssFormatRate(x.rateF)+'</small></div>';}).join('')
+      +'</div>';
+
+    var summaryTable='<div class="table-wrap scroll-horizontal scroll-vertical"><table><thead><tr><th>Classe</th><th>Total</th><th>Annuel: admis</th><th>Annuel par sexe</th><th>Enseignant(s) affecté(s) / Matière(s)</th><th>C1 réussite</th><th>C2 réussite</th><th>C3 réussite</th><th>C4 réussite</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+
+    var bilan='<div id="enssBilanMatiereEnseignant" class="card" style="padding:.6rem;margin-top:.6rem;border-top:3px solid #3b82f6;">'
+      +'<h4 style="font-size:.85rem;margin-bottom:.35rem;">📚 Bilan annuel par matière / enseignant</h4>'
+      +'<div style="font-size:.66rem;color:#475569;margin-bottom:.35rem;">Les enseignants affichés ici proviennent uniquement des affectations enregistrées pour chaque classe; les matières sont celles réellement affectées.</div>'
+      +'<div class="table-wrap scroll-horizontal scroll-vertical"><table><thead><tr><th>Classe</th><th>Code</th><th>Matière</th><th>Enseignant(s) affecté(s)</th><th>Réussite matière</th><th>C1</th><th>C2</th><th>C3</th><th>C4</th></tr></thead><tbody>'+(subjectRows||'<tr><td colspan="9">Aucune donnée numérique disponible.</td></tr>')+'</tbody></table></div></div>';
+
+    var globalSubject='<div class="card" style="padding:.6rem;margin-top:.6rem;border-top:3px solid #0ea5e9;">'
+      +'<h4 style="font-size:.85rem;margin-bottom:.35rem;">🌐 Bilan global par matière / enseignant (toutes les classes)</h4>'
+      +'<div class="table-wrap scroll-horizontal scroll-vertical"><table><thead><tr><th>Classe</th><th>Matière</th><th>Code</th><th>Enseignant(s)</th><th>Réussis</th><th>Taux global</th><th>Garçons</th><th>Filles</th></tr></thead><tbody>'+(subjectGlobalRows||'<tr><td colspan="8">Aucune donnée.</td></tr>')+'</tbody></table></div></div>';
+
+    var nav='<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;">'
+      +'<a href="#enssGlobalAnnualBlock" class="btn btn-success" style="padding:.22rem .55rem;font-size:.66rem;">📊 Global annuel</a>'
+      +'<a href="#enssBilanMatiereEnseignant" class="btn btn-primary" style="padding:.22rem .55rem;font-size:.66rem;">📚 Bilan annuel par matière / enseignant</a>'
+      +'</div>';
+
+    var html=nav+globalBlock+summaryTable+bilan+globalSubject;
+    if(container1) container1.innerHTML=html;
+    if(container2) container2.innerHTML=html;
+  }
+  window.renderDirectionSummary=render;
+  try{ render(); }catch(e){ console.error('V88 renderDirectionSummary',e); }
+})();
+</script>
 </body>
 </html>
