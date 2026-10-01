@@ -1787,7 +1787,8 @@
         </div>
     </div>
 
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
         // ============================================================
         // KÒD JAVASCRIPT KOMPLÈ (Tout fonksyon yo)
         // ============================================================
@@ -1919,98 +1920,181 @@
         var currentLang = 'ht';
         var excellenceList = [];
 
-        // --- === TRADUCTION === ---
+        // --- === TRADUCTION / i18n STRICTE ===
+        // Une seule langue d'interface à la fois. Les données saisies (noms, adresses, contenus scolaires)
+        // ne sont pas traduites automatiquement.
         var translations = {
             ht: {
-                dashboard:'Tablo de Bò', classes:'Klas yo', students:'Elèv yo', results:'Rezilta yo', subjects:'Matyè yo',
-                subjectSummary:'Rezime Matyè', staff:'Pèsonèl', timetable:'Orè', attendance:'Prezans', finance:'Finans',
-                committees:'Komite yo', cantine:'Kantin', cantineAttendance:'Prezans Kantin', inventory:'Envantè', settings:'Paramèt',
-                contacts:'Kontak Responsab yo', add:'+ Ajoute', save:'💾 Anrejistre', delete:'🗑 Efase', edit:'✏️ Modifye',
-                print:'🖨 Enprime', exportCSV:'⬇ Ekspòte CSV', search:'Rechèch', clear:'✕', apply:'Aplike', load:'Chaje',
-                accueil:'Akèy', direction:'Direksyon', preparation:'Preparasyon leson', discipline:'Disiplin',
-                quiz:'QUIZ', evaluation:'ÉVALUATION', library:'Bibliyotèk', homework:'Devoir', communication:'Kominikasyon',
-                teachers:'Ansèyan yo', studentsClass:'Elèv Klas la', parameters:'Paramèt', start:'▶️ Kòmanse', stop:'⏹️ Kanpe / Sòti',
-                cancel:'Anile', close:'Fèmen', next:'Pwochen', previous:'Anvan', answer:'Repons', showAnswer:'Montre repons',
-                correct:'Kòrèk', incorrect:'Pa kòrèk', finish:'Fini', saveResult:'Anrejistre rezilta', allSubjects:'Tout matyè yo',
-                select:'Chwazi', date:'Dat', name:'Non', firstName:'Prenon', class:'Klas', subject:'Matyè', teacher:'Ansèyan',
-                student:'Elèv', actions:'Aksyon', status:'Estati', yes:'Wi', no:'Non', editPassword:'Modifye pwofil ak modpas',
-                viewPassword:'Gade modpas', all:'Tout', none:'Okenn', refresh:'🔄 Rafrechi', upload:'Telechaje', download:'Telechaje fichye',
-                printPDF:'PDF', printWord:'Word'
+                dashboard:'Tablo de Bò', classes:'Klas yo', students:'Elèv yo', results:'Rezilta yo', subjects:'Matyè yo', subjectSummary:'Rezime Matyè', staff:'Pèsonèl', timetable:'Orè', attendance:'Prezans', finance:'Finans', committees:'Komite yo', cantine:'Kantin', cantineAttendance:'Prezans Kantin', inventory:'Envantè', settings:'Paramèt', contacts:'Kontak Responsab yo', add:'+ Ajoute', save:'💾 Anrejistre', delete:'🗑 Efase', edit:'✏️ Modifye', print:'🖨 Enprime', exportCSV:'⬇ Ekspòte CSV', search:'Rechèch', clear:'✕', apply:'Aplike', load:'Chaje', accueil:'Akèy', direction:'Direksyon', preparation:'Preparasyon leson', discipline:'Disiplin', quiz:'QUIZ', evaluation:'EVALUASYON', library:'Bibliyotèk', homework:'Devwa', communication:'Kominikasyon', teachers:'Ansèyan yo', studentsClass:'Elèv Klas la', parameters:'Paramèt', start:'▶️ Kòmanse', stop:'⏹️ Kanpe / Sòti', cancel:'Anile', close:'Fèmen', next:'Pwochen', previous:'Anvan', answer:'Repons', showAnswer:'Montre repons', correct:'Kòrèk', incorrect:'Pa kòrèk', finish:'Fini', saveResult:'Anrejistre rezilta', allSubjects:'Tout matyè yo', select:'Chwazi', date:'Dat', name:'Non', firstName:'Prenon', class:'Klas', subject:'Matyè', teacher:'Ansèyan', student:'Elèv', actions:'Aksyon', status:'Estati', yes:'Wi', no:'Non', editPassword:'Modifye pwofil ak modpas', viewPassword:'Gade modpas', all:'Tout', none:'Okenn', refresh:'🔄 Rafrechi', upload:'Chaje', download:'Telechaje', printPDF:'PDF', printWord:'Word'
             },
             fr: {
-                dashboard:'Tableau de bord', classes:'Classes', students:'Élèves', results:'Résultats', subjects:'Matières',
-                subjectSummary:'Résumé des matières', staff:'Personnel', timetable:'Emploi du temps', attendance:'Présences', finance:'Finance',
-                committees:'Comités', cantine:'Cantine', cantineAttendance:'Présences de la cantine', inventory:'Inventaire', settings:'Paramètres',
-                contacts:'Contacts des responsables', add:'+ Ajouter', save:'💾 Enregistrer', delete:'🗑 Supprimer', edit:'✏️ Modifier',
-                print:'🖨 Imprimer', exportCSV:'⬇ Exporter CSV', search:'Rechercher', clear:'✕', apply:'Appliquer', load:'Charger',
-                accueil:'Accueil', direction:'Direction', preparation:'Préparation de cours', discipline:'Discipline',
-                quiz:'QUIZ', evaluation:'ÉVALUATION', library:'Bibliothèque', homework:'Devoirs', communication:'Communication',
-                teachers:'Enseignants', studentsClass:'Élèves de la classe', parameters:'Paramètres', start:'▶️ Commencer', stop:'⏹️ Arrêter / Quitter',
-                cancel:'Annuler', close:'Fermer', next:'Suivant', previous:'Précédent', answer:'Réponse', showAnswer:'Afficher la réponse',
-                correct:'Correct', incorrect:'Incorrect', finish:'Terminer', saveResult:'Enregistrer le résultat', allSubjects:'Toutes les matières',
-                select:'Sélectionner', date:'Date', name:'Nom', firstName:'Prénom', class:'Classe', subject:'Matière', teacher:'Enseignant',
-                student:'Élève', actions:'Actions', status:'Statut', yes:'Oui', no:'Non', editPassword:'Modifier le profil et le mot de passe',
-                viewPassword:'Voir le mot de passe', all:'Tous', none:'Aucun', refresh:'🔄 Actualiser', upload:'Téléverser', download:'Télécharger',
-                printPDF:'PDF', printWord:'Word'
+                dashboard:'Tableau de bord', classes:'Classes', students:'Élèves', results:'Résultats', subjects:'Matières', subjectSummary:'Résumé des matières', staff:'Personnel', timetable:'Emploi du temps', attendance:'Présences', finance:'Finance', committees:'Comités', cantine:'Cantine', cantineAttendance:'Présences de la cantine', inventory:'Inventaire', settings:'Paramètres', contacts:'Contacts des responsables', add:'+ Ajouter', save:'💾 Enregistrer', delete:'🗑 Supprimer', edit:'✏️ Modifier', print:'🖨 Imprimer', exportCSV:'⬇ Exporter CSV', search:'Rechercher', clear:'✕', apply:'Appliquer', load:'Charger', accueil:'Accueil', direction:'Direction', preparation:'Préparation de cours', discipline:'Discipline', quiz:'QUIZ', evaluation:'ÉVALUATION', library:'Bibliothèque', homework:'Devoirs', communication:'Communication', teachers:'Enseignants', studentsClass:'Élèves de la classe', parameters:'Paramètres', start:'▶️ Commencer', stop:'⏹️ Arrêter / Quitter', cancel:'Annuler', close:'Fermer', next:'Suivant', previous:'Précédent', answer:'Réponse', showAnswer:'Afficher la réponse', correct:'Correct', incorrect:'Incorrect', finish:'Terminer', saveResult:'Enregistrer le résultat', allSubjects:'Toutes les matières', select:'Sélectionner', date:'Date', name:'Nom', firstName:'Prénom', class:'Classe', subject:'Matière', teacher:'Enseignant', student:'Élève', actions:'Actions', status:'Statut', yes:'Oui', no:'Non', editPassword:'Modifier le profil et le mot de passe', viewPassword:'Voir le mot de passe', all:'Tous', none:'Aucun', refresh:'🔄 Actualiser', upload:'Téléverser', download:'Télécharger', printPDF:'PDF', printWord:'Word'
             },
-            en: { dashboard:'Dashboard', classes:'Classes', students:'Students', results:'Results', subjects:'Subjects', subjectSummary:'Subject Summary', staff:'Staff', timetable:'Timetable', attendance:'Attendance', finance:'Finance', committees:'Committees', cantine:'Canteen', cantineAttendance:'Canteen Attendance', inventory:'Inventory', settings:'Settings', contacts:'Parent Contacts', add:'+ Add', save:'💾 Save', delete:'🗑 Delete', edit:'✏️ Edit', print:'🖨 Print', exportCSV:'⬇ Export CSV', search:'Search', clear:'✕', apply:'Apply', load:'Load', accueil:'Home', direction:'Administration', preparation:'Lesson Preparation', discipline:'Discipline', quiz:'QUIZ', evaluation:'EVALUATION', library:'Library', homework:'Homework', communication:'Communication', start:'▶️ Start', stop:'⏹️ Stop / Exit', cancel:'Cancel', close:'Close', next:'Next', previous:'Previous', answer:'Answer', showAnswer:'Show answer', correct:'Correct', incorrect:'Incorrect', finish:'Finish', saveResult:'Save result', allSubjects:'All subjects', select:'Select', date:'Date', name:'Name', firstName:'First name', class:'Class', subject:'Subject', teacher:'Teacher', student:'Student', actions:'Actions', status:'Status', yes:'Yes', no:'No', editPassword:'Edit profile and password', viewPassword:'View password', all:'All', none:'None', refresh:'🔄 Refresh', upload:'Upload', download:'Download', printPDF:'PDF', printWord:'Word' },
-            es: { dashboard:'Panel', classes:'Clases', students:'Alumnos', results:'Resultados', subjects:'Materias', subjectSummary:'Resumen de materias', staff:'Personal', timetable:'Horario', attendance:'Asistencia', finance:'Finanzas', committees:'Comités', cantine:'Comedor', cantineAttendance:'Asistencia del comedor', inventory:'Inventario', settings:'Configuración', contacts:'Contactos de responsables', add:'+ Añadir', save:'💾 Guardar', delete:'🗑 Eliminar', edit:'✏️ Editar', print:'🖨 Imprimir', exportCSV:'⬇ Exportar CSV', search:'Buscar', clear:'✕', apply:'Aplicar', load:'Cargar', accueil:'Inicio', direction:'Dirección', preparation:'Preparación de clase', discipline:'Disciplina', quiz:'QUIZ', evaluation:'EVALUACIÓN', library:'Biblioteca', homework:'Tareas', communication:'Comunicación', start:'▶️ Comenzar', stop:'⏹️ Detener / Salir', cancel:'Cancelar', close:'Cerrar', next:'Siguiente', previous:'Anterior', answer:'Respuesta', showAnswer:'Mostrar respuesta', correct:'Correcto', incorrect:'Incorrecto', finish:'Finalizar', saveResult:'Guardar resultado', allSubjects:'Todas las materias', select:'Seleccionar', date:'Fecha', name:'Nombre', firstName:'Nombre', class:'Clase', subject:'Materia', teacher:'Profesor', student:'Alumno', actions:'Acciones', status:'Estado', yes:'Sí', no:'No', editPassword:'Editar perfil y contraseña', viewPassword:'Ver contraseña', all:'Todos', none:'Ninguno', refresh:'🔄 Actualizar', upload:'Subir', download:'Descargar', printPDF:'PDF', printWord:'Word' }
-        };
-
-        var UI_PHRASES = {
-            fr: {
-                'Akèy':'Accueil','Akèy la':'Accueil','Tablo de Bò':'Tableau de bord','Rezime Matyè':'Résumé des matières','Kontak Responsab':'Contacts des responsables','Klas yo':'Classes','Elèv yo':'Élèves','Ansèyan':'Enseignant','Ansèyan yo':'Enseignants','Pèsonèl':'Personnel','Direksyon':'Direction','Paramèt':'Paramètres','Rechèch':'Recherche','Chwazi':'Sélectionner','Anrejistre':'Enregistrer','Enprime':'Imprimer','Modifye':'Modifier','Efase':'Supprimer','Fèmen':'Fermer','Anile':'Annuler','Kòmanse':'Commencer','Kanpe / Sòti':'Arrêter / Quitter','Pwochen':'Suivant','Anvan':'Précédent','Montre repons':'Afficher la réponse','Repons':'Réponse','Kòrèk':'Correct','Pa kòrèk':'Incorrect','Fini':'Terminer','Kesyon':'Question','Kesyon yo':'Questions','Mwen konprann':'J’ai compris','Tout matyè yo':'Toutes les matières','Matiyè':'Matière','Matyè yo':'Matières','Klas':'Classe','Elèv':'Élève','Dat':'Date','Non':'Nom','Prenon':'Prénom','Aksyon':'Actions','Estati':'Statut','Wi':'Oui','Non':'Non','Chaje':'Charger','Aplike':'Appliquer','Rafrechi':'Actualiser','Devoir':'Devoirs','Kominikasyon':'Communication','Disiplin':'Discipline','Bibliyotèk':'Bibliothèque','Prezans':'Présences','Envantè':'Inventaire','Kantin':'Cantine','Finans':'Finance','Komite yo':'Comités','Preparasyon leson':'Préparation de cours'
+            en: {
+                dashboard:'Dashboard', classes:'Classes', students:'Students', results:'Results', subjects:'Subjects', subjectSummary:'Subject Summary', staff:'Staff', timetable:'Timetable', attendance:'Attendance', finance:'Finance', committees:'Committees', cantine:'Canteen', cantineAttendance:'Canteen Attendance', inventory:'Inventory', settings:'Settings', contacts:'Parent Contacts', add:'+ Add', save:'💾 Save', delete:'🗑 Delete', edit:'✏️ Edit', print:'🖨 Print', exportCSV:'⬇ Export CSV', search:'Search', clear:'✕', apply:'Apply', load:'Load', accueil:'Home', direction:'Administration', preparation:'Lesson Preparation', discipline:'Discipline', quiz:'QUIZ', evaluation:'EVALUATION', library:'Library', homework:'Homework', communication:'Communication', teachers:'Teachers', studentsClass:'Class Students', parameters:'Settings', start:'▶️ Start', stop:'⏹️ Stop / Exit', cancel:'Cancel', close:'Close', next:'Next', previous:'Previous', answer:'Answer', showAnswer:'Show answer', correct:'Correct', incorrect:'Incorrect', finish:'Finish', saveResult:'Save result', allSubjects:'All subjects', select:'Select', date:'Date', name:'Name', firstName:'First name', class:'Class', subject:'Subject', teacher:'Teacher', student:'Student', actions:'Actions', status:'Status', yes:'Yes', no:'No', editPassword:'Edit profile and password', viewPassword:'View password', all:'All', none:'None', refresh:'🔄 Refresh', upload:'Upload', download:'Download', printPDF:'PDF', printWord:'Word'
             },
-            ht: {
-                'Accueil':'Akèy','Tableau de bord':'Tablo de Bò','Tableau de Bord':'Tablo de Bò','Résumé des matières':'Rezime Matyè','Résumé Matières':'Rezime Matyè','Contacts des responsables':'Kontak Responsab yo','Contacts Responsables':'Kontak Responsab yo','Classes':'Klas yo','Élèves':'Elèv yo','Élève':'Elèv','Enseignant':'Ansèyan','Enseignants':'Ansèyan yo','Personnel':'Pèsonèl','Direction':'Direksyon','Paramètres':'Paramèt','Recherche':'Rechèch','Sélectionner':'Chwazi','Enregistrer':'Anrejistre','Imprimer':'Enprime','Modifier':'Modifye','Supprimer':'Efase','Fermer':'Fèmen','Annuler':'Anile','Commencer':'Kòmanse','Arrêter / Quitter':'Kanpe / Sòti','Suivant':'Pwochen','Précédent':'Anvan','Afficher la réponse':'Montre repons','Réponse':'Repons','Correct':'Kòrèk','Incorrect':'Pa kòrèk','Terminer':'Fini','Question':'Kesyon','Questions':'Kesyon yo','Toutes les matières':'Tout matyè yo','Matière':'Matyè','Matières':'Matyè yo','Classe':'Klas','Date':'Dat','Nom':'Non','Prénom':'Prenon','Actions':'Aksyon','Statut':'Estati','Oui':'Wi','Non':'Non','Charger':'Chaje','Appliquer':'Aplike','Actualiser':'Rafrechi','Devoirs':'Devoir','Communication':'Kominikasyon','Discipline':'Disiplin','Bibliothèque':'Bibliyotèk','Présences':'Prezans','Inventaire':'Envantè','Cantine':'Kantin','Finance':'Finans','Comités':'Komite yo','Préparation de cours':'Preparasyon leson','ÉVALUATION':'ÉVALUASYON'
+            es: {
+                dashboard:'Panel de control', classes:'Clases', students:'Alumnos', results:'Resultados', subjects:'Materias', subjectSummary:'Resumen de materias', staff:'Personal', timetable:'Horario', attendance:'Asistencia', finance:'Finanzas', committees:'Comités', cantine:'Comedor', cantineAttendance:'Asistencia del comedor', inventory:'Inventario', settings:'Configuración', contacts:'Contactos de los responsables', add:'+ Añadir', save:'💾 Guardar', delete:'🗑 Eliminar', edit:'✏️ Editar', print:'🖨 Imprimir', exportCSV:'⬇ Exportar CSV', search:'Buscar', clear:'✕', apply:'Aplicar', load:'Cargar', accueil:'Inicio', direction:'Dirección', preparation:'Preparación de clase', discipline:'Disciplina', quiz:'QUIZ', evaluation:'EVALUACIÓN', library:'Biblioteca', homework:'Tareas', communication:'Comunicación', teachers:'Profesores', studentsClass:'Alumnos de la clase', parameters:'Configuración', start:'▶️ Comenzar', stop:'⏹️ Detener / Salir', cancel:'Cancelar', close:'Cerrar', next:'Siguiente', previous:'Anterior', answer:'Respuesta', showAnswer:'Mostrar respuesta', correct:'Correcto', incorrect:'Incorrecto', finish:'Finalizar', saveResult:'Guardar resultado', allSubjects:'Todas las materias', select:'Seleccionar', date:'Fecha', name:'Nombre', firstName:'Nombre', class:'Clase', subject:'Materia', teacher:'Profesor', student:'Alumno', actions:'Acciones', status:'Estado', yes:'Sí', no:'No', editPassword:'Editar perfil y contraseña', viewPassword:'Ver contraseña', all:'Todos', none:'Ninguno', refresh:'🔄 Actualizar', upload:'Subir', download:'Descargar', printPDF:'PDF', printWord:'Word'
             }
         };
 
-        function setLang(lang) {
-            currentLang = translations[lang] ? lang : 'ht';
-            document.querySelectorAll('.lang-selector .flag').forEach(function(el) { el.classList.toggle('active', el.dataset.lang === currentLang); });
-            applyTranslations();
-            localStorage.setItem('ENSS_LANG', currentLang);
+        // [Source FR/HT] -> [HT, FR, EN, ES]
+        // Les entrées sont volontairement limitées aux textes d'interface : jamais les noms/données d'élèves.
+        var I18N_ENTRIES = [
+          ['Accueil','Akèy','Home','Inicio'],['Tableau de bord','Tablo de Bò','Dashboard','Panel de control'],['Classes','Klas yo','Classes','Clases'],['Élèves','Elèv yo','Students','Alumnos'],['Élève','Elèv','Student','Alumno'],['Résultats','Rezilta yo','Results','Resultados'],['Matières','Matyè yo','Subjects','Materias'],['Matière','Matyè','Subject','Materia'],['Personnel','Pèsonèl','Staff','Personal'],['Enseignant','Ansèyan','Teacher','Profesor'],['Enseignants','Ansèyan yo','Teachers','Profesores'],['Emploi du temps','Orè','Timetable','Horario'],['Présences','Prezans','Attendance','Asistencia'],['Finance','Finans','Finance','Finanzas'],['Comités','Komite yo','Committees','Comités'],['Cantine','Kantin','Canteen','Comedor'],['Inventaire','Envantè','Inventory','Inventario'],['Paramètres','Paramèt','Settings','Configuración'],['Contacts des responsables','Kontak Responsab yo','Parent Contacts','Contactos de los responsables'],['Ajouter','Ajoute','Add','Añadir'],['Enregistrer','Anrejistre','Save','Guardar'],['Sauvegarder','Sove','Save','Guardar'],['Supprimer','Efase','Delete','Eliminar'],['Modifier','Modifye','Edit','Editar'],['Imprimer','Enprime','Print','Imprimir'],['Rechercher','Rechèch','Search','Buscar'],['Appliquer','Aplike','Apply','Aplicar'],['Charger','Chaje','Load','Cargar'],['Actualiser','Rafrechi','Refresh','Actualizar'],['Sélectionner','Chwazi','Select','Seleccionar'],['Annuler','Anile','Cancel','Cancelar'],['Fermer','Fèmen','Close','Cerrar'],['Commencer','Kòmanse','Start','Comenzar'],['Arrêter / Quitter','Kanpe / Sòti','Stop / Exit','Detener / Salir'],['Suivant','Pwochen','Next','Siguiente'],['Précédent','Anvan','Previous','Anterior'],['Réponse','Repons','Answer','Respuesta'],['Afficher la réponse','Montre repons','Show answer','Mostrar respuesta'],['Correct','Kòrèk','Correct','Correcto'],['Incorrect','Pa kòrèk','Incorrect','Incorrecto'],['Terminer','Fini','Finish','Finalizar'],['Question','Kesyon','Question','Pregunta'],['Questions','Kesyon yo','Questions','Preguntas'],['Toutes les matières','Tout matyè yo','All subjects','Todas las materias'],['Tout','Tout','All','Todos'],['Tous','Tout','All','Todos'],['Aucun','Okenn','None','Ninguno'],['Date','Dat','Date','Fecha'],['Nom','Non','Name','Nombre'],['Prénom','Prenon','First name','Nombre'],['Classe','Klas','Class','Clase'],['Actions','Aksyon','Actions','Acciones'],['Statut','Estati','Status','Estado'],['Oui','Wi','Yes','Sí'],['Non','Non','No','No'],['Profil','Pwofil','Profile','Perfil'],['Mot de passe','Mo de pase','Password','Contraseña'],['Direction','Direksyon','Administration','Dirección'],['Préparation de cours','Preparasyon leson','Lesson Preparation','Preparación de clase'],['Discipline','Disiplin','Discipline','Disciplina'],['Bibliothèque','Bibliyotèk','Library','Biblioteca'],['Devoirs','Devwa','Homework','Tareas'],['Communication','Kominikasyon','Communication','Comunicación'],
+          ['Enregistrer le résultat','Anrejistre rezilta','Save result','Guardar resultado'],['Résumé des matières','Rezime Matyè','Subject Summary','Resumen de materias'],['Élèves de la classe','Elèv Klas la','Class Students','Alumnos de la clase'],['Télécharger','Telechaje','Download','Descargar'],['Téléverser','Chaje','Upload','Subir'],['Export CSV','Ekspòte CSV','Export CSV','Exportar CSV'],['Exporter CSV','Ekspòte CSV','Export CSV','Exportar CSV'],['PDF','PDF','PDF','PDF'],['Word','Word','Word','Word'],
+          ['Akèy','Akèy','Home','Inicio'],['Pèsonèl','Pèsonèl','Staff','Personal'],['Klas','Klas','Class','Clase'],['Elèv','Elèv','Student','Alumno'],['Ansèyan','Ansèyan','Teacher','Profesor'],['Rechèch','Rechèch','Search','Buscar'],['Chwazi','Chwazi','Select','Seleccionar'],['Anrejistre','Anrejistre','Save','Guardar'],['Enprime','Enprime','Print','Imprimir'],['Modifye','Modifye','Edit','Editar'],['Efase','Efase','Delete','Eliminar'],['Fèmen','Fèmen','Close','Cerrar'],['Anile','Anile','Cancel','Cancelar'],['Kòmanse','Kòmanse','Start','Comenzar'],['Kanpe / Sòti','Kanpe / Sòti','Stop / Exit','Detener / Salir'],['Pwochen','Pwochen','Next','Siguiente'],['Anvan','Anvan','Previous','Anterior'],['Repons','Repons','Answer','Respuesta'],['Montre repons','Montre repons','Show answer','Mostrar respuesta'],['Kòrèk','Kòrèk','Correct','Correcto'],['Pa kòrèk','Pa kòrèk','Incorrect','Incorrecto'],['Fini','Fini','Finish','Finalizar'],['Matiyè','Matyè','Subject','Materia'],['Matyè yo','Matyè yo','Subjects','Materias'],['Dat','Dat','Date','Fecha'],['Non','Non','Name','Nombre'],['Prenon','Prenon','First name','Nombre'],['Aksyon','Aksyon','Actions','Acciones'],['Estati','Estati','Status','Estado'],['Chaje','Chaje','Load','Cargar'],['Aplike','Aplike','Apply','Aplicar'],['Rafrechi','Rafrechi','Refresh','Actualizar'],['Kominikasyon','Kominikasyon','Communication','Comunicación'],['Disiplin','Disiplin','Discipline','Disciplina'],['Bibliyotèk','Bibliyotèk','Library','Biblioteca'],['Prezans','Prezans','Attendance','Asistencia'],['Envantè','Envantè','Inventory','Inventario'],['Kantin','Kantin','Canteen','Comedor'],['Finans','Finans','Finance','Finanzas'],['Komite yo','Komite yo','Committees','Comités'],['Preparasyon leson','Preparasyon leson','Lesson Preparation','Preparación de clase'],
+          ['Inscription','Enskripsyon','Registration','Inscripción'],['Scolarité','Lekòl','Tuition','Matrícula'],['Gratuité','Gratis','Free education','Gratuidad'],['Catégorie','Kategori','Category','Categoría'],['Dépenses','Depans','Expenses','Gastos'],['Autres','Lòt','Other','Otros'],['Montant','Kantite','Amount','Importe'],['Balance','Balans','Balance','Saldo'],['Rubrique','Rubrik','Category','Rubro'],['Poste','Pòs','Budget item','Partida'],['Montant prévu','Kantite prevwa','Planned amount','Importe previsto'],['Montant réel','Kantite reyèl','Actual amount','Importe real'],
+          ['Recherche','Rechèch','Search','Búsqueda'],['Tous les élèves','Tout elèv yo','All students','Todos los alumnos'],['Toutes les classes','Tout klas yo','All classes','Todas las clases'],['Niveau','Nivo','Level','Nivel'],['Type','Kalite','Type','Tipo'],['Observation','Obsèvasyon','Observation','Observación'],['Description','Deskripsyon','Description','Descripción'],['Mesure / Sanction','Mezi / Sanksyon','Measure / Sanction','Medida / Sanción'],['Connu','Li konnen','Known','Conocido'],['Pas connu','Li pa konnen','Unknown','Desconocido'],['Vivant','Vivan','Alive','Vivo'],['Décédé','Mouri','Deceased','Fallecido'],['Occupation','Okipasyon','Occupation','Ocupación'],['Adresse','Adrès','Address','Dirección'],['Garçon','Gason','Boy','Niño'],['Fille','Fi','Girl','Niña'],
+          ['Aujourd’hui','Jodi a','Today','Hoy'],['Aujourd\'hui','Jodi a','Today','Hoy'],['Semène sa a','Semèn sa a','This week','Esta semana'],['Mwa sa a','Mwa sa a','This month','Este mes'],['Tout ane a','Tout ane a','All year','Todo el año'],['Du','Soti','From','Desde'],['Au','Jiska','To','Hasta'],
+          ['Lundi','Lendi','Monday','Lunes'],['Mardi','Madi','Tuesday','Martes'],['Mercredi','Mèkredi','Wednesday','Miércoles'],['Jeudi','Jedi','Thursday','Jueves'],['Vendredi','Vandredi','Friday','Viernes'],
+          ['Facile','Fasil','Easy','Fácil'],['Difficile','Difisil','Difficult','Difícil'],['Nombre de questions','Kantite kesyon','Number of questions','Número de preguntas'],['Toutes les questions disponibles','Tout kesyon ki disponib yo','All available questions','Todas las preguntas disponibles'],['Périmètre','Dimansyon','Scope','Alcance'],['Une matière','Yon matyè','One subject','Una materia'],['Mixte','Melanje','Mixed','Mixto'],['Nombre','Kantite','Number','Cantidad'],['Tout disponib','Tout ki disponib','All available','Todo disponible'],['Étude','Etid','Study','Estudio'],
+          ['Palette','Palèt','Palette','Paleta'],['Défaut','Defò','Default','Predeterminado'],['Bleu','Ble','Blue','Azul'],['Vert','Vèt','Green','Verde'],['Rouge','Wouj','Red','Rojo'],['Violet','Vyolèt','Purple','Morado'],['Orange','Oranj','Orange','Naranja'],['Sombre','Fènwa','Dark','Oscuro'],['Taille de police','Gwosè polis','Font size','Tamaño de fuente'],['Petite','Piti','Small','Pequeña'],['Grande','Gwo','Large','Grande'],['Très grande','Trè gwo','Very large','Muy grande'],['Couleur des bandes','Koulè bann yo','Band color','Color de las bandas'],['Appliquer','Aplike','Apply','Aplicar'],['Supprimer','Efase','Delete','Eliminar'],
+          ['Téléphone','Telefòn','Phone','Teléfono'],['Email','Imèl','Email','Correo electrónico'],['Code','Kòd','Code','Código'],['Max Points','Pwen maksimòm','Max Points','Puntos máximos'],['Produit','Pwodui','Product','Producto'],['Quantité','Kantite','Quantity','Cantidad'],['État','Eta','Condition','Estado'],['Unité','Inite','Unit','Unidad'],['Qté','Kte','Qty','Cant.'],['Section','Seksyon','Section','Sección'],['Désignation','Deziyasyon','Description','Denominación'],['Ration / personne (kg)','Rasyon / moun (kg)','Ration / person (kg)','Ración / persona (kg)'],['Entrées totales','Antre total','Total inputs','Entradas totales'],['Sorties totales','Soti total','Total outputs','Salidas totales'],['Solde (kg)','Balans (kg)','Balance (kg)','Saldo (kg)'],
+          ['Avertissement','Avètisman','Warning','Advertencia'],['convocation','Konvokasyon','Summons','Convocatoria'],['retenue','Retni','Detention','Retención'],['Retard','Reta','Late','Retraso'],['Absence injustifiée','Absans san jistifikasyon','Unexcused absence','Ausencia injustificada'],['Indiscipline','Endisiplin','Indiscipline','Indisciplina'],['Violence','Vyolans','Violence','Violencia'],['Comportement','Konpòtman','Behavior','Comportamiento'],['Autre','Lòt','Other','Otro'],
+          ['Ajouter ligne','Ajoute liy','Add row','Añadir fila'],['Enregistrer la dépense','Anrejistre depans lan','Save expense','Guardar gasto'],['Toutes les rubriques','Tout rubrik yo','All categories','Todos los rubros'],['Toutes les catégories','Tout kategori yo','All categories','Todas las categorías'],['Toutes les sections','Tout seksyon yo','All sections','Todas las secciones'],['Filtrer par catégorie','Filtre pa kategori','Filter by category','Filtrar por categoría'],['Filtrer par section','Filtre pa seksyon','Filter by section','Filtrar por sección'],['Prévision','Previzyon','Forecast','Previsión'],['Perception','Pèsepsyon','Collection','Percepción'],['Dépense','Depans','Expense','Gasto'],
+          ['Nouvelle fiche','Nouvo fich','New form','Nueva ficha'],['Enseignant(e)','Ansèyan(e)','Teacher','Profesor(a)'],['Nom de l\'élève (optionnel)','Non elèv la (opsyonèl)','Student name (optional)','Nombre del alumno (opcional)'],['Jour','Jou','Day','Día'],['Consigne / devoir','Enstriksyon / devwa','Instructions / homework','Instrucción / tarea'],['Ajouter au jour','Ajoute pou jou a','Add to day','Añadir al día'],['Enregistrer la fiche','Anrejistre fich la','Save the form','Guardar la ficha'],['Le coin des messages (Informations aux parents)','Kwen mesaj yo (Enfòmasyon pou paran yo)','Message corner (Information for parents)','Rincón de mensajes (Información para padres)'],
+          ['Sécurité','Sekirite','Security','Seguridad'],['Accès sécurisé — Direction','Aksè sekirize — Direksyon','Secure access — Administration','Acceso seguro — Dirección'],['Permissions par rôle','Pèmisyon pa wòl','Permissions by role','Permisos por rol'],['Accès Public','Aksè Piblik','Public Access','Acceso público'],['Aksè Piblik','Aksè Piblik','Public Access','Acceso público'],['Paret / Kache meni yo','Parèt / Kache meni yo','Show / Hide menus','Mostrar / Ocultar menús'],['Masquer les notes','Kache nòt yo','Hide grades','Ocultar notas'],['Modifier Mo de Pase','Modifye Mo de Pase','Change Password','Cambiar contraseña'],['Chanje','Chanje','Change','Cambiar'],
+          ['Connexion','Koneksyon','Login','Inicio de sesión'],['Konekte','Konekte','Log in','Iniciar sesión'],['Identité','Idantite','Identity','Identidad'],['Verifikasyon elèv','Verifikasyon elèv','Student verification','Verificación del alumno'],['Chèche','Chèche','Search','Buscar'],['Byenvini nan platfòm jesyon ENSS.','Byenvini nan platfòm jesyon ENSS.','Welcome to the ENSS management platform.','Bienvenido a la plataforma de gestión de ENSS.'],
+          ['Enskri Nouvo Elèv','Enskri Nouvo Elèv','Register New Student','Inscribir nuevo alumno'],['Enregistrer le résultat','Anrejistre rezilta','Save result','Guardar resultado'],['Mettre à jour','Mete ajou','Update','Actualizar'],['Transition année','Tranzisyon ane','Year transition','Transición de año'],['Import CSV','Enpòte CSV','Import CSV','Importar CSV'],['Dossiers Cantine','Dosye Kantin','Canteen Files','Expedientes del comedor'],
+          ['🎯 QUIZ — Kesyon / Repons','🎯 QUIZ — Kesyon / Repons','🎯 QUIZ — Questions / Answers','🎯 QUIZ — Preguntas / Respuestas'],['🎯 Quiz elèv yo','🎯 Quiz elèv yo','🎯 Student Quiz','🎯 Quiz de alumnos'],['📚 Bibliyotèk Quiz ENSS','📚 Bibliyotèk Quiz ENSS','📚 ENSS Quiz Library','📚 Biblioteca de Quiz ENSS'],['▶️ Kòmanse Quiz','▶️ Kòmanse Quiz','▶️ Start Quiz','▶️ Comenzar Quiz'],['Chwazi klas/élève epi klike « Kòmanse Quiz ».','Chwazi klas/élève epi klike « Kòmanse Quiz ».','Select a class/student and click “Start Quiz”.','Seleccione una clase/alumno y pulse « Comenzar Quiz ».'],['📝 ÉVALUATION','📝 EVALUASYON','📝 EVALUATION','📝 EVALUACIÓN'],['📝 Évaluation par matière','📝 Evalyasyon pa matyè','📝 Evaluation by subject','📝 Evaluación por materia'],['▶️ Kòmanse evalyasyon','▶️ Kòmanse evalyasyon','▶️ Start evaluation','▶️ Comenzar evaluación'],['Sécurité','Sekirite','Security','Seguridad'],['🔒 Sécurité','🔒 Sekirite','🔒 Security','🔒 Seguridad'],['📇 Kontak Responsab','📇 Kontak Responsab','📇 Parent Contacts','📇 Contactos de responsables'],['📅 Emploi du Temps','📅 Orè','📅 Timetable','📅 Horario'],['📋 Présences Cantine','📋 Prezans Kantin','📋 Canteen Attendance','📋 Asistencia del comedor'],['🗓️ Prezans Pèsonèl','🗓️ Prezans Pèsonèl','🗓️ Staff Attendance','🗓️ Asistencia del personal'],['📈 Résultats & Bulletins','📈 Rezilta & Bilten yo','📈 Results & Report Cards','📈 Resultados y boletines'],['📚 Matières','📚 Matyè yo','📚 Subjects','📚 Materias'],['🏫 Classes','🏫 Klas yo','🏫 Classes','🏫 Clases'],['👔 Personnel','👔 Pèsonèl','👔 Staff','👔 Personal'],['💰 Finance','💰 Finans','💰 Finance','💰 Finanzas'],['🤝 Comités','🤝 Komite yo','🤝 Committees','🤝 Comités'],['🍲 Cantine','🍲 Kantin','🍲 Canteen','🍲 Comedor'],['📦 Inventaire','📦 Envantè','📦 Inventory','📦 Inventario'],['⚙️ Paramètres','⚙️ Paramèt','⚙️ Settings','⚙️ Configuración'],['Nouvelle fiche','Nouvo fich','New form','Nueva ficha'],['Imprimer / PDF','Enprime / PDF','Print / PDF','Imprimir / PDF'],['Tout niveau','Tout nivo','All levels','Todos los niveles'],['I — Chwa miltip','I — Chwa miltip','I — Multiple choice','I — Opción múltiple'],['II — Konplete','II — Konplete','II — Fill in the blank','II — Completar'],['III — Kople kolòn','III — Kople kolòn','III — Match columns','III — Relacionar columnas'],['IV — Ekri repons','IV — Ekri repons','IV — Written answer','IV — Respuesta escrita'],['Pwen:','Pwen:','Points:','Puntos:'],['Se sèlman matyè Fondamental 1er AF rive 9e AF. Matyè Préscolaire yo pa nan gwoup sa a.','Se sèlman matyè Fondamental 1er AF rive 9e AF. Matyè Préscolaire yo pa nan gwoup sa a.','Only Fundamental 1st–9th grade subjects are in this group. Preschool subjects are excluded.','Solo las materias de Fundamental de 1.º a 9.º están en este grupo. Las materias de preescolar están excluidas.'],['Cette liste est complètement séparée des matières 1er–9e AF. Elle est réservée aux classes Préscolaire.','Lis sa a separe nèt ak matyè 1e–9e AF yo. Li rezève pou klas Preskolè yo.','This list is completely separate from 1st–9th grade subjects. It is reserved for preschool classes.','Esta lista está completamente separada de las materias de 1.º–9.º. Está reservada para las clases de preescolar.'],['Enregistrement automatique','Anrejistreman otomatik','Automatic saving','Guardado automático'],['Tous les élèves','Tout elèv yo','All students','Todos los alumnos'],['Aucune donnée disponible. Importez des élèves ou chargez les données démo.','Pa gen done ki disponib. Enpòte elèv yo oswa chaje done demonstrasyon yo.','No data available. Import students or load demo data.','No hay datos disponibles. Importe alumnos o cargue los datos de demostración.'],['Absans','Absans','Absence','Ausencia'],['Absans jiskaprezan','Absans jiskaprezan','Absences to date','Ausencias hasta la fecha'],['Absence','Absans','Absence','Ausencia'],['Sove','Sove','Sove','Sove'],['Devwa','Devwa','Homework','Tarea'],['Devoir','Devwa','Homework','Tarea'],['Devwa pa fèt','Devwa pa fèt','Homework not done','Tarea no realizada'],['Devoir non fait','Devwa pa fèt','Homework not done','Tarea no realizada'],['Pwoblèm disiplin','Pwoblèm disiplin','Discipline problem','Problema disciplinario'],['Problème de discipline','Pwoblèm disiplin','Discipline problem','Problema disciplinario'],['Reta','Reta','Late arrival','Retraso'],['Retard','Reta','Late arrival','Retraso'],['Envitasyon randevou','Envitasyon randevou','Meeting invitation','Invitación a una reunión'],['Invitation à un rendez-vous','Envitasyon randevou','Meeting invitation','Invitación a una reunión'],['Ijans sante / aksidan','Ijans sante / aksidan','Health emergency / accident','Emergencia de salud / accidente'],['Urgence santé / accident','Ijans sante / aksidan','Health emergency / accident','Emergencia de salud / accidente'],['Ijans disiplin','Ijans disiplin','Discipline emergency','Emergencia disciplinaria'],['Urgence discipline','Ijans disiplin','Discipline emergency','Emergencia disciplinaria'],['Rappel frè lekòl','Rappel frè lekòl','School fee reminder','Recordatorio de cuotas escolares'],['Rappel de frais scolaires','Rappel frè lekòl','School fee reminder','Recordatorio de cuotas escolares'],['Vakans / evènman lekòl','Vakans / evènman lekòl','School holiday / event','Vacaciones / evento escolar'],['Vacances / événement scolaire','Vakans / evènman lekòl','School holiday / event','Vacaciones / evento escolar'],['Bulletin disponib','Bulletin disponib','Report card available','Boletín disponible'],['Bulletin disponible','Bulletin disponib','Report card available','Boletín disponible']
+        ];
+
+        var I18N_LOOKUP = Object.create(null);
+        I18N_ENTRIES.forEach(function(e){
+            var ht=e[1],fr=e[0],en=e[2],es=e[3], values=[ht,fr,en,es];
+            values.forEach(function(v,idx){if(v!=null&&v!=='')I18N_LOOKUP[v.trim()]={ht:ht,fr:fr,en:en,es:es,sourceIndex:idx};});
+        });
+
+        // Noms de mots d'interface fréquents : cela traduit aussi les petites phrases mélangées
+        // sans toucher aux cellules de données (élèves, personnel, résultats, etc.).
+        var I18N_WORDS = {
+          'ht': {'recherche':'rechèch','rechercher':'rechèch','choisir':'chwazi','choisissez':'chwazi','enregistrer':'anrejistre','sauvegarder':'sove','modifier':'modifye','supprimer':'efase','fermer':'fèmen','annuler':'anile','imprimer':'enprime','charger':'chaje','actualiser':'rafrechi','ajouter':'ajoute','tout':'tout','tous':'tout','toutes':'tout','élève':'elèv','élèves':'elèv yo','enseignant':'ansèyan','enseignants':'ansèyan yo','matière':'matyè','matières':'matyè yo','classe':'klas','classes':'klas yo','date':'dat','nom':'non','prénom':'prenon','actions':'aksyon','statut':'estati','profil':'pwofil','mot':'mo','passe':'pase','password':'modpas','direction':'direksyon','résultat':'rezilta','résultats':'rezilta yo','présence':'prezans','présences':'prezans','pwen':'pwen','points':'pwen','score':'rezilta','multiple':'plizyè','choice':'chwa','chwa':'chwa','fill':'konplete','blank':'espas','match':'kople','columns':'kolòn','written':'ekri','answer':'repons','questions':'kesyon yo','finance':'finans','inventaire':'envantè','cantine':'kantin','devoir':'devwa','devoirs':'devwa','communication':'kominikasyon','discipline':'disiplin','bibliothèque':'bibliyotèk','oui':'wi','non':'non','années':'ane','année':'ane','aujourd\'hui':'jodi a','semaine':'semèn','mois':'mwa','jour':'jou','lundi':'lendi','mardi':'madi','mercredi':'mèkredi','jeudi':'jedi','vendredi':'vandredi','facile':'fasil','difficile':'difisil','nombre':'kantite','question':'kesyon','questions':'kesyon yo','réponse':'repons','correct':'kòrèk','incorrect':'pa kòrèk','terminer':'fini','commencer':'kòmanse','suivant':'pwochen','précédent':'anvan','description':'deskripsyon','observation':'obsèvasyon','catégorie':'kategori','dépenses':'depans','dépense':'depans','montant':'kantite','balance':'balans','produit':'pwodui','quantité':'kantite','état':'eta','téléphone':'telefòn','email':'imèl','adresse':'adrès','garçon':'gason','fille':'fi'},
+          'fr': {'tablo de bò':'tableau de bord','akèy':'accueil','klas yo':'classes','elèv yo':'élèves','elèv':'élève','ansèyan yo':'enseignants','ansèyan':'enseignant','pèsonèl':'personnel','direksyon':'direction','paramèt':'paramètres','rechèch':'recherche','chwazi':'sélectionner','anrejistre':'enregistrer','sove':'sauvegarder','enprime':'imprimer','modifye':'modifier','efase':'supprimer','fèmen':'fermer','anile':'annuler','kòmanse':'commencer','kanpe':'arrêter','sòti':'quitter','pwochen':'suivant','anvan':'précédent','repons':'réponse','kòrèk':'correct','pa kòrèk':'incorrect','fini':'terminer','kesyon':'question','matyè':'matière','matyè yo':'matières','dat':'date','non':'nom','prenon':'prénom','aksyon':'actions','estati':'statut','wi':'oui','tout':'tous','chaje':'charger','aplîke':'appliquer','aplika':'appliquer','rafrechi':'actualiser','devwa':'devoirs','kominikasyon':'communication','disiplin':'discipline','bibliyotèk':'bibliothèque','preparasyon leson':'préparation de cours','finans':'finance','kantin':'cantine','envantè':'inventaire','prezans':'présences'},
+          'en': {'tablo de bò':'dashboard','akèy':'home','klas yo':'classes','elèv yo':'students','elèv':'student','ansèyan yo':'teachers','ansèyan':'teacher','pèsonèl':'staff','direksyon':'administration','paramèt':'settings','rechèch':'search','chwazi':'select','anrejistre':'save','sove':'save','enprime':'print','modifye':'edit','efase':'delete','fèmen':'close','anile':'cancel','kòmanse':'start','kanpe':'stop','sòti':'exit','pwochen':'next','anvan':'previous','repons':'answer','kòrèk':'correct','pa kòrèk':'incorrect','fini':'finish','kesyon':'question','matyè':'subject','matyè yo':'subjects','dat':'date','non':'name','prenon':'first name','aksyon':'actions','estati':'status','wi':'yes','tout':'all','chaje':'load','aplîke':'apply','aplika':'apply','rafrechi':'refresh','devwa':'homework','kominikasyon':'communication','disiplin':'discipline','bibliyotèk':'library','preparasyon leson':'lesson preparation','finans':'finance','kantin':'canteen','envantè':'inventory','prezans':'attendance'},
+          'es': {'tablo de bò':'panel de control','akèy':'inicio','klas yo':'clases','elèv yo':'alumnos','elèv':'alumno','ansèyan yo':'profesores','ansèyan':'profesor','pèsonèl':'personal','direksyon':'dirección','paramèt':'configuración','rechèch':'buscar','chwazi':'seleccionar','anrejistre':'guardar','sove':'guardar','enprime':'imprimir','modifye':'editar','efase':'eliminar','fèmen':'cerrar','anile':'cancelar','kòmanse':'comenzar','kanpe':'detener','sòti':'salir','pwochen':'siguiente','anvan':'anterior','repons':'respuesta','kòrèk':'correcto','pa kòrèk':'incorrecto','fini':'finalizar','kesyon':'pregunta','matyè':'materia','matyè yo':'materias','dat':'fecha','non':'nombre','prenon':'nombre','aksyon':'acciones','estati':'estado','wi':'sí','tout':'todos','chaje':'cargar','aplîke':'aplicar','aplika':'aplicar','rafrechi':'actualizar','devwa':'tareas','kominikasyon':'comunicación','disiplin':'disciplina','bibliyotèk':'biblioteca','preparasyon leson':'preparación de clase','finans':'finanzas','kantin':'comedor','envantè':'inventario','prezans':'asistencia'}
+        };
+
+        var _langNodeSource = new WeakMap();
+        var _langAttrSource = new WeakMap();
+        var _langObserverTimer = null;
+        var _langApplying = false;
+
+        function _translatePhrase(text,target){
+            var raw=String(text==null?'':text), trim=raw.trim();
+            if(!trim) return raw;
+            var direct=I18N_LOOKUP[trim];
+            if(direct) return raw.replace(trim,direct[target]);
+            var normalized=trim.replace(/\s+/g,' ').trim();
+            var direct2=I18N_LOOKUP[normalized];
+            if(direct2) return raw.replace(trim,direct2[target]);
+            var words=I18N_WORDS[target]||{};
+            var out=normalized;
+            Object.keys(words).sort(function(a,b){return b.length-a.length;}).forEach(function(src){
+                var esc=src.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+                var re=new RegExp('(^|[^\\p{L}])'+esc+'(?=$|[^\\p{L}])','giu');
+                out=out.replace(re,function(_,pre){return pre+words[src];});
+            });
+            return raw.replace(trim,out);
         }
 
-        function translateInterfaceText(root) {
-            if (currentLang !== 'ht' && currentLang !== 'fr') return;
-            var map = UI_PHRASES[currentLang];
-            var selectors = 'button, label, h1, h2, h3, h4, h5, h6, th, option, .btn, .badge, .card-title, .section-title, .page-title, .page-header, .menu-item, .nav-item';
-            (root || document).querySelectorAll(selectors).forEach(function(el) {
-                if (el.closest('script,style')) return;
-                if (el.dataset && el.dataset.langLock === '1') return;
-                var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false), n;
-                var nodes = [];
-                while ((n = walker.nextNode())) nodes.push(n);
-                nodes.forEach(function(node) {
-                    var v = node.nodeValue;
-                    var trimmed = v.trim();
-                    if (!trimmed || trimmed.length > 100) return;
-                    if (map[trimmed]) node.nodeValue = v.replace(trimmed, map[trimmed]);
+        function _translateTextNode(node){
+            if(!node || !node.nodeValue) return;
+            var el=node.parentElement;
+            if(!el || el.closest('script,style,[data-lang-ignore="1"]')) return;
+            var v=node.nodeValue, source=_langNodeSource.get(node);
+            if(source==null){source=v;_langNodeSource.set(node,source);}
+            var target=_translatePhrase(source,currentLang);
+            if(target!==v) node.nodeValue=target;
+        }
+
+        function translateInterfaceText(root){
+            var base=root||document;
+            var selectors='button,label,h1,h2,h3,h4,h5,h6,th,option,.btn,.badge,.card-title,.section-title,.page-title,.page-header,.menu-item,.nav-item,.modal-title,.form-group';
+            base.querySelectorAll(selectors).forEach(function(el){
+                if(el.dataset && el.dataset.langLock==='1') return;
+                var walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false),node;
+                var nodes=[]; while(node=walker.nextNode()) nodes.push(node);
+                nodes.forEach(_translateTextNode);
+            });
+            // Textes fixes hors des tableaux de données : traduction exacte uniquement.
+            // Ainsi, un nom d'élève/personnel ou une valeur métier n'est jamais traduit.
+            base.querySelectorAll('p,small,legend,.hint,.help-text,.notice,.alert,.info,.subtitle').forEach(function(el){
+                if(el.dataset && el.dataset.langLock==='1') return;
+                var walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false),node;
+                var nodes=[]; while(node=walker.nextNode()) nodes.push(node);
+                nodes.forEach(function(n){
+                    var v=n.nodeValue, src=_langNodeSource.get(n);
+                    if(src==null){src=v;_langNodeSource.set(n,src);}
+                    var trim=src.trim();
+                    if(I18N_LOOKUP[trim]){var target=_translatePhrase(src,currentLang);if(target!==v)n.nodeValue=target;}
+                });
+            });
+            // Dernier passage global : uniquement les nœuds de texte dont le contenu complet
+            // correspond à une entrée d'interface connue. Les tableaux de données sont exclus.
+            base.querySelectorAll('body *').forEach(function(el){
+                var tag=el.tagName;
+                if(!tag || ['SCRIPT','STYLE','INPUT','TEXTAREA','SELECT','TD'].indexOf(tag)!==-1) return;
+                if(el.dataset && el.dataset.langLock==='1') return;
+                if(el.children && el.children.length) return;
+                var walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false), node;
+                var nodes=[]; while(node=walker.nextNode()) nodes.push(node);
+                nodes.forEach(function(n){
+                    var v=n.nodeValue, src=_langNodeSource.get(n);
+                    if(src==null){src=v;_langNodeSource.set(n,src);}
+                    var trim=src.trim();
+                    if(I18N_LOOKUP[trim]){var target=_translatePhrase(src,currentLang);if(target!==v)n.nodeValue=target;}
+                });
+            });
+            base.querySelectorAll('input[placeholder],textarea[placeholder],[title],[aria-label]').forEach(function(el){
+                if(el.dataset && el.dataset.langLock==='1') return;
+                ['placeholder','title','aria-label'].forEach(function(attr){
+                    if(!el.hasAttribute(attr)) return;
+                    var val=el.getAttribute(attr), bag=_langAttrSource.get(el)||{}, source=bag[attr];
+                    if(source==null){source=val;bag[attr]=source;_langAttrSource.set(el,bag);}
+                    var target=_translatePhrase(source,currentLang); if(target!==val) el.setAttribute(attr,target);
                 });
             });
         }
 
-        function applyTranslations() {
-            var t = translations[currentLang] || translations.ht;
-            document.querySelectorAll('[data-t]').forEach(function(el) {
-                var key = el.dataset.t;
-                if (t[key]) {
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') { if (el.placeholder) el.placeholder = t[key]; }
-                    else el.textContent = t[key];
-                }
-            });
-            var pageMap = { dashboard:'dashboard', classes:'classes', eleves:'students', resultats:'results', matieres:'subjects', 'rezime-matiere':'subjectSummary', personnel:'staff', emploi:'timetable', preparation:'preparation', presences:'attendance', discipline:'discipline', finance:'finance', comites:'committees', cantine:'cantine', cantinePresences:'cantineAttendance', inventaire:'inventory', parametres:'settings', contacts:'contacts', accueil:'accueil', direction:'direction', quiz:'quiz', evaluation:'evaluation', bibliotheque:'library', devoirs:'homework', communication:'communication' };
-            var pageKey = pageMap[currentPage];
-            var title = document.getElementById('pageTitle');
-            if (title && t[pageKey]) title.textContent = t[pageKey];
-            translateInterfaceText(document);
+        function applyTranslations(){
+            if(_langApplying) return;
+            _langApplying=true;
+            try{
+                var t=translations[currentLang]||translations.ht;
+                document.documentElement.setAttribute('lang',currentLang);
+                document.querySelectorAll('[data-t]').forEach(function(el){
+                    var key=el.dataset.t;
+                    if(t[key]){
+                        if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'){
+                            if(el.hasAttribute('placeholder')){
+                                var bag=_langAttrSource.get(el)||{}; if(bag.placeholder==null)bag.placeholder=el.getAttribute('placeholder'); _langAttrSource.set(el,bag);
+                                if(el.placeholder!==t[key])el.placeholder=t[key];
+                            }
+                        } else if(el.textContent!==t[key]) el.textContent=t[key];
+                    }
+                });
+                var pageMap={dashboard:'dashboard',classes:'classes',eleves:'students',resultats:'results',matieres:'subjects','rezime-matiere':'subjectSummary',personnel:'staff',emploi:'timetable',preparation:'preparation',presences:'attendance',discipline:'discipline',finance:'finance',comites:'committees',cantine:'cantine',cantinePresences:'cantineAttendance',inventaire:'inventory',parametres:'settings',contacts:'contacts',accueil:'accueil',direction:'direction',quiz:'quiz',evaluation:'evaluation',bibliotheque:'library',devoirs:'homework',communication:'communication'};
+                var title=document.getElementById('pageTitle'), key=pageMap[currentPage]; if(title&&key&&t[key]&&title.textContent!==t[key])title.textContent=t[key];
+                translateInterfaceText(document);
+                // Messages natifs de l'interface : traduire sans toucher aux données métier.
+                if(window._enssOriginalAlert==null){window._enssOriginalAlert=window.alert;window._enssOriginalConfirm=window.confirm;}
+            }finally{_langApplying=false;}
         }
 
-        var _langObserverTimer = null;
-        if (typeof MutationObserver !== 'undefined') {
-            new MutationObserver(function(){ clearTimeout(_langObserverTimer); _langObserverTimer=setTimeout(function(){ applyTranslations(); }, 80); }).observe(document.body,{childList:true,subtree:true});
+        function setLang(lang){
+            currentLang=translations[lang]?lang:'ht';
+            document.querySelectorAll('.lang-selector .flag').forEach(function(el){el.classList.toggle('active',el.dataset.lang===currentLang);});
+            applyTranslations();
+            localStorage.setItem('ENSS_LANG',currentLang);
+        }
+
+        if(typeof MutationObserver!=='undefined'){
+            new MutationObserver(function(){
+                if(_langApplying) return;
+                clearTimeout(_langObserverTimer);
+                _langObserverTimer=setTimeout(function(){applyTranslations();},120);
+            }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
         }
 
         function escapeHtml(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -2093,12 +2177,391 @@
             };
         }
 
+        // --- === PERSISTANCE DES DONNÉES : AUCUN REMPLACEMENT DE L'ETAT EXISTANT ===
+        // Chaque version du fichier porte un numéro de schéma. Les données déjà présentes
+        // dans le navigateur sont toujours conservées; la nouvelle version ne fait qu'ajouter
+        // les champs manquants nécessaires. Un second emplacement sert de copie de secours.
+        var ENSS_DATA_SCHEMA = 76;
+        var ENSS_STATE_KEY = 'ENSS_STATE';
+        var ENSS_BACKUP_KEY = 'ENSS_STATE_BACKUP';
+
+        function nonDestructiveDefaults(target, defaults) {
+            if (!target || typeof target !== 'object' || !defaults || typeof defaults !== 'object') return target;
+            Object.keys(defaults).forEach(function(k) {
+                if (target[k] === undefined || target[k] === null) {
+                    target[k] = JSON.parse(JSON.stringify(defaults[k]));
+                }
+            });
+            return target;
+        }
+
+        function markStateVersion() {
+            if (!STATE || typeof STATE !== 'object') return;
+            var old = Number(STATE._dataSchema || 0);
+            STATE._dataSchema = Math.max(old, ENSS_DATA_SCHEMA);
+            STATE._dataLastMigratedAt = new Date().toISOString();
+        }
+
+        function saveStateBackup(raw) {
+            try {
+                if (raw) localStorage.setItem(ENSS_BACKUP_KEY, raw);
+            } catch (e) {
+                console.warn('Backup state error', e);
+            }
+        }
+
+        // --- === BASE SANTRAL SUPABASE : KONSÈV DONE + SENKRONIZASYON SAN RANPLASMAN ===
+        // V75 konekte dirèkteman ak pwojè Supabase ENSS la; localStorage la rete kòm fallback/backup
+        // Supabase. localStorage la rete kòm fallback/backup; done yo pa efase lè koneksyon santral la manke.
+        // Pa mete service_role/secret key nan frontend. Sèlman Publishable/anon key + RLS.
+        var ENSS_CENTRAL_CONFIG_KEY = 'ENSS_CENTRAL_CONFIG_V1';
+        var ENSS_CENTRAL_META_KEY = 'ENSS_CENTRAL_META_V1';
+        var ENSS_CENTRAL_BASE_KEY = 'ENSS_CENTRAL_BASE_SNAPSHOT_V1';
+        var ENSS_CENTRAL_TABLE = 'school_state';
+        // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
+        // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
+        var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
+        var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null };
+
+        function getCentralConfig() {
+            try {
+                var raw = localStorage.getItem(ENSS_CENTRAL_CONFIG_KEY);
+                var saved = raw ? JSON.parse(raw) : {};
+                var base = ENSS_CENTRAL_PUBLIC_CONFIG || {};
+                return {
+                    url: String(saved.url || base.url || '').trim(),
+                    key: String(saved.key || base.key || '').trim(),
+                    schoolId: String(saved.schoolId || base.schoolId || 'ENSS-SCHOOL-1').trim() || 'ENSS-SCHOOL-1'
+                };
+            } catch (e) { return { url:String((ENSS_CENTRAL_PUBLIC_CONFIG||{}).url||''), key:String((ENSS_CENTRAL_PUBLIC_CONFIG||{}).key||''), schoolId:String((ENSS_CENTRAL_PUBLIC_CONFIG||{}).schoolId||'ENSS-SCHOOL-1') }; }
+        }
+        function saveCentralConfig(cfg) {
+            var safe = {
+                url: String(cfg && cfg.url || '').trim().replace(/\/$/, ''),
+                key: String(cfg && cfg.key || '').trim(),
+                schoolId: String(cfg && cfg.schoolId || 'ENSS-SCHOOL-1').trim() || 'ENSS-SCHOOL-1'
+            };
+            localStorage.setItem(ENSS_CENTRAL_CONFIG_KEY, JSON.stringify(safe));
+            ENSS_CENTRAL.ready = false;
+            ENSS_CENTRAL.client = null;
+            return safe;
+        }
+        function hasCentralConfig() {
+            var c=getCentralConfig();
+            return !!(c.url && c.key && c.schoolId);
+        }
+        function centralStatus(text, ok) {
+            var el=document.getElementById('enssCentralStatus');
+            if(el){ el.textContent=text; el.style.color=ok===true?'#166534':ok===false?'#b91c1c':'#475569'; }
+        }
+        function updateCentralPanel() {
+            var c=getCentralConfig();
+            var u=document.getElementById('enssCentralUrl'); if(u && u.value!==c.url) u.value=c.url;
+            var k=document.getElementById('enssCentralKey'); if(k && k.value!==c.key) k.value=c.key;
+            var school=document.getElementById('enssCentralSchoolId'); if(school && school.value!==c.schoolId) school.value=c.schoolId;
+            if (ENSS_CENTRAL.session) centralStatus('✓ Konekte ak baz santral la.', true);
+            else if (!c.url || !c.key) centralStatus('Baz santral la poko konfigire.', null);
+            else centralStatus('Konfigirasyon an pare. Konekte ak kont santral la.', null);
+        }
+        function ensureCentralClient() {
+            var c=getCentralConfig();
+            if(!c.url || !c.key) return null;
+            if(!window.supabase || !window.supabase.createClient) throw new Error('Bibliyotèk Supabase pa chaje. Verifye koneksyon entènèt la.');
+            if(ENSS_CENTRAL.client) return ENSS_CENTRAL.client;
+            ENSS_CENTRAL.client=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+            return ENSS_CENTRAL.client;
+        }
+        async function centralRefreshSession(){
+            var client=ensureCentralClient(); if(!client) return null;
+            var r=await client.auth.getSession();
+            if(r.error) throw r.error;
+            ENSS_CENTRAL.session=r.data && r.data.session ? r.data.session : null;
+            return ENSS_CENTRAL.session;
+        }
+        async function centralSignIn(){
+            var email=(document.getElementById('enssCentralEmail')||{}).value||'';
+            var password=(document.getElementById('enssCentralPassword')||{}).value||'';
+            email=email.trim();
+            if(!email||!password){ alert('Antre email ak mo de pase kont Supabase la.'); return false; }
+            try{
+                var client=ensureCentralClient();
+                var r=await client.auth.signInWithPassword({email:email,password:password});
+                if(r.error) throw r.error;
+                ENSS_CENTRAL.session=r.data.session;
+                centralStatus('✓ Koneksyon santral la aktive.', true);
+                await centralPullState(true);
+                spawnHearts();
+                return true;
+            }catch(e){ centralStatus('Erè koneksyon: '+(e.message||e), false); alert('Koneksyon santral la echwe. Verifye email, mo de pase ak pwojè Supabase la.'); return false; }
+        }
+        async function centralCreateAccount(){
+            var email=(document.getElementById('enssCentralEmail')||{}).value||'';
+            var password=(document.getElementById('enssCentralPassword')||{}).value||'';
+            email=email.trim();
+            if(!email||!password){ alert('Antre email ak yon mo de pase pou kreye kont santral la.'); return false; }
+            if(password.length<6){ alert('Supabase mande yon mo de pase ki gen omwen 6 karaktè.'); return false; }
+            try{
+                var client=ensureCentralClient();
+                var r=await client.auth.signUp({email:email,password:password});
+                if(r.error) throw r.error;
+                if(r.data && r.data.session){ ENSS_CENTRAL.session=r.data.session; await centralPullState(true); centralStatus('✓ Kont santral la kreye epi konekte.', true); }
+                else centralStatus('✓ Kont lan kreye. Verifye email la si pwojè a mande konfimasyon.', true);
+                return true;
+            }catch(e){ centralStatus('Kreyasyon kont echwe: '+(e.message||e), false); alert('Kreyasyon kont santral la echwe: '+(e.message||e)); return false; }
+        }
+
+        async function centralSignOut(){
+            try{ if(ENSS_CENTRAL.client) await ENSS_CENTRAL.client.auth.signOut(); }catch(e){}
+            ENSS_CENTRAL.session=null; ENSS_CENTRAL.ready=false; centralStatus('Sesyon baz santral la fèmen.', null);
+        }
+        function centralSanitizeStateForRemote(){
+            try{
+                var cloned=JSON.parse(JSON.stringify(STATE));
+                // Sesyon lokal la pa dwe antre nan baz santral la.
+                if(cloned) cloned.utilisateur=null;
+                if(cloned) cloned.currentPage='accueil';
+                return cloned;
+            }catch(e){ return JSON.parse(JSON.stringify(STATE)); }
+        }
+        function centralIdentity(item, index) {
+            if (item === null || item === undefined || typeof item !== 'object') return 'primitive:' + String(item);
+            var fields=['id','nisu','profil','teacherId','personnelId','school_id','code','key','slug','date','timestamp'];
+            for(var i=0;i<fields.length;i++){
+                if(item[fields[i]]!==undefined && item[fields[i]]!==null && String(item[fields[i]])!=='') return fields[i]+':'+String(item[fields[i]]);
+            }
+            return 'index:'+String(index);
+        }
+        function centralDeepEqual(a,b){
+            try{return JSON.stringify(a)===JSON.stringify(b);}catch(e){return a===b;}
+        }
+        function centralGetBaseSnapshot(){
+            try{var raw=localStorage.getItem(ENSS_CENTRAL_BASE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
+        }
+        function centralSetBaseSnapshot(state){
+            try{localStorage.setItem(ENSS_CENTRAL_BASE_KEY,JSON.stringify(centralSanitizeStateForRemoteObject(state)));}catch(e){}
+        }
+        function centralSanitizeStateForRemoteObject(state){
+            try{
+                var cloned=JSON.parse(JSON.stringify(state||{}));
+                if(cloned) cloned.utilisateur=null;
+                if(cloned) cloned.currentPage='accueil';
+                return cloned;
+            }catch(e){return {};}
+        }
+        function centralMergeValues(remoteValue, localValue) {
+            if(remoteValue===undefined || remoteValue===null) return localValue===undefined ? remoteValue : JSON.parse(JSON.stringify(localValue));
+            if(localValue===undefined || localValue===null) return remoteValue;
+            if(Array.isArray(remoteValue) && Array.isArray(localValue)){
+                var out=JSON.parse(JSON.stringify(remoteValue)), pos={};
+                out.forEach(function(v,i){pos[centralIdentity(v,i)]=i;});
+                localValue.forEach(function(v,i){
+                    var k=centralIdentity(v,i);
+                    if(pos[k]===undefined){pos[k]=out.length;out.push(JSON.parse(JSON.stringify(v)));}
+                });
+                return out;
+            }
+            if(typeof remoteValue==='object' && typeof localValue==='object' && !Array.isArray(remoteValue) && !Array.isArray(localValue)){
+                var obj=JSON.parse(JSON.stringify(remoteValue));
+                Object.keys(localValue).forEach(function(k){
+                    if(obj[k]===undefined || obj[k]===null) obj[k]=JSON.parse(JSON.stringify(localValue[k]));
+                    else if(obj[k] && localValue[k] && typeof obj[k]==='object' && typeof localValue[k]==='object') obj[k]=centralMergeValues(obj[k],localValue[k]);
+                });
+                return obj;
+            }
+            return remoteValue;
+        }
+        // Fusion à trois états: préserve les modifications locales et distantes indépendantes.
+        // En conflit sur exactement la même valeur, la modification locale la plus récente est gardée.
+        function centralThreeWayMerge(base, remote, local){
+            if(base===undefined || base===null) return centralMergeValues(remote,local);
+            if(centralDeepEqual(local,base)) return JSON.parse(JSON.stringify(remote));
+            if(centralDeepEqual(remote,base)) return JSON.parse(JSON.stringify(local));
+            if(Array.isArray(base) && Array.isArray(remote) && Array.isArray(local)){
+                var bMap={},rMap={},lMap={},order=[];
+                base.forEach(function(v,i){var k=centralIdentity(v,i);bMap[k]=v;order.push(k);});
+                remote.forEach(function(v,i){var k=centralIdentity(v,i);rMap[k]=v;if(order.indexOf(k)<0)order.push(k);});
+                local.forEach(function(v,i){var k=centralIdentity(v,i);lMap[k]=v;if(order.indexOf(k)<0)order.push(k);});
+                var out=[];
+                order.forEach(function(k){
+                    var b=bMap[k],r=rMap[k],l=lMap[k];
+                    if(r===undefined && l===undefined)return;
+                    if(b===undefined){
+                        if(l!==undefined && r!==undefined) out.push(centralThreeWayMerge(undefined,r,l));
+                        else out.push(JSON.parse(JSON.stringify(l!==undefined?l:r)));
+                    }else if(r===undefined){
+                        if(centralDeepEqual(l,b)) return; // distant delete preserved
+                        out.push(JSON.parse(JSON.stringify(l)));
+                    }else if(l===undefined){
+                        if(centralDeepEqual(r,b)) return; // local delete preserved
+                        out.push(JSON.parse(JSON.stringify(r)));
+                    }else{
+                        out.push(centralThreeWayMerge(b,r,l));
+                    }
+                });
+                return out;
+            }
+            if(typeof base==='object' && typeof remote==='object' && typeof local==='object' && !Array.isArray(base) && !Array.isArray(remote) && !Array.isArray(local)){
+                var keys={};Object.keys(base).forEach(function(k){keys[k]=1;});Object.keys(remote).forEach(function(k){keys[k]=1;});Object.keys(local).forEach(function(k){keys[k]=1;});
+                var obj={};
+                Object.keys(keys).forEach(function(k){
+                    var bv=base[k],rv=remote[k],lv=local[k];
+                    if(rv===undefined && lv===undefined)return;
+                    if(rv===undefined){if(!centralDeepEqual(lv,bv))obj[k]=JSON.parse(JSON.stringify(lv));return;}
+                    if(lv===undefined){if(!centralDeepEqual(rv,bv))obj[k]=JSON.parse(JSON.stringify(rv));return;}
+                    obj[k]=centralThreeWayMerge(bv,rv,lv);
+                });
+                return obj;
+            }
+            // Même champ modifié depuis la dernière lecture: la copie locale est celle que l'utilisateur vient de sauvegarder.
+            return JSON.parse(JSON.stringify(local));
+        }
+
+        async function centralPullState(allowMerge){
+            if(ENSS_CENTRAL.syncing) return false;
+            try{
+                var client=ensureCentralClient(); if(!client) return false;
+                await centralRefreshSession(); if(!ENSS_CENTRAL.session) return false;
+                var c=getCentralConfig();
+                ENSS_CENTRAL.syncing=true;
+                var r=await client.from(ENSS_CENTRAL_TABLE).select('state,schema_version,updated_at,revision').eq('school_id',c.schoolId).maybeSingle();
+                if(r.error) throw r.error;
+                var localUser=STATE&&STATE.utilisateur?STATE.utilisateur:null;
+                var localPage=STATE&&STATE.currentPage?STATE.currentPage:'accueil';
+                if(!r.data){
+                    centralStatus('Baz santral la poko inisyalize. Admin lan dwe peze « Inisyalize baz » apre li fin verifye done lokal yo.', null);
+                    return false;
+                }
+                var remote=r.data.state||{};
+                var localBefore=centralSanitizeStateForRemote();
+                var base=centralGetBaseSnapshot();
+                var merged=(allowMerge&&base)?centralThreeWayMerge(base,remote,localBefore):(allowMerge?centralMergeValues(remote,localBefore):JSON.parse(JSON.stringify(remote)));
+                if(merged && typeof nonDestructiveDefaults==='function') nonDestructiveDefaults(merged,getDefaultState());
+                if(!merged||typeof merged!=='object') merged=getDefaultState();
+                // Le profil de session de l'application reste local; il ne fait pas partie de l'état partagé.
+                merged.utilisateur=localUser;
+                merged.currentPage=localPage||'accueil';
+                STATE=merged;
+                try{ localStorage.setItem(ENSS_STATE_KEY,JSON.stringify(STATE)); saveStateBackup(JSON.stringify(STATE)); }catch(e){}
+                centralSetBaseSnapshot(remote);
+                ENSS_CENTRAL.lastRemoteAt=r.data.updated_at||null;
+                ENSS_CENTRAL.ready=true;
+                centralStatus('✓ Done santral yo chaje sou aparèy sa a.', true);
+                try{ initApp(); }catch(e){}
+                return true;
+            }catch(e){ centralStatus('Baz santral pa disponib: '+(e.message||e), false); return false; }
+            finally{ ENSS_CENTRAL.syncing=false; }
+        }
+        async function centralPushState(force){
+            if(ENSS_CENTRAL.syncing && !force) return false;
+            try{
+                var client=ensureCentralClient(); if(!client) return false;
+                await centralRefreshSession(); if(!ENSS_CENTRAL.session) return false;
+                var c=getCentralConfig();
+                if(!force && !ENSS_CENTRAL.ready) return false;
+                var localState=centralSanitizeStateForRemote();
+                var current=await client.from(ENSS_CENTRAL_TABLE).select('state,schema_version,revision,updated_at').eq('school_id',c.schoolId).maybeSingle();
+                if(current.error) throw current.error;
+                var remote=current.data&&current.data.state&&typeof current.data.state==='object'?current.data.state:null;
+                var base=centralGetBaseSnapshot();
+                var mergedState;
+                if(remote){
+                    mergedState=base?centralThreeWayMerge(base,remote,localState):centralMergeValues(remote,localState);
+                }else{
+                    mergedState=localState;
+                }
+                var payload={school_id:c.schoolId,state:mergedState,schema_version:Math.max(ENSS_DATA_SCHEMA,Number(current.data&&current.data.schema_version||0)),updated_at:new Date().toISOString(),updated_by:ENSS_CENTRAL.session.user.id};
+                var r=await client.from(ENSS_CENTRAL_TABLE).upsert(payload,{onConflict:'school_id'}).select('school_id,updated_at,revision,state').single();
+                if(r.error) throw r.error;
+                ENSS_CENTRAL.ready=true;
+                ENSS_CENTRAL.lastRemoteAt=r.data.updated_at||payload.updated_at;
+                centralSetBaseSnapshot(r.data.state||mergedState);
+                try{ localStorage.setItem(ENSS_CENTRAL_META_KEY,JSON.stringify({schoolId:c.schoolId,lastRemoteAt:ENSS_CENTRAL.lastRemoteAt,schema:ENSS_DATA_SCHEMA,revision:r.data.revision||null})); }catch(e){}
+                centralStatus('✓ Done sove nan baz santral la.', true);
+                return true;
+            }catch(e){ centralStatus('Senkronizasyon echwe: '+(e.message||e), false); return false; }
+        }
+
+        function scheduleCentralPush(){
+            if(!hasCentralConfig() || !ENSS_CENTRAL.session) return;
+            clearTimeout(ENSS_CENTRAL.timer);
+            ENSS_CENTRAL.timer=setTimeout(function(){ centralPushState(false); },1500);
+        }
+        async function centralTestConnection(){
+            if(!requireAdmin('teste baz santral la')) return false;
+            try{
+                var cfg=saveCentralConfig({
+                    url:(document.getElementById('enssCentralUrl')||{}).value||'',
+                    key:(document.getElementById('enssCentralKey')||{}).value||'',
+                    schoolId:(document.getElementById('enssCentralSchoolId')||{}).value||''
+                });
+                var client=ensureCentralClient();
+                var r=await client.auth.getSession();
+                if(r.error) throw r.error;
+                ENSS_CENTRAL.session=r.data && r.data.session ? r.data.session : null;
+                centralStatus(ENSS_CENTRAL.session?'✓ Supabase pare epi sesyon aktif.':'✓ Supabase pare; konekte kont lan pou senkronize.', true);
+                return true;
+            }catch(e){ centralStatus('Teste echwe: '+(e.message||e), false); return false; }
+        }
+        async function centralSeedCurrentState(){
+            if(!requireAdmin('inisyalize baz santral la')) return false;
+            if(!ENSS_CENTRAL.session){ alert('Konekte ak kont Supabase administratè a anvan.'); return false; }
+            var studentCount=Array.isArray(STATE&&STATE.students)?STATE.students.length:0;
+            var personnelCount=Array.isArray(STATE&&STATE.personnel)?STATE.personnel.length:0;
+            var year=String(STATE&&STATE.anneeCourante||'');
+            if(!confirm('Premye migration ENSS: '+studentCount+' élèves + '+personnelCount+' personnel, ansanm ak tout lòt done STATE yo, pral kopye nan baz santral la. Done ki deja nan baz la ap konsève; pa gen RESET. Kontinye?')) return false;
+            try{
+                var backupRaw=JSON.stringify(STATE); saveStateBackup(backupRaw);
+                var ok=await centralPushState(true);
+                if(ok) alert('✅ Migration san pèt fini. '+studentCount+' élèves ak '+personnelCount+' personnel te prepare pou baz santral la. Ane aktif: '+year+'.');
+                return ok;
+            }catch(e){alert('Migration echwe: '+(e.message||e));return false;}
+        }
+        async function centralPullForAll(){
+            var ok=await centralPullState(true);
+            if(ok) spawnHearts();
+            return ok;
+        }
+        async function initCentralSync(){
+            try{
+                if(!hasCentralConfig()) return;
+                ensureCentralClient();
+                await centralRefreshSession();
+                if(ENSS_CENTRAL.session){
+                    await centralPullState(true);
+                    ENSS_CENTRAL.ready=true;
+                }
+                updateCentralPanel();
+            }catch(e){ centralStatus('Baz santral pa konekte: '+(e.message||e), false); }
+        }
+        window.addEventListener('online',function(){ if(ENSS_CENTRAL.session) centralPullForAll(); });
+        document.addEventListener('visibilitychange',function(){ if(!document.hidden && ENSS_CENTRAL.session) centralPullForAll(); });
+        setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden) centralPullForAll(); },30000);
         function loadState() {
             try {
-                var raw = localStorage.getItem('ENSS_STATE');
+                var raw = localStorage.getItem(ENSS_STATE_KEY);
+                var rawSource = 'primary';
+                if (!raw) {
+                    raw = localStorage.getItem(ENSS_BACKUP_KEY);
+                    rawSource = 'backup';
+                }
                 if (raw) {
-                    var parsed = JSON.parse(raw);
+                    var parsed;
+                    try {
+                        parsed = JSON.parse(raw);
+                    } catch (parseErr) {
+                        var backupRaw = localStorage.getItem(ENSS_BACKUP_KEY);
+                        if (backupRaw && backupRaw !== raw) {
+                            parsed = JSON.parse(backupRaw);
+                            rawSource = 'backup-after-parse-error';
+                        } else {
+                            throw parseErr;
+                        }
+                    }
                     STATE = parsed;
+                    if (!STATE || typeof STATE !== 'object' || Array.isArray(STATE)) STATE = getDefaultState();
+                    // Ne jamais remplacer des collections existantes. On complète uniquement les
+                    // nouvelles rubriques introduites par une version plus récente.
+                    nonDestructiveDefaults(STATE, getDefaultState());
                     if (!STATE.finance) STATE.finance = { transactions: [], frais: {}, budget: [] };
                     if (!STATE.cantine) STATE.cantine = { stocks: {}, produitsJour: [], mouvements: [], rations: {} };
                     if (!STATE.cantine.rations) STATE.cantine.rations = {};
@@ -2165,6 +2628,8 @@
                         if (!s.telephone) s.telephone = '';
                     });
                     cleanMatieresData();
+                    markStateVersion();
+                    if (rawSource !== 'primary') saveState();
                     return true;
                 }
             } catch (e) {
@@ -2175,7 +2640,13 @@
 
         function saveState() {
             try {
-                localStorage.setItem('ENSS_STATE', JSON.stringify(STATE));
+                markStateVersion();
+                var raw = JSON.stringify(STATE);
+                // Une copie de secours précède toujours l'écriture principale.
+                saveStateBackup(raw);
+                localStorage.setItem(ENSS_STATE_KEY, raw);
+                // Local/backup fini anvan; senkronizasyon santral la fèt apre, san bloke fonksyon yo.
+                scheduleCentralPush();
             } catch (e) {
                 console.warn('Save error', e);
             }
@@ -2219,6 +2690,7 @@
         function initState() {
             if (!loadState()) {
                 STATE = getDefaultState();
+                markStateVersion();
                 saveState();
             }
             if (!STATE.securite.users || STATE.securite.users.length === 0) {
@@ -2971,6 +3443,7 @@
             var n=String(extractClassNumber(classe)||'');
             if(n==='1'||n==='2') return '1-2';
             if(n==='3'||n==='4') return '3-4';
+            if(n==='5'||n==='6') return '5-6';
             if(n==='7'||n==='8'||n==='9') return '7-9';
             return '';
         }
@@ -4139,7 +4612,7 @@
             </div>
             ${html}
             <p style="font-size:0.6rem;color:#777;margin-top:0.5rem;">Imprimé le ${new Date().toLocaleDateString()}</p>
-            <script>window.onload=function(){window.print();}<\/script>
+<script>window.onload=function(){window.print();}<\/script>
                 <div id="directionAuthModal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(12,30,55,.62);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:1rem;">
         <div class="card" style="width:min(430px,100%);padding:1.2rem;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.25);border:1px solid #d6e2f0;background:#fff;">
             <div style="text-align:center;margin-bottom:0.8rem;">
@@ -11859,6 +12332,7 @@
             STATE.parametres.autoLogin = false;
             localStorage.removeItem('ENSS_LOGIN');
             saveState();
+            try { centralSignOut(); } catch (e) {}
             pageHistory = [];
             directionAuthSession = false;
             selectedStudents.clear();
@@ -12275,7 +12749,15 @@
             initState();
         } catch (e) {
             console.error('⚠️ Erè kritik pandan chajman done yo:', e);
-            STATE = getDefaultState();
+            // En cas d'erreur, ne pas écraser un état déjà présent. Repli sur le backup avant le défaut.
+            try {
+                var _bk = localStorage.getItem(ENSS_BACKUP_KEY);
+                STATE = _bk ? JSON.parse(_bk) : getDefaultState();
+                nonDestructiveDefaults(STATE, getDefaultState());
+                saveState();
+            } catch (_) {
+                STATE = getDefaultState();
+            }
         }
 
         try {
@@ -12291,6 +12773,9 @@
             console.error('⚠️ Erè kritik pandan demaraj aplikasyon an:', e);
             initApp();
         }
+
+        // Supabase se opsyonèl jiskaske konfigirasyon an fèt; li pa anpeche aplikasyon an demare lokalman.
+        setTimeout(function(){ initCentralSync(); }, 600);
 
         // --- === EKSPOZE FONKSYON === ---
         window.navigateTo = navigateTo;
@@ -12350,6 +12835,13 @@
         window.renderCantine = renderCantine;
         window.renderInventaire = renderInventaire;
         window.renderParametres = renderParametres;
+        window.centralTestConnection = centralTestConnection;
+        window.centralSignIn = centralSignIn;
+        window.centralCreateAccount = centralCreateAccount;
+        window.centralSignOut = centralSignOut;
+        window.centralSeedCurrentState = centralSeedCurrentState;
+        window.centralPullForAll = centralPullForAll;
+        window.initCentralSync = initCentralSync;
         window.renderContacts = renderContacts;
         window.refreshResults = refreshResults;
         window.printResults = printResults;
@@ -13159,20 +13651,39 @@
 
   // ===== Messagerie parents/responsables =====
   var MOTIFS={
-    absance:{ht:'Absans',fr:'Absence'},sove:{ht:'Sove',fr:'Sove'},devoir:{ht:'Devwa',fr:'Devoir'},devoir_non_fait:{ht:'Devwa pa fèt',fr:'Devoir non fait'},discipline:{ht:'Pwoblèm disiplin',fr:'Problème de discipline'},lecon:{ht:'Elèv la pa konnen leson an',fr:'L’élève ne connaît pas la leçon'},reta:{ht:'Reta',fr:'Retard'},rendezvous:{ht:'Envitasyon randevou',fr:'Invitation à un rendez-vous'},sante:{ht:'Ijans sante / aksidan',fr:'Urgence santé / accident'},discipline_urgent:{ht:'Ijans disiplin',fr:'Urgence discipline'},frais:{ht:'Rappel frè lekòl',fr:'Rappel de frais scolaires'},vacances:{ht:'Vakans / evènman lekòl',fr:'Vacances / événement scolaire'},bulletin:{ht:'Bulletin disponib',fr:'Bulletin disponible'}
+    absance:{ht:'Absans',fr:'Absence',en:'Absence',es:'Ausencia'},sove:{ht:'Sove',fr:'Sove',en:'Sove',es:'Sove'},devoir:{ht:'Devwa',fr:'Devoir',en:'Homework',es:'Tarea'},devoir_non_fait:{ht:'Devwa pa fèt',fr:'Devoir non fait',en:'Homework not done',es:'Tarea no realizada'},discipline:{ht:'Pwoblèm disiplin',fr:'Problème de discipline',en:'Discipline problem',es:'Problema disciplinario'},lecon:{ht:'Elèv la pa konnen leson an',fr:'L’élève ne connaît pas la leçon',en:'The student does not know the lesson',es:'El alumno no conoce la lección'},reta:{ht:'Reta',fr:'Retard',en:'Late arrival',es:'Retraso'},rendezvous:{ht:'Envitasyon randevou',fr:'Invitation à un rendez-vous',en:'Meeting invitation',es:'Invitación a una reunión'},sante:{ht:'Ijans sante / aksidan',fr:'Urgence santé / accident',en:'Health emergency / accident',es:'Emergencia de salud / accidente'},discipline_urgent:{ht:'Ijans disiplin',fr:'Urgence discipline',en:'Discipline emergency',es:'Emergencia disciplinaria'},frais:{ht:'Rappel frè lekòl',fr:'Rappel de frais scolaires',en:'School fee reminder',es:'Recordatorio de cuotas escolares'},vacances:{ht:'Vakans / evènman lekòl',fr:'Vacances / événement scolaire',en:'School holiday / event',es:'Vacaciones / evento escolar'},bulletin:{ht:'Bulletin disponib',fr:'Bulletin disponible',en:'Report card available',es:'Boletín disponible'}
   };
+  function parentLink(){return (STATE.parametres&&STATE.parametres.parentPortalUrl)||location.href.split('#')[0];}
+  function studentByNisu(nisu){return getStudents().find(function(s){return s.nisu===nisu;});}
+  function _msgText(lang,key){var d={
+    ht:{hello:'Bonjou responsab',contact:'nou kontakte w konsènan elèv la.',reason:'Motif',abs:'Absans jiskaprezan',sove:'Kantite sove',done:'Devwa fèt',disc:'Dosye disiplin',thanks:'Tanpri swiv sitiyasyon an ak lekòl la.',portal:'Pòtal'},
+    fr:{hello:'Bonjour responsable',contact:'nous vous contactons au sujet de l’élève.',reason:'Motif',abs:'Absences à ce jour',sove:'Nombre de sove',done:'Devoirs faits',disc:'Dossiers disciplinaires',thanks:'Merci de suivre la situation avec l’école.',portal:'Portail'},
+    en:{hello:'Hello, parent/guardian',contact:'we are contacting you regarding the student.',reason:'Reason',abs:'Absences to date',sove:'Number of sove',done:'Homework completed',disc:'Discipline records',thanks:'Please follow up on the situation with the school.',portal:'Portal'},
+    es:{hello:'Hola, padre/madre o responsable',contact:'nos ponemos en contacto con usted sobre el alumno.',reason:'Motivo',abs:'Ausencias hasta la fecha',sove:'Cantidad de sove',done:'Tareas realizadas',disc:'Registros disciplinarios',thanks:'Por favor, haga seguimiento de la situación con la escuela.',portal:'Portal'}
+  };return (d[lang]&&d[lang][key])||d.ht[key]||key;}
+  function defaultTemplate(motif,s,lang){
+    lang=translations[lang]?lang:'ht'; var a=computeAttendanceSummaryForYear(s.nisu,s.classe,getYear()),d=getStudentDevoirSummary(s.nisu,s.classe,getYear()),school=STATE.parametres.ecoleNom||'ENSS',link=parentLink();
+    var intro=_msgText(lang,'hello')+' '+s.nom+' '+s.prenom+', '+_msgText(lang,'contact'); var extra='';
+    if(motif==='absance')extra=_msgText(lang,'abs')+' : '+a.absent+'.';
+    if(motif==='sove')extra=_msgText(lang,'sove')+' : '+a.sove+'.';
+    if(motif==='devoir'||motif==='devoir_non_fait')extra=_msgText(lang,'done')+' : '+d.done+'/'+d.assigned+'.';
+    if(motif==='discipline'||motif==='discipline_urgent'){var n=(STATE.discipline||[]).filter(function(x){return x.nisu===s.nisu&&x._YEAR===getYear();}).length;extra=_msgText(lang,'disc')+' : '+n+'.';}
+    var reason=(MOTIFS[motif]&&MOTIFS[motif][lang])||motif;
+    var lines=[intro,'',_msgText(lang,'reason')+' : '+reason+'.',extra,'',_msgText(lang,'thanks'),_msgText(lang,'portal')+' : '+link,'',school];
+    return lines.join('\n');
+  }
   function parentLink(){return (STATE.parametres&&STATE.parametres.parentPortalUrl)||location.href.split('#')[0];}
   function studentByNisu(nisu){return getStudents().find(function(s){return s.nisu===nisu;});}
   function attendanceMotif(s){var a=computeAttendanceSummaryForYear(s.nisu,s.classe,getYear());return 'Absans: '+a.absent+' jou; Sove: '+a.sove;}
   function defaultTemplate(motif,s,lang){var a=computeAttendanceSummaryForYear(s.nisu,s.classe,getYear()),d=getStudentDevoirSummary(s.nisu,s.classe,getYear());var l=lang==='fr';var school=STATE.parametres.ecoleNom||'ENSS';var link=parentLink();var extra='';if(motif==='absance')extra=l?'Absences à ce jour : '+a.absent+'.':'Absans jiskaprezan : '+a.absent+'.';if(motif==='sove')extra=l?'Nombre de sove : '+a.sove+'.':'Kantite sove : '+a.sove+'.';if(motif==='devoir'||motif==='devoir_non_fait')extra=l?'Devoirs faits : '+d.done+'/'+d.assigned+'.':'Devwa fèt : '+d.done+'/'+d.assigned+'.';if(motif==='discipline'||motif==='discipline_urgent'){var n=(STATE.discipline||[]).filter(function(x){return x.nisu===s.nisu&&x._YEAR===getYear();}).length;extra=l?'Dossiers disciplinaires : '+n+'.':'Dosye disiplin : '+n+'.';}var intro=l?'Bonjour '+s.nom+' '+s.prenom+', responsable de '+s.nom+' '+s.prenom+'.':'Bonjou responsab '+s.nom+' '+s.prenom+', nou kontakte w konsènan elèv la.';var body=l?intro+'\n\nMotif : '+(MOTIFS[motif]?MOTIFS[motif].fr:motif)+'.\n'+extra+'\n\nMerci de suivre la situation avec l’école. Portail : '+link+'\n\n'+school:'Bonjou, '+s.nom+' '+s.prenom+'.\n\nMotif : '+(MOTIFS[motif]?MOTIFS[motif].ht:motif)+'.\n'+extra+'\nTanpri swiv sitiyasyon an ak lekòl la. Pòtal : '+link+'\n\n'+school;return body;}
-  window.generateParentMessage=function(){var s=studentByNisu((document.getElementById('enssMsgStudent')||{}).value);if(!s)return '';var motif=(document.getElementById('enssMsgMotif')||{}).value||'absance',lang=(document.getElementById('enssMsgLang')||{}).value||'ht';var custom=(document.getElementById('enssMsgCustom')||{}).value||'';var msg=custom.trim()||defaultTemplate(motif,s,lang);var rv=(document.getElementById('enssMsgRdvTime')||{}).value;if(motif==='rendezvous'&&rv)msg+='\n\nRandevou / Rendez-vous : '+rv;var ta=document.getElementById('enssMsgText');if(ta)ta.value=msg;return msg;};
+  window.generateParentMessage=function(){var s=studentByNisu((document.getElementById('enssMsgStudent')||{}).value);if(!s)return '';var motif=(document.getElementById('enssMsgMotif')||{}).value||'absance',lang=(document.getElementById('enssMsgLang')||{}).value||'ht';var custom=(document.getElementById('enssMsgCustom')||{}).value||'';var msg=custom.trim()||defaultTemplate(motif,s,lang);var rv=(document.getElementById('enssMsgRdvTime')||{}).value;if(motif==='rendezvous'&&rv){var rt=currentLang==='fr'?'Rendez-vous':currentLang==='en'?'Meeting':currentLang==='es'?'Reunión':'Randevou';msg+='\n\n'+rt+' : '+rv;}var ta=document.getElementById('enssMsgText');if(ta)ta.value=msg;return msg;};
   window.sendParentMessage=function(via){if(!canModifyData('contacts')&&!canModifyData('devoirs')&&!canModifyData('discipline'))return requireLogin('voye mesaj bay responsab','contacts');var nisu=(document.getElementById('enssMsgStudent')||{}).value,s=studentByNisu(nisu);if(!s)return alert('Chwazi elèv la.');var phone=cleanPhone(s.telephone||s.telPersResponsable||'');if(!phone||phone.replace(/\D/g,'').length<8)return alert('Pa gen nimewo responsab valide pou elèv sa a.');var msg=generateParentMessage();STATE.parentMessages=Array.isArray(STATE.parentMessages)?STATE.parentMessages:[];STATE.parentMessages.push({id:'MSG-'+Date.now(),date:new Date().toISOString(),nisu:nisu,classe:s.classe,motif:(document.getElementById('enssMsgMotif')||{}).value,lang:(document.getElementById('enssMsgLang')||{}).value,via:via,user:STATE.utilisateur||'',message:msg});saveState();var clean=phone.replace(/\D/g,'');if(via==='sms')window.open('sms:'+clean+'?body='+encodeURIComponent(msg),'_blank');else window.open('https://wa.me/'+clean+'?text='+encodeURIComponent(msg),'_blank');alert('Mesaj la pare pou '+(via==='sms'?'SMS':'WhatsApp')+'.');};
   window.copyParentApiJSON=function(){var nisu=(document.getElementById('enssMsgStudent')||{}).value,s=studentByNisu(nisu);if(!s)return alert('Chwazi elèv la.');var msg=generateParentMessage();var payload={school:STATE.parametres.ecoleNom||'ENSS',student:{nisu:s.nisu,name:(s.nom+' '+s.prenom),class:s.classe},recipient:{phone:cleanPhone(s.telephone||s.telPersResponsable||'')},channel:(document.getElementById('enssMsgVia')||{}).value||'whatsapp',message:msg,tracking_url:parentLink(),timestamp:new Date().toISOString()};navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(payload,null,2));alert('JSON API copié. Pou yon envoi automatique réel, sèvi ak yon backend/gateway sécurisé; pa mete token API sekrè nan HTML la.');};
   window.setParentPortalUrl=function(){if(!requireAdmin('configure portail parent'))return;var v=prompt('Lien du portail / plateforme pour les responsables:',(STATE.parametres.parentPortalUrl||location.href.split('#')[0]));if(v===null)return;STATE.parametres.parentPortalUrl=v.trim();saveState();renderParametres();};
   function injectClassModules(classe){
     var host=document.getElementById('classeDetailContent');if(!host)return;
     var old=document.getElementById('enssClassExtraModules');if(old)old.remove();
-    var box=document.createElement('div');box.id='enssClassExtraModules';box.innerHTML='<div class="card" style="padding:.65rem;border-left:4px solid #f59e0b;margin:.6rem 0;"><h4 style="margin:0 0 .4rem;font-size:.86rem;">📨 Messagerie Responsables — '+escapeHtml(classe)+'</h4><div class="grid grid-3" style="gap:.4rem;"><div><label style="font-size:.68rem;">Élève</label><select id="enssMsgStudent" onchange="generateParentMessage()" style="width:100%;padding:.2rem .3rem;"></select></div><div><label style="font-size:.68rem;">Motif</label><select id="enssMsgMotif" onchange="generateParentMessage()" style="width:100%;padding:.2rem .3rem;">'+Object.keys(MOTIFS).map(function(k){return '<option value="'+k+'">'+MOTIFS[k].ht+' / '+MOTIFS[k].fr+'</option>';}).join('')+'</select></div><div><label style="font-size:.68rem;">Langue</label><select id="enssMsgLang" onchange="generateParentMessage()" style="width:100%;padding:.2rem .3rem;"><option value="ht">Kreyòl</option><option value="fr">Français</option></select></div></div><div class="flex gap-1" style="margin:.4rem 0;flex-wrap:wrap;align-items:center;"><label style="font-size:.68rem;">Heure randevou</label><input type="time" id="enssMsgRdvTime" onchange="generateParentMessage()"/><button class="btn" onclick="document.getElementById(&quot;enssMsgCustom&quot;).value=&quot;&quot; ;generateParentMessage();">🔄 Modèl otomatik</button><button class="btn" onclick="generateParentMessage()">⚡ Chwazi motif</button><button class="btn" onclick="setParentPortalUrl()">🔗 Lien portail</button></div><textarea id="enssMsgCustom" placeholder="Ou ka chwazi manyèlman epi modifye mesaj la..." style="width:100%;min-height:90px;padding:.35rem;font-size:.72rem;" oninput="generateParentMessage()"></textarea><div class="flex gap-1" style="margin-top:.4rem;flex-wrap:wrap;"><button class="btn btn-success" onclick="sendParentMessage(&quot;whatsapp&quot;)">💬 WhatsApp</button><button class="btn btn-primary" onclick="sendParentMessage(&quot;sms&quot;)">📱 SMS</button><button class="btn" onclick="copyParentApiJSON()">{ } JSON API</button></div></div><div id="enssStudentHomeworkPanel"></div>';
+    var box=document.createElement('div');box.id='enssClassExtraModules';box.innerHTML='<div class="card" style="padding:.65rem;border-left:4px solid #f59e0b;margin:.6rem 0;"><h4 style="margin:0 0 .4rem;font-size:.86rem;">📨 Messagerie Responsables — '+escapeHtml(classe)+'</h4><div class="grid grid-3" style="gap:.4rem;"><div><label style="font-size:.68rem;">Élève</label><select id="enssMsgStudent" onchange="generateParentMessage()" style="width:100%;padding:.2rem .3rem;"></select></div><div><label style="font-size:.68rem;">Motif</label><select id="enssMsgMotif" onchange="generateParentMessage()" style="width:100%;padding:.2rem .3rem;">'+Object.keys(MOTIFS).map(function(k){return '<option value="'+k+'">'+(MOTIFS[k][currentLang]||MOTIFS[k].ht)+'</option>';}).join('')+'</select></div><div><label style="font-size:.68rem;">Langue</label><select id="enssMsgLang" onchange="generateParentMessage()" style="width:100%;padding:.2rem .3rem;"><option value="ht">Kreyòl</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option></select></div></div><div class="flex gap-1" style="margin:.4rem 0;flex-wrap:wrap;align-items:center;"><label style="font-size:.68rem;">Heure randevou</label><input type="time" id="enssMsgRdvTime" onchange="generateParentMessage()"/><button class="btn" onclick="document.getElementById(&quot;enssMsgCustom&quot;).value=&quot;&quot; ;generateParentMessage();">🔄 Modèl otomatik</button><button class="btn" onclick="generateParentMessage()">⚡ Chwazi motif</button><button class="btn" onclick="setParentPortalUrl()">🔗 Lien portail</button></div><textarea id="enssMsgCustom" placeholder="Ou ka chwazi manyèlman epi modifye mesaj la..." style="width:100%;min-height:90px;padding:.35rem;font-size:.72rem;" oninput="generateParentMessage()"></textarea><div class="flex gap-1" style="margin-top:.4rem;flex-wrap:wrap;"><button class="btn btn-success" onclick="sendParentMessage(&quot;whatsapp&quot;)">💬 WhatsApp</button><button class="btn btn-primary" onclick="sendParentMessage(&quot;sms&quot;)">📱 SMS</button><button class="btn" onclick="copyParentApiJSON()">{ } JSON API</button></div></div><div id="enssStudentHomeworkPanel"></div>';
     host.appendChild(box);
     var sel=document.getElementById('enssMsgStudent');sel.innerHTML=getStudentsByClasse(classe).map(function(s){return '<option value="'+escapeHtml(s.nisu)+'">'+escapeHtml(s.nom+' '+s.prenom)+' — '+escapeHtml(s.nisu)+'</option>';}).join('');
     generateParentMessage(); refreshStudentHomeworkPanel();
@@ -14228,6 +14739,53 @@
   function fix(){
     try{if(!window.STATE||!Array.isArray(STATE.personnel))return;var changed=false;STATE.personnel.forEach(function(p){if(!p)return;var n=clean(p.nom),pr=clean(p.prenom);var nn=n.replace(/\s*[·•-]?\s*\[?per-[a-z0-9]+\]?\s*$/i,'').trim();if(/^\[?per-[a-z0-9]+\]?$/i.test(pr)||/^per-[a-z0-9]+$/i.test(pr))pr='';if(n!==nn){p.nom=nn;changed=true;}if(pr!==p.prenom){p.prenom=pr;changed=true;}});if(changed&&typeof saveState==='function')saveState();if(typeof renderPersonnel==='function')renderPersonnel();}catch(e){console.error(e);}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(fix,100);});else setTimeout(fix,100);
+})();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  function ensureCentralUi(){
+    var page=document.getElementById('page-parametres'); if(!page) return;
+    var box=document.getElementById('enssCentralDbPanel');
+    if(!box){
+      box=document.createElement('div'); box.id='enssCentralDbPanel'; box.className='card';
+      box.style.cssText='padding:.8rem;margin-top:.7rem;border-left:4px solid #16a34a;';
+      box.innerHTML=''
+       +'<div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center;flex-wrap:wrap;">'
+       +'<h4 style="margin:0;font-size:.9rem;">☁️ Baz Done Santral ENSS</h4>'
+       +'<span id="enssCentralStatus" style="font-size:.68rem;color:#475569;">Baz santral la poko konfigire.</span></div>'
+       +'<p style="font-size:.68rem;color:#475569;margin:.35rem 0;">Supabase se sous done santral la. Vèsyon lokal la rete kòm backup. Apre koneksyon an, done yo rale otomatikman epi chanjman yo voye nan baz santral la san RESET. Pa mete service_role key la isit la.</p>'
+       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.35rem;">'
+       +'<input id="enssCentralUrl" placeholder="Supabase Project URL" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'<input id="enssCentralKey" placeholder="Publishable key" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'<input id="enssCentralSchoolId" placeholder="ID lekòl la" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'</div>'
+       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.35rem;margin-top:.35rem;">'
+       +'<input id="enssCentralEmail" type="email" placeholder="Email kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'<input id="enssCentralPassword" type="password" placeholder="Mo de pase kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'</div>'
+       +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">'
+       +'<button class="btn" onclick="centralTestConnection()" style="padding:.25rem .55rem;font-size:.68rem;">🔎 Teste</button>'
+       +'<button class="btn btn-primary" onclick="centralSignIn()" style="padding:.25rem .55rem;font-size:.68rem;">🔐 Konekte</button>'
+       +'<button class="btn" onclick="centralCreateAccount()" style="padding:.25rem .55rem;font-size:.68rem;">➕ Kreye kont</button>'
+       +'<button class="btn" onclick="centralSignOut()" style="padding:.25rem .55rem;font-size:.68rem;">🚪 Dekonekte</button>'
+       +'<button class="btn btn-success" onclick="centralSeedCurrentState()" style="padding:.25rem .55rem;font-size:.68rem;">⬆️ Inisyalize baz</button>'
+       +'<button class="btn" onclick="centralPullForAll()" style="padding:.25rem .55rem;font-size:.68rem;">⬇️ Rale done</button>'
+       +'</div>'
+       +'<p style="font-size:.62rem;color:#64748b;margin:.4rem 0 0;">Premye fwa: SQL la dwe deja egzekite, kont Auth yo dwe egziste, epi admin lan dwe konekte pou premye migration an. Apre sa, chak koneksyon rale menm eta santral la; chanjman lokal yo sove nan Supabase epi yo pa fè RESET done yo.</p>';
+      page.appendChild(box);
+    }
+    try{ updateCentralPanel(); }catch(e){}
+  }
+  var oldRender=window.renderParametres;
+  window.renderParametres=function(){
+    var r=oldRender?oldRender.apply(this,arguments):null;
+    setTimeout(ensureCentralUi,40);
+    return r;
+  };
+  window.ensureCentralUi=ensureCentralUi;
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureCentralUi,500);});
 })();
 </script>
 </body>
