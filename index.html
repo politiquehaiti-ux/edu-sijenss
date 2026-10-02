@@ -967,10 +967,10 @@
                     <div style="padding:.35rem .5rem;border-radius:8px;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:1px solid #93c5fd;color:#1e3a8a;font-weight:800;margin-bottom:.5rem;">📝 Modèle de Fiche de Préparation de Leçon</div>
                     <div class="grid grid-4" style="gap:.45rem;">
                         <div class="form-group"><label style="font-size:.65rem;">Nom de l'école</label><input id="prepEcole" type="text" /></div>
-                        <div class="form-group"><label style="font-size:.65rem;">Classe / Niveau</label><select id="preparationClasseSelect" onchange="loadPreparationForClasse(this.value)"></select></div>
-                        <div class="form-group"><label style="font-size:.65rem;">Discipline (Branche)</label><select id="prepDiscipline" onchange="syncPreparationTeacherFromAssignment()"></select></div>
-                        <div class="form-group"><label style="font-size:.65rem;">Nom de l'enseignant(e)</label><select id="prepTeacher" disabled style="background:#f1f5f9;color:#334155;font-weight:700;cursor:not-allowed;"></select><small style="display:block;font-size:.56rem;color:#64748b;margin-top:.12rem;">Déterminé automatiquement selon l'affectation classe + matière.</small></div>
+                        <div class="form-group"><label style="font-size:.65rem;">Nom de l'enseignant(e)</label><select id="prepTeacher"></select></div>
                         <div class="form-group"><label style="font-size:.65rem;">Date</label><input id="prepDate" type="date" /></div>
+                        <div class="form-group"><label style="font-size:.65rem;">Classe / Niveau</label><select id="preparationClasseSelect" onchange="loadPreparationForClasse(this.value)"></select></div>
+                        <div class="form-group"><label style="font-size:.65rem;">Discipline (Branche)</label><select id="prepDiscipline"></select></div>
                         <div class="form-group"><label style="font-size:.65rem;">Sous-branche</label><input id="prepSousBranche" type="text" placeholder="Calcul, Conjugaison, Géométrie..." /></div>
                         <div class="form-group"><label style="font-size:.65rem;">Durée de la séance</label><input id="prepDuree" type="text" placeholder="45 minutes, 60 minutes..." /></div>
                         <div class="form-group"><label style="font-size:.65rem;">Titre / Sujet de la leçon</label><input id="prepTitre" type="text" /></div>
@@ -13803,13 +13803,61 @@
             if(isTeacherRole(role) && linked) teachers=[linked];
             return teachers;
         }
+        function getPreparationAssignedTeacher(classe, discipline){
+            var rows=[];
+            try{ rows=getClasseTeacherAssignments(classe)||[]; }catch(e){ rows=[]; }
+            var de=document.getElementById('prepDiscipline');
+            var opt=de&&de.options&&de.selectedIndex>=0?de.options[de.selectedIndex]:null;
+            var wantedCode=String((opt&&opt.dataset&&opt.dataset.code)||'').trim();
+            var wantedName=String((discipline||((opt&&opt.value)||''))).trim();
+            var norm=function(v){return String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();};
+            var codeN=norm(wantedCode), nameN=norm(wantedName);
+            var is79=/^(CLASSE\s*)?(7e|8e|9e) AF$/i.test(String(classe||''));
+            var matList=[];
+            try{ matList=isPrescolaire(classe)?(STATE.matieresPrescolaire||[]):getMatieresForClasse(classe); }catch(e){matList=[];}
+            var wantedObj=matList.find(function(m){return norm(m.code)===codeN||norm(m.nom)===nameN;});
+            if(wantedObj){ codeN=norm(wantedObj.code); nameN=norm(wantedObj.nom); }
+            function rowSubjects(a){
+                var vals=[];
+                if(Array.isArray(a&&a.subjects)) vals=vals.concat(a.subjects);
+                if(a&&a.subject!=null) vals=vals.concat(String(a.subject).split('/'));
+                return vals.map(function(x){return String(x||'').trim();}).filter(Boolean);
+            }
+            function subjectMatches(a){
+                var subs=rowSubjects(a), sn=subs.map(norm);
+                if(!subs.length) return !is79; // In 7e–9e, an empty subject must never be treated as TLM.
+                if(sn.some(function(x){return x==='tlm'||x==='toutes les matieres'||x==='toutes les matières';})) return true;
+                return sn.some(function(x){
+                    return (codeN && x===codeN) || (nameN && x===nameN) ||
+                           (wantedObj && ((norm(wantedObj.code)===x)||(norm(wantedObj.nom)===x)));
+                });
+            }
+            var matches=rows.filter(function(a){return a&&a.teacher&&(subjectMatches(a));});
+            if(matches.length){
+                // For 7e–9e there must be one teacher tied to the selected subject.
+                // If several assignments contain the same subject, keep the first exact assignment.
+                return matches[0];
+            }
+            // Never invent a teacher from the first personnel record for 7e–9e.
+            // A logged-in teacher may still resolve to their own linked assignment.
+            var u=getCurrentUserObj(), linked=resolveLinkedPersonnel(u);
+            if(!is79 && isTeacherRole(getRole())&&linked&&teacherHasClassAccess(classe)&&teacherHasSubjectAccess(classe,wantedCode||wantedName)){
+                return {teacherId:String(linked.id||''),teacher:getPersonnelDisplayFirstName(linked),subject:wantedCode||wantedName};
+            }
+            return null;
+        }
+        function syncPreparationTeacherFromAssignment(){
+            var cl=document.getElementById('preparationClasseSelect'), de=document.getElementById('prepDiscipline'), te=document.getElementById('prepTeacher');
+            if(!te)return;
+            var classe=cl?cl.value:'', discipline=de?de.value:'';
+            var a=getPreparationAssignedTeacher(classe,discipline), name=a?String(a.teacher||'').trim():'';
+            te.innerHTML='<option value="'+escapeHtml(name)+'" data-pid="'+escapeHtml(a&&a.teacherId||'')+'">'+escapeHtml(name||'— Affectation non trouvée —')+'</option>';
+            te.value=name; te.disabled=true; te.title='Nom verrouillé selon l’affectation Classe + Matière.';
+        }
         function prepTeacherOptions(){
             var el=document.getElementById('prepTeacher'); if(!el)return;
-            var current=el.value||'';
-            var teachers=getPrepTeacherPersonnel();
-            el.innerHTML='<option value="">— Choisir l’enseignant(e) —</option>'+teachers.map(function(p){var n=getPersonnelDisplayFirstName(p);return '<option value="'+escapeHtml(n)+'" data-pid="'+escapeHtml(p.id||'')+'">'+escapeHtml(n||'')+'</option>';}).join('');
-            if(current && teachers.some(function(p){return getPersonnelDisplayFirstName(p)===current;})) el.value=current;
-            if(el) el.onchange=window.syncPreparationTeacherClass;
+            el.disabled=true;
+            syncPreparationTeacherFromAssignment();
         }
         function prepClassOptions(selected){
             var el=document.getElementById('preparationClasseSelect'); if(!el)return;
@@ -13841,6 +13889,7 @@
             options+=mats.map(function(m){return '<option value="'+escapeHtml(m.nom)+'" data-code="'+escapeHtml(m.code)+'" '+(m.nom===selected?'selected':'')+'>'+escapeHtml(m.nom)+' ('+escapeHtml(m.code)+')</option>';}).join('');
             el.innerHTML=options;
             if(selected && !mats.some(function(m){return m.nom===selected;})) el.innerHTML+='<option value="'+escapeHtml(selected)+'" selected>'+escapeHtml(selected)+'</option>';
+            syncPreparationTeacherFromAssignment();
         }
         window.syncPreparationTeacherClass=function(){
             var cl=document.getElementById('preparationClasseSelect'), classe=cl?cl.value:'';
@@ -13931,7 +13980,7 @@
         };
         window.editPreparationCours=function(id){
             var rec=prepById(id); if(!rec)return; prepCurrentId=rec.id; prepSteps=JSON.parse(JSON.stringify(rec.steps||[]));
-            setPrepVal('prepEcole',rec.ecole); prepTeacherOptions(); setPrepVal('prepDate',rec.date); prepClassOptions(rec.classe); prepDisciplineOptions(rec.classe,rec.discipline); setPrepVal('prepSousBranche',rec.sousBranche); setPrepVal('prepDuree',rec.duree); setPrepVal('prepTitre',rec.titre); setPrepVal('prepCompetence',rec.competence); setPrepVal('prepObjectif',rec.objectif); setPrepVal('prepMateriel',rec.materiel); setPrepVal('prepPrerequis',rec.prerequis); setPrepVal('prepDevoir',rec.devoir); setPrepVal('prepAutoFonctionne',rec.autoFonctionne); setPrepVal('prepAutoDifficulte',rec.autoDifficulte); setPrepVal('prepAutoModifier',rec.autoModifier); var te=document.getElementById('prepTeacher'); if(te)te.value=rec.teacher||''; renderPreparationSteps(); renderPreparationSavedList();
+            setPrepVal('prepEcole',rec.ecole); prepTeacherOptions(); setPrepVal('prepDate',rec.date); prepClassOptions(rec.classe); prepDisciplineOptions(rec.classe,rec.discipline); setPrepVal('prepSousBranche',rec.sousBranche); setPrepVal('prepDuree',rec.duree); setPrepVal('prepTitre',rec.titre); setPrepVal('prepCompetence',rec.competence); setPrepVal('prepObjectif',rec.objectif); setPrepVal('prepMateriel',rec.materiel); setPrepVal('prepPrerequis',rec.prerequis); setPrepVal('prepDevoir',rec.devoir); setPrepVal('prepAutoFonctionne',rec.autoFonctionne); setPrepVal('prepAutoDifficulte',rec.autoDifficulte); setPrepVal('prepAutoModifier',rec.autoModifier); var te=document.getElementById('prepTeacher'); if(te){te.value=rec.teacher||''; te.disabled=true;} syncPreparationTeacherFromAssignment(); renderPreparationSteps(); renderPreparationSavedList();
         };
         window.deletePreparationCours=function(id){
             if(!requireAdmin('Supprimer cette préparation')) return; if(!confirm('Supprimer cette fiche de préparation ?')) return; STATE.lecons=(STATE.lecons||[]).filter(function(x){return String(x.id)!==String(id);}); if(String(prepCurrentId)===String(id)) prepCurrentId=null; saveState(); renderPreparationSavedList(); alert('Fiche supprimée.');
@@ -16302,39 +16351,40 @@
     });
   }
 
-  /* ---------- Rapport Budget dynamique : source unique = Budget détaillé ENSS ---------- */
+  /* ---------- Rapport Budget dynamique : même présentation + même source que Budget détaillé ENSS ---------- */
   window.renderRapportExecutionBudgetaire=function(){
     if(!window.STATE || !STATE.finance) return;
     if(typeof ensureBudgetENSS==='function') ensureBudgetENSS();
-    var all=(STATE.finance.budgetEcole||[]).map(function(r){if(typeof budgetENSSCalc==='function') budgetENSSCalc(r); return r;});
+    var all=STATE.finance.budgetEcole||[]; all.forEach(function(r){if(typeof budgetENSSCalc==='function') budgetENSSCalc(r);});
     var cf=document.getElementById('rapportBudgetCategoryFilter'), sf=document.getElementById('rapportBudgetSectionFilter');
     var oldC=cf?cf.value:'', oldS=sf?sf.value:'';
     if(cf){var cats=[...new Set(all.map(function(r){return r.categorie||'';}).filter(Boolean))].sort();cf.innerHTML='<option value="">Toutes les catégories</option>'+cats.map(function(c){return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>';}).join('');cf.value=cats.indexOf(oldC)>=0?oldC:'';}
     if(sf){var secs=[...new Set(all.map(function(r){return r.section||'';}).filter(Boolean))];sf.innerHTML='<option value="">Toutes les sections</option>'+secs.map(function(c){return '<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>';}).join('');sf.value=secs.indexOf(oldS)>=0?oldS:'';}
     var search=((document.getElementById('rapportBudgetSearch')||{}).value||'').toLowerCase(), cat=cf?cf.value:'', sec=sf?sf.value:'';
-    var data=all.filter(function(r){return (!cat||r.categorie===cat)&&(!sec||r.section===sec)&&(!search||String(r.poste||'').toLowerCase().indexOf(search)>=0||String(r.categorie||'').toLowerCase().indexOf(search)>=0);});
+    var data=all.filter(function(r){return (!cat||r.categorie===cat)&&(!sec||r.section===sec)&&(!search||String(r.poste||'').toLowerCase().indexOf(search)>=0||String(r.categorie||'').toLowerCase().indexOf(search)>=0||String(r.section||'').toLowerCase().indexOf(search)>=0);});
     var totalP=data.reduce(function(a,r){return a+Number(r.prevision||0);},0), totalR=data.reduce(function(a,r){return a+Number(r.reel||0);},0), ecart=totalP-totalR, taux=totalP?totalR*100/totalP:0;
     var f=data.filter(function(r){return String(r.section).indexOf('Fonctionnement')>=0;}), rep=data.filter(function(r){return String(r.section).indexOf('Réparation')>=0;}), inv=data.filter(function(r){return String(r.section).indexOf('Investissement')>=0;});
     function sums(rows){var p=rows.reduce(function(a,r){return a+Number(r.prevision||0);},0),q=rows.reduce(function(a,r){return a+Number(r.reel||0);},0);return {p:p,r:q,t:p?q*100/p:0};}
     var sf1=sums(f),sf2=sums(rep),sf3=sums(inv),sum=document.getElementById('rapportBudgetSummary');
     if(sum) sum.innerHTML='<div class="stat-card" style="padding:.4rem .6rem"><div class="stat-number" style="font-size:1rem">'+sf1.p.toLocaleString('fr-FR')+' HTG</div><div class="stat-label" style="font-size:.58rem">Fonctionnement · '+sf1.t.toFixed(1)+'%</div><div style="font-size:.55rem">Réel : '+sf1.r.toLocaleString('fr-FR')+' HTG</div></div><div class="stat-card" style="padding:.4rem .6rem"><div class="stat-number" style="font-size:1rem">'+sf2.p.toLocaleString('fr-FR')+' HTG</div><div class="stat-label" style="font-size:.58rem">Réparation · '+sf2.t.toFixed(1)+'%</div><div style="font-size:.55rem">Réel : '+sf2.r.toLocaleString('fr-FR')+' HTG</div></div><div class="stat-card" style="padding:.4rem .6rem"><div class="stat-number" style="font-size:1rem">'+sf3.p.toLocaleString('fr-FR')+' HTG</div><div class="stat-label" style="font-size:.58rem">Investissement · '+sf3.t.toFixed(1)+'%</div><div style="font-size:.55rem">Réel : '+sf3.r.toLocaleString('fr-FR')+' HTG</div></div><div class="stat-card accent" style="padding:.4rem .6rem"><div class="stat-number" style="font-size:1rem">'+totalR.toLocaleString('fr-FR')+' HTG</div><div class="stat-label" style="font-size:.58rem">Total exécuté · '+taux.toFixed(1)+'%</div><div style="font-size:.55rem">Prévu : '+totalP.toLocaleString('fr-FR')+' HTG · Écart : '+ecart.toLocaleString('fr-FR')+' HTG</div></div>';
     var body=document.getElementById('rapportExecutionBudgetaireBody'); if(!body)return;
-    body.innerHTML=data.map(function(r){var p=Number(r.prevision||0), rr=Number(r.reel||0), e=p-rr, t=p?rr*100/p:0;return '<tr><td style="font-size:.58rem">'+escapeHtml(r.section||'')+'</td><td style="font-size:.58rem">'+escapeHtml(r.categorie||'')+'</td><td style="font-size:.58rem">'+escapeHtml(r.poste||'')+'</td><td style="font-size:.58rem;text-align:right;font-weight:700">'+p.toLocaleString('fr-FR')+'</td><td style="font-size:.58rem;text-align:right;font-weight:700">'+rr.toLocaleString('fr-FR')+'</td><td style="font-size:.58rem;text-align:right">'+e.toLocaleString('fr-FR')+'</td><td style="font-size:.58rem;text-align:right;font-weight:800">'+t.toFixed(1)+'%</td></tr>';}).join('')||'<tr><td colspan="7" class="text-center text-muted" style="font-size:.7rem">Aucune ligne de budget.</td></tr>';
-    var st=document.getElementById('rapportBudgetStatus');if(st)st.textContent='✓ Rapport synchronisé avec le Budget détaillé ENSS — '+new Date().toLocaleTimeString();
+    var lastSection='',lastCategory='',html='';
+    data.forEach(function(r){var i=all.indexOf(r);if(r.section!==lastSection){html+='<tr><td colspan="9" style="background:#e8eefc;font-weight:800;padding:.3rem .45rem;"><input value="'+escapeHtml(r.section||'')+'" onchange="budgetENSSSave('+i+',\'section\',this.value);renderRapportExecutionBudgetaire()" style="width:100%;font-weight:800;background:transparent;border:0;font-size:.62rem;"></td></tr>';lastSection=r.section;lastCategory='';}if(r.categorie!==lastCategory){html+='<tr><td colspan="9" style="background:#f5f7fb;font-weight:700;padding:.22rem .45rem;"><input value="'+escapeHtml(r.categorie||'')+'" onchange="budgetENSSSave('+i+',\'categorie\',this.value);renderRapportExecutionBudgetaire()" style="width:100%;font-weight:700;background:transparent;border:0;font-size:.59rem;"></td></tr>';lastCategory=r.categorie;}var p=Number(r.prevision||0),rr=Number(r.reel||0),e=p-rr,t=p?rr*100/p:0;html+='<tr><td><input value="'+escapeHtml(r.section||'')+'" onchange="budgetENSSSave('+i+',\'section\',this.value);renderRapportExecutionBudgetaire()" style="width:150px;font-size:.55rem"></td><td><input value="'+escapeHtml(r.categorie||'')+'" onchange="budgetENSSSave('+i+',\'categorie\',this.value);renderRapportExecutionBudgetaire()" style="width:145px;font-size:.55rem"></td><td><input value="'+escapeHtml(r.poste||'')+'" onchange="budgetENSSSave('+i+',\'poste\',this.value);renderRapportExecutionBudgetaire()" style="width:190px;font-size:.55rem"></td><td><input value="'+escapeHtml(r.unite||'')+'" onchange="budgetENSSSave('+i+',\'unite\',this.value);renderRapportExecutionBudgetaire()" style="width:70px;font-size:.55rem"></td><td><input type="number" value="'+Number(r.qte||0)+'" onchange="budgetENSSSave('+i+',\'qte\',this.value);renderRapportExecutionBudgetaire()" step="0.01" style="width:65px;font-size:.55rem"></td><td><input type="number" value="'+Number(r.pu||0)+'" onchange="budgetENSSSave('+i+',\'pu\',this.value);renderRapportExecutionBudgetaire()" step="0.01" style="width:90px;font-size:.55rem"></td><td style="font-weight:700;text-align:right;font-size:.58rem">'+Number(r.prevision||0).toLocaleString('fr-FR')+'</td><td><input type="number" value="'+Number(r.reel||0)+'" onchange="budgetENSSSave('+i+',\'reel\',this.value);renderRapportExecutionBudgetaire()" step="0.01" style="width:90px;font-size:.55rem"></td><td style="font-size:.55rem;text-align:right"><div style="font-weight:700">'+e.toLocaleString('fr-FR')+'</div><div style="font-weight:800">'+t.toFixed(1)+'%</div><button onclick="budgetENSSDelete('+i+');renderRapportExecutionBudgetaire()" style="font-size:.55rem">🗑</button></td></tr>';});
+    body.innerHTML=html||'<tr><td colspan="9" class="text-center text-muted" style="font-size:.7rem">Aucune ligne de budget.</td></tr>';
+    var st=document.getElementById('rapportBudgetStatus');if(st)st.textContent='✓ Rapport lié au Budget détaillé ENSS — toute modification est enregistrée dans la même source.';
   };
   window.refreshRapportExecutionBudgetaire=function(){renderRapportExecutionBudgetaire();};
   window._rapportBudgetHtml=function(){
-    if(typeof ensureBudgetENSS==='function') ensureBudgetENSS();
-    var data=(STATE.finance&&STATE.finance.budgetEcole)||[], p=STATE.parametres||{}, emb=p.officialEmblem||'', seal=p.schoolSeal||'', sig=p.directorSignature||'';
-    var rows=data.map(function(r){var pre=Number(r.prevision||0),real=Number(r.reel||0),ec=pre-real,t=pre?real*100/pre:0;return '<tr><td>'+escapeHtml(r.section||'')+'</td><td>'+escapeHtml(r.categorie||'')+'</td><td>'+escapeHtml(r.poste||'')+'</td><td style="text-align:right">'+pre.toLocaleString('fr-FR')+'</td><td style="text-align:right">'+real.toLocaleString('fr-FR')+'</td><td style="text-align:right">'+ec.toLocaleString('fr-FR')+'</td><td style="text-align:right">'+t.toFixed(1)+'%</td></tr>';}).join('');
+    if(typeof ensureBudgetENSS==='function')ensureBudgetENSS();var data=(STATE.finance&&STATE.finance.budgetEcole)||[],p=STATE.parametres||{},emb=p.officialEmblem||'',seal=p.schoolSeal||'',sig=p.directorSignature||'';
+    var rows=data.map(function(r){var pre=Number(r.prevision||0),real=Number(r.reel||0),ec=pre-real,t=pre?real*100/pre:0;return '<tr><td>'+escapeHtml(r.section||'')+'</td><td>'+escapeHtml(r.categorie||'')+'</td><td>'+escapeHtml(r.poste||'')+'</td><td>'+escapeHtml(r.unite||'')+'</td><td style="text-align:right">'+Number(r.qte||0)+'</td><td style="text-align:right">'+Number(r.pu||0).toLocaleString('fr-FR')+'</td><td style="text-align:right">'+pre.toLocaleString('fr-FR')+'</td><td style="text-align:right">'+real.toLocaleString('fr-FR')+'</td><td style="text-align:right">'+ec.toLocaleString('fr-FR')+' / '+t.toFixed(1)+'%</td></tr>';}).join('');
     var tp=data.reduce(function(a,r){return a+Number(r.prevision||0);},0),tr=data.reduce(function(a,r){return a+Number(r.reel||0);},0),tg=tp?tr*100/tp:0;
     var header='<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #222;padding-bottom:8px;margin-bottom:12px"><div style="width:80px;text-align:center">'+(emb?'<img src="'+emb+'" style="max-width:70px;max-height:70px">':'')+'</div><div style="flex:1;text-align:center;line-height:1.25"><div style="font-weight:bold;font-size:15px">RÉPUBLIQUE D’HAÏTI</div><div style="font-size:11px">MINISTÈRE DE L’ÉDUCATION NATIONALE ET DE LA FORMATION PROFESSIONNELLE (MENFP)</div><div style="font-size:10px">DIRECTION DÉPARTEMENTALE DU NORD-EST / INSPECTION DU FONDAMENTAL</div><div style="font-weight:bold;font-size:13px">'+escapeHtml(p.ecoleNom||'ÉCOLE NATIONALE DE SAINTE-SUZANNE')+'</div><div style="font-size:9px">'+escapeHtml(p.ecoleAdresse||'')+(p.ecoleTel?' — Tél: '+escapeHtml(p.ecoleTel):'')+'</div></div><div style="width:80px;text-align:center">'+(seal?'<img src="'+seal+'" style="max-width:70px;max-height:70px">':'')+'</div></div>';
     var sign=(sig?'<img src="'+sig+'" style="height:45px;max-width:180px;display:block;margin:auto">':'')+'<div style="border-bottom:1px solid #333;margin:6px 0"></div><strong>'+escapeHtml(p.directorNom||'Joseph Mary CHARLES')+'</strong><br><span>Directeur / Administrateur</span>';
-    return header+'<h2 style="text-align:center;font-size:17px;margin:8px 0">RAPPORT BUDGET — EXÉCUTION BUDGÉTAIRE 2026–2027</h2><p><strong>Total prévisionnel :</strong> '+tp.toLocaleString('fr-FR')+' HTG &nbsp; | &nbsp; <strong>Total réel :</strong> '+tr.toLocaleString('fr-FR')+' HTG &nbsp; | &nbsp; <strong>Taux :</strong> '+tg.toFixed(1)+'%</p><table><thead><tr><th>Section</th><th>Catégorie</th><th>Désignation</th><th>Prévision HTG</th><th>Réel HTG</th><th>Écart HTG</th><th>Taux</th></tr></thead><tbody>'+rows+'</tbody></table><div style="margin-top:35px;display:flex;justify-content:flex-end;text-align:center"><div style="min-width:230px">'+sign+'</div></div>';
+    return header+'<h2 style="text-align:center;font-size:17px;margin:8px 0">RAPPORT BUDGET — EXÉCUTION BUDGÉTAIRE 2026–2027</h2><p><strong>Total prévisionnel :</strong> '+tp.toLocaleString('fr-FR')+' HTG &nbsp; | &nbsp; <strong>Total réel :</strong> '+tr.toLocaleString('fr-FR')+' HTG &nbsp; | &nbsp; <strong>Taux :</strong> '+tg.toFixed(1)+'%</p><table><thead><tr><th>Section</th><th>Catégorie</th><th>Désignation</th><th>Unité</th><th>Qté</th><th>P.U. HTG</th><th>Prévision HTG</th><th>Réel HTG</th><th>Écart / Taux</th></tr></thead><tbody>'+rows+'</tbody></table><div style="margin-top:35px;display:flex;justify-content:flex-end;text-align:center"><div style="min-width:230px">'+sign+'</div></div>';
   };
-  window.printRapportExecutionBudgetaire=function(){if(!canPrintOrExport('finance'))return requireLogin('imprimer/exporter le rapport budget','finance');var w=window.open('','_blank');if(!w)return;w.document.write('<html><head><meta charset="utf-8"><title>Rapport Budget ENSS 2026-2027</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;font-size:9px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:4px}th{background:#eee}</style></head><body>'+window._rapportBudgetHtml()+'<script>window.onload=function(){window.print();}<\\/script></body></html>');w.document.close();};
-  window.exportRapportExecutionBudgetaireWord=function(){if(!canPrintOrExport('finance'))return requireLogin('exporter le rapport budget en Word','finance');var html='<html><head><meta charset="utf-8"><title>Rapport Budget ENSS 2026-2027</title><style>body{font-family:Arial,sans-serif;font-size:10pt}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:5px}th{background:#eee}</style></head><body>'+window._rapportBudgetHtml()+'</body></html>';var blob=new Blob(['\\ufeff',html],{type:'application/msword'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rapport_Budget_ENSS_2026-2027.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);};
-  window.downloadRapportExecutionBudgetaireCSV=function(){if(!canPrintOrExport('finance'))return requireLogin('telechaje rapport budget','finance');if(typeof ensureBudgetENSS==='function')ensureBudgetENSS();var data=STATE.finance.budgetEcole||[],lines=[['Section','Catégorie','Désignation','Prévision (HTG)','Réel (HTG)','Écart (HTG)','Taux']];data.forEach(function(r){var p=Number(r.prevision||0),rr=Number(r.reel||0);lines.push([r.section,r.categorie,r.poste,p,rr,p-rr,(p?rr*100/p:0).toFixed(1)+'%']);});var csv=lines.map(function(row){return row.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(';');}).join('\\n');var blob=new Blob(['\\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rapport_Budget_ENSS_2026-2027.csv';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);};
+  window.printRapportExecutionBudgetaire=function(){if(!canPrintOrExport('finance'))return requireLogin('imprimer/exporter le rapport budget','finance');var w=window.open('','_blank');if(!w)return;w.document.write('<html><head><meta charset="utf-8"><title>Rapport Budget ENSS 2026-2027</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;font-size:9px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:4px}th{background:#eee}</style></head><body>'+window._rapportBudgetHtml()+'<script>window.onload=function(){window.print();}<\/script></body></html>');w.document.close();};
+  window.exportRapportExecutionBudgetaireWord=function(){if(!canPrintOrExport('finance'))return requireLogin('exporter le rapport budget en Word','finance');var html='<html><head><meta charset="utf-8"><title>Rapport Budget ENSS 2026-2027</title><style>body{font-family:Arial,sans-serif;font-size:10pt}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:5px}th{background:#eee}</style></head><body>'+window._rapportBudgetHtml()+'</body></html>';var blob=new Blob(['\ufeff',html],{type:'application/msword'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rapport_Budget_ENSS_2026-2027.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);};
+  window.downloadRapportExecutionBudgetaireCSV=function(){if(!canPrintOrExport('finance'))return requireLogin('telechaje rapport budget','finance');if(typeof ensureBudgetENSS==='function')ensureBudgetENSS();var data=STATE.finance.budgetEcole||[],lines=[['Section','Catégorie','Désignation','Unité','Qté','P.U. (HTG)','Prévision (HTG)','Réel (HTG)','Écart (HTG)','Taux']];data.forEach(function(r){var p=Number(r.prevision||0),rr=Number(r.reel||0);lines.push([r.section,r.categorie,r.poste,r.unite,r.qte,r.pu,p,rr,p-rr,(p?rr*100/p:0).toFixed(1)+'%']);});var csv=lines.map(function(row){return row.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(';');}).join('\n');var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rapport_Budget_ENSS_2026-2027.csv';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);};
   /* ---------- Report print/download, guarded ---------- */
   window.printRapportExecutionBudgetaire=function(){
     if(!window.canPrintOrExport('finance')){showAccessNotice('🔒 Otorizasyon obligatwa pou enprime/telechaje rapò a.','rapport-export');return false;}
@@ -16357,184 +16407,5 @@
   setInterval(refreshAllGuards,2200);
   window.addEventListener('load',function(){setTimeout(refreshAllGuards,80);});
 })();
-</script>\n
-<script>
-/* ===== V91 — PRÉPARATION DE LEÇON : SOURCE UNIQUE = AFFECTATIONS CLASSE + MATIÈRE + ENSEIGNANT ===== */
-(function(){
-  'use strict';
-  function N(v){return String(v==null?'':v).trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/\\s+/g,' ');}
-  function E(v){return typeof escapeHtml==='function'?escapeHtml(v):String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function canonical(c){var a=window.ALL_CLASSES||[];return a.find(function(x){return N(x)===N(c);})||c;}
-  function rows(c){
-    try{if(typeof window.getClasseTeacherAssignments==='function'){var r=window.getClasseTeacherAssignments(c);if(Array.isArray(r))return r;}}catch(e){}
-    var real=canonical(c), r=(STATE.classAssignments&&STATE.classAssignments[real])||[];
-    return Array.isArray(r)?r:[];
-  }
-  function subjectValues(r){
-    var a=[];
-    if(Array.isArray(r&&r.subjects))a=a.concat(r.subjects);
-    if(r&&r.subject)a=a.concat(String(r.subject).split('/'));
-    var seen={};
-    return a.map(function(x){return String(x||'').trim();}).filter(function(x){var k=N(x);if(!k||seen[k])return false;seen[k]=1;return true;});
-  }
-  function nameForRow(r){
-    var id=String(r&&r.teacherId||'');
-    var p=(STATE.personnel||[]).find(function(x){return String(x&&x.id||'')===id;});
-    if(p && typeof getPersonnelDisplayFirstName==='function')return String(getPersonnelDisplayFirstName(p)||'').trim();
-    if(p)return [p.prenom,p.nom].filter(Boolean).join(' ').trim();
-    return String(r&&r.teacher||'').trim();
-  }
-  function labelForSubject(c,s){
-    if(N(s)==='tlm')return 'Toutes les matières — TLM';
-    try{
-      var ms=(typeof getMatieresForClasse==='function'?getMatieresForClasse(c):[])||[];
-      var hit=ms.find(function(m){return N(m&&m.code)===N(s)||N(m&&m.id)===N(s)||N(m&&m.nom)===N(s);});
-      return hit?String(hit.nom||hit.code||hit.id||s):String(s);
-    }catch(e){return String(s||'');}
-  }
-  function subjectMatches(c,r,s){
-    var vals=subjectValues(r);
-    return vals.some(function(v){return N(v)===N(s);}) || vals.some(function(v){return N(v)==='tlm';});
-  }
-  function assignedForSubject(c,s){
-    return rows(c).filter(function(r){return r&&subjectMatches(c,r,s);}).map(function(r){
-      return {teacherId:String(r.teacherId||''),teacher:nameForRow(r),subjects:subjectValues(r)};
-    }).filter(function(x){return x.teacher;});
-  }
-  function classesForCurrentUser(){
-    var role=typeof getRole==='function'?getRole():'';
-    var u=typeof getCurrentUserObj==='function'?getCurrentUserObj():null;
-    var linked=typeof resolveLinkedPersonnel==='function'?resolveLinkedPersonnel(u):null;
-    var assigned=[];
-    if(linked){
-      var lid=String(linked.id||'');
-      (window.ALL_CLASSES||[]).forEach(function(c){
-        if(rows(c).some(function(r){return String(r.teacherId||'')===lid || N(nameForRow(r))===N([linked.prenom,linked.nom].filter(Boolean).join(' '));}))assigned.push(c);
-      });
-    }
-    if(typeof isTeacherRole==='function' && isTeacherRole(role))return assigned;
-    return (window.ALL_CLASSES||[]).slice();
-  }
-  function setTeacherField(matches){
-    var el=document.getElementById('prepTeacher');if(!el)return;
-    var u=typeof getCurrentUserObj==='function'?getCurrentUserObj():null;
-    var linked=typeof resolveLinkedPersonnel==='function'?resolveLinkedPersonnel(u):null;
-    var list=matches||[];
-    if(linked){
-      var mine=list.filter(function(x){return String(x.teacherId)===String(linked.id);});
-      if(mine.length)list=mine;
-    }
-    el.innerHTML=list.length?list.map(function(x,i){return '<option value="'+E(x.teacher)+'" data-pid="'+E(x.teacherId)+'" '+(i===0?'selected':'')+'>'+E(x.teacher)+'</option>';}).join(''):'<option value="">— Aucune affectation trouvée —</option>';
-    el.disabled=true;
-    el.title=list.length?'Enseignant déterminé par l’affectation de la classe et de la matière.':'Aucun enseignant affecté pour cette classe et cette matière.';
-  }
-  window.syncPreparationTeacherFromAssignment=function(){
-    var cl=document.getElementById('preparationClasseSelect'), ds=document.getElementById('prepDiscipline');
-    var c=cl?cl.value:'', s=ds?ds.value:'';
-    setTeacherField(c&&s?assignedForSubject(c,s):[]);
-    if(typeof renderPreparationSavedList==='function')renderPreparationSavedList();
-  };
-  function prepTeacherOptions(){setTeacherField([]);}
-  function prepClassOptions(selected){
-    var el=document.getElementById('preparationClasseSelect');if(!el)return;
-    var classes=classesForCurrentUser();
-    if(!classes.length)classes=(window.ALL_CLASSES||[]).slice();
-    el.innerHTML=classes.map(function(c){return '<option value="'+E(c)+'" '+(c===selected?'selected':'')+'>'+E(c)+'</option>';}).join('');
-    if(selected && classes.indexOf(selected)<0)el.value=classes[0]||'';
-    el.onchange=function(){window.loadPreparationForClasse(this.value);};
-  }
-  function prepDisciplineOptions(c,selected){
-    var el=document.getElementById('prepDiscipline');if(!el)return;
-    var vals=[],seen={};
-    rows(c).forEach(function(r){subjectValues(r).forEach(function(s){
-      var k=N(s);if(!k||k==='tlm'&&seen[k])return;
-      if(k==='tlm'){
-        /* TLM means the assigned teacher covers all valid subjects of the class. */
-        var ms=(typeof getMatieresForClasse==='function'?getMatieresForClasse(c):[])||[];
-        ms.forEach(function(m){var v=String(m.code||m.nom||'').trim();if(v&&!seen[N(v)]){seen[N(v)]=1;vals.push(v);}});
-      }else if(!seen[k]){seen[k]=1;vals.push(s);}
-    });});
-    var options='<option value="">— Choisir la matière —</option>'+vals.map(function(v){return '<option value="'+E(v)+'" '+(N(v)===N(selected)?'selected':'')+'>'+E(labelForSubject(c,v))+'</option>';}).join('');
-    el.innerHTML=options;
-    window.syncPreparationTeacherFromAssignment();
-  }
-  function syncAll(c,selectedSubject){
-    prepClassOptions(c);
-    var real=(document.getElementById('preparationClasseSelect')||{}).value||c||'';
-    prepDisciplineOptions(real,selectedSubject||'');
-    window.syncPreparationTeacherFromAssignment();
-  }
-  function blankPreparation(c){
-    if(typeof prepCurrentId!=='undefined'){}
-    prepTeacherOptions();
-    if(typeof setPrepVal==='function'){
-      setPrepVal('prepEcole',STATE.parametres&&STATE.parametres.ecoleNom||'ENSS');
-      setPrepVal('prepDate',typeof prepToday==='function'?prepToday():new Date().toISOString().slice(0,10));
-      setPrepVal('prepSousBranche','');setPrepVal('prepDuree','');setPrepVal('prepTitre','');setPrepVal('prepCompetence','');setPrepVal('prepObjectif','');setPrepVal('prepMateriel','');setPrepVal('prepPrerequis','');setPrepVal('prepDevoir','');setPrepVal('prepAutoFonctionne','');setPrepVal('prepAutoDifficulte','');setPrepVal('prepAutoModifier','');
-    }
-    prepClassOptions(c||'');
-    var real=(document.getElementById('preparationClasseSelect')||{}).value||c||'';
-    prepDisciplineOptions(real,'');
-    if(typeof renderPreparationSteps==='function')renderPreparationSteps();
-  }
-  window.newPreparationCours=function(classe){
-    window.prepCurrentId=null;
-    if(typeof prepCurrentId!=='undefined')prepCurrentId=null;
-    if(typeof prepSteps!=='undefined')prepSteps=JSON.parse(JSON.stringify(window.PREP_DEFAULT_STEPS||[]));
-    var c=classe||((document.getElementById('preparationClasseSelect')||{}).value)||((window.ALL_CLASSES||[])[0]||'');
-    blankPreparation(c);
-    if(typeof renderPreparationSavedList==='function')renderPreparationSavedList();
-  };
-  window.loadPreparationForClasse=function(c){
-    var current=(typeof prepCurrentId!=='undefined'&&prepCurrentId&&typeof prepById==='function')?prepById(prepCurrentId):null;
-    if(!current || current.classe!==c){window.newPreparationCours(c);return;}
-    prepClassOptions(c);prepDisciplineOptions(c,current.discipline||'');
-  };
-  window.editPreparationCours=function(id){
-    var rec=typeof prepById==='function'?prepById(id):null;if(!rec)return;
-    prepCurrentId=rec.id;
-    if(typeof prepSteps!=='undefined')prepSteps=JSON.parse(JSON.stringify(rec.steps||[]));
-    setPrepVal('prepEcole',rec.ecole);setPrepVal('prepDate',rec.date);
-    prepClassOptions(rec.classe);prepDisciplineOptions(rec.classe,rec.discipline);
-    setPrepVal('prepSousBranche',rec.sousBranche);setPrepVal('prepDuree',rec.duree);setPrepVal('prepTitre',rec.titre);setPrepVal('prepCompetence',rec.competence);setPrepVal('prepObjectif',rec.objectif);setPrepVal('prepMateriel',rec.materiel);setPrepVal('prepPrerequis',rec.prerequis);setPrepVal('prepDevoir',rec.devoir);setPrepVal('prepAutoFonctionne',rec.autoFonctionne);setPrepVal('prepAutoDifficulte',rec.autoDifficulte);setPrepVal('prepAutoModifier',rec.autoModifier);
-    window.syncPreparationTeacherFromAssignment();
-    if(typeof renderPreparationSteps==='function')renderPreparationSteps();
-    if(typeof renderPreparationSavedList==='function')renderPreparationSavedList();
-  };
-  window.savePreparationCours=function(){
-    if(!isLoggedIn())return requireLogin('anrejistre preparation an','preparation');
-    var c=(document.getElementById('preparationClasseSelect')||{}).value||'', s=(document.getElementById('prepDiscipline')||{}).value||'', te=document.getElementById('prepTeacher'), opt=te&&te.options[te.selectedIndex];
-    var matches=assignedForSubject(c,s), u=typeof getCurrentUserObj==='function'?getCurrentUserObj():null, linked=typeof resolveLinkedPersonnel==='function'?resolveLinkedPersonnel(u):null;
-    if(linked)matches=matches.filter(function(x){return String(x.teacherId)===String(linked.id);});
-    if(!c||!s||!matches.length){alert('🔒 Cette fiche doit respecter une affectation existante : classe + matière + enseignant.');return;}
-    if(typeof capturePreparationSteps==='function')capturePreparationSteps();
-    var teacher=matches[0], rec={
-      id:prepCurrentId||('prep-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),year:STATE.anneeCourante||'2025-2026',ecole:prepVal('prepEcole'),teacherId:teacher.teacherId,teacher:teacher.teacher,date:prepVal('prepDate'),classe:c,discipline:s,disciplineNom:labelForSubject(c,s),sousBranche:prepVal('prepSousBranche'),duree:prepVal('prepDuree'),titre:prepVal('prepTitre'),competence:prepVal('prepCompetence'),objectif:prepVal('prepObjectif'),materiel:prepVal('prepMateriel'),prerequis:prepVal('prepPrerequis'),steps:prepSteps,devoir:prepVal('prepDevoir'),autoFonctionne:prepVal('prepAutoFonctionne'),autoDifficulte:prepVal('prepAutoDifficulte'),autoModifier:prepVal('prepAutoModifier'),assignmentSource:'STATE.classAssignments',updatedAt:new Date().toISOString()
-    };
-    if(typeof isAdminUser==='function'&&!isAdminUser()&&typeof isTeacherRole==='function'&&isTeacherRole(getRole())&&!teacherCanModifyScope(c,s)){alert('🔒 Préparation hors de votre affectation.');return;}
-    STATE.lecons=Array.isArray(STATE.lecons)?STATE.lecons:[];
-    var idx=STATE.lecons.findIndex(function(x){return String(x.id)===String(rec.id);});
-    if(idx>=0)STATE.lecons[idx]=Object.assign({},STATE.lecons[idx],rec);else STATE.lecons.push(rec);
-    prepCurrentId=rec.id;saveState();
-    if(typeof renderPreparationSavedList==='function')renderPreparationSavedList();
-    alert('Fiche de préparation enregistrée selon l’affectation classe + matière + enseignant.');
-  };
-  /* L’écran de préparation reste inchangé dans son contenu pédagogique; seule sa source d’identité est verrouillée sur les affectations. */
-  window.renderPreparationPage=function(){
-    if(!document.getElementById('prepEcole'))return;
-    if(prepCurrentId && typeof prepById==='function' && prepById(prepCurrentId))window.editPreparationCours(prepCurrentId);
-    else window.newPreparationCours(currentClasseNotes||((window.ALL_CLASSES||[])[0]||''));
-    if(typeof renderPreparationSavedList==='function')renderPreparationSavedList();
-  };
-  setTimeout(function(){
-    try{
-      var c=document.getElementById('preparationClasseSelect');if(c)c.onchange=function(){window.loadPreparationForClasse(this.value);};
-      var d=document.getElementById('prepDiscipline');if(d)d.onchange=window.syncPreparationTeacherFromAssignment;
-      if(document.getElementById('prepEcole'))window.renderPreparationPage();
-    }catch(e){console.warn('V91 preparation init',e);}
-  },150);
-  console.log('📚 V91 — Préparation de cours liée directement aux affectations classe + matière + enseignant.');
-})();
-</script>
-</body>
+</script>\n</body>
 </html>
