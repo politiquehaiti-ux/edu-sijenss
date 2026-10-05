@@ -17181,5 +17181,31 @@
   try{ensureSpecialPersonnel();if(typeof saveState==='function')saveState();}catch(e){}
 })();
 </script>
+
+<style id="enss-only-teacher-presence-horizontal">
+/* Sèlman prezans anseyan yo: Anseyan → Matiè → P/R/A/M/C, sou yon sèl liy */
+#presAppel .class-teacher-pres-row {
+  display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
+  align-items:center !important; gap:.45rem !important; white-space:nowrap !important;
+  width:100% !important; overflow-x:auto !important; overflow-y:hidden !important;
+  box-sizing:border-box !important;
+}
+#presAppel .class-teacher-pres-row > strong {
+  flex:0 0 145px !important; min-width:145px !important;
+  white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important;
+}
+#presAppel .class-teacher-pres-row .ctp-subject {
+  flex:0 0 135px !important; width:135px !important; min-width:135px !important;
+}
+#presAppel .class-teacher-pres-row .ctp-status {
+  display:inline-flex !important; flex:0 0 auto !important; flex-direction:row !important;
+  align-items:center !important; gap:.45rem !important; white-space:nowrap !important;
+}
+#presAppel .class-teacher-pres-row .ctp-status label {
+  display:inline-flex !important; flex:0 0 auto !important; align-items:center !important;
+  white-space:nowrap !important;
+}
+#presAppel .class-teacher-pres-row input[type="radio"] { width:auto !important; margin:0 !important; }
+</style>
 </body>
 </html>
