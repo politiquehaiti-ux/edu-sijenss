@@ -17181,21 +17181,22 @@
   try{ensureSpecialPersonnel();if(typeof saveState==='function')saveState();}catch(e){}
 })();
 </script>
-
-<style id="enss-only-teacher-presence-horizontal">
-/* Sèlman prezans anseyan yo: Anseyan → Matiè → P/R/A/M/C, sou yon sèl liy */
+<style id="enss-only-teacher-presence-horizontal-v2">
+/* Prezans anseyan yo sou yon sèl liy: Anseyan → Matiè → P/R/A/M/C */
 #presAppel .class-teacher-pres-row {
   display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
-  align-items:center !important; gap:.45rem !important; white-space:nowrap !important;
-  width:100% !important; overflow-x:auto !important; overflow-y:hidden !important;
-  box-sizing:border-box !important;
+  align-items:center !important; gap:.45rem !important; width:100% !important;
+  min-width:0 !important; overflow-x:auto !important; overflow-y:hidden !important;
+  white-space:nowrap !important; padding:.28rem .15rem !important; box-sizing:border-box !important;
 }
 #presAppel .class-teacher-pres-row > strong {
-  flex:0 0 145px !important; min-width:145px !important;
-  white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important;
+  flex:0 0 150px !important; width:150px !important; min-width:150px !important;
+  max-width:150px !important; overflow:hidden !important; text-overflow:ellipsis !important;
+  white-space:nowrap !important;
 }
 #presAppel .class-teacher-pres-row .ctp-subject {
   flex:0 0 135px !important; width:135px !important; min-width:135px !important;
+  max-width:160px !important;
 }
 #presAppel .class-teacher-pres-row .ctp-status {
   display:inline-flex !important; flex:0 0 auto !important; flex-direction:row !important;
@@ -17203,9 +17204,110 @@
 }
 #presAppel .class-teacher-pres-row .ctp-status label {
   display:inline-flex !important; flex:0 0 auto !important; align-items:center !important;
-  white-space:nowrap !important;
+  gap:.12rem !important; white-space:nowrap !important;
 }
-#presAppel .class-teacher-pres-row input[type="radio"] { width:auto !important; margin:0 !important; }
+#presAppel .class-teacher-pres-row .ctp-status input[type="radio"] { width:auto !important; margin:0 !important; }
 </style>
+<script id="enss-live-connected-users-v2">
+(function(){
+  'use strict';
+  var channel=null, client=null, tabKey='tab-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9), ready=false, retryTimer=null;
+  function profileName(){try{return String(window.STATE&&STATE.utilisateur||'').trim();}catch(e){return '';}}
+  function schoolId(){try{return String(window.ENSS_CENTRAL_PUBLIC_CONFIG&&ENSS_CENTRAL_PUBLIC_CONFIG.schoolId||'ENSS-SCHOOL-1');}catch(e){return 'ENSS-SCHOOL-1';}}
+  function isAdmin(){try{return typeof window.isAdminUser==='function'&&!!window.isAdminUser();}catch(e){return false;}}
+  function escapeHtml(v){return String(v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function ensurePanel(){
+    var p=document.getElementById('enssConnectedUsersPanel');
+    if(!p){p=document.createElement('section');p.id='enssConnectedUsersPanel';p.className='enss-connected-users-panel';p.style.display='none';
+      p.innerHTML='<div class="enss-cup-head"><strong>👥 Pwofil ki konekte kounye a</strong><button type="button" class="enss-cup-close" aria-label="Fèmen">×</button></div><div class="enss-cup-body"></div>';
+      document.body.appendChild(p);p.querySelector('.enss-cup-close').addEventListener('click',function(){p.style.display='none';});
+    }
+    return p;
+  }
+  function ensureCounter(){
+    var actions=document.querySelector('#topbar .topbar-actions')||document.querySelector('.topbar-actions');
+    if(!actions)return null;
+    var b=document.getElementById('enssConnectedUsersBadge');
+    if(!b){b=document.createElement('button');b.type='button';b.id='enssConnectedUsersBadge';b.className='enss-connected-users';b.textContent='👥 Konekte: —';b.setAttribute('aria-live','polite');
+      b.style.cssText='display:inline-flex!important;visibility:visible!important;opacity:1!important;align-items:center;gap:.25rem;border:1px solid rgba(255,255,255,.8);border-radius:20px;background:#fff;color:#173b5e;padding:.28rem .55rem;font-size:.72rem;font-weight:750;white-space:nowrap;cursor:default;position:relative;z-index:950;';
+      var year=document.getElementById('topbarYearBadge');
+      if(year&&year.parentNode===actions) actions.insertBefore(b,year.nextSibling); else actions.insertBefore(b,actions.firstChild);
+    }
+    b.onclick=isAdmin()?function(){showConnectedUsers();}:null;
+    b.style.cursor=isAdmin()?'pointer':'default';
+    b.title=isAdmin()?'Klike pou wè ki pwofil ki konekte':'Kantite moun ki konekte sou platfòm la';
+    b.style.display='inline-flex';b.style.visibility='visible';
+    return b;
+  }
+  function payloads(){
+    if(!channel||typeof channel.presenceState!=='function')return [];
+    var st=channel.presenceState()||{}, out=[];
+    Object.keys(st).forEach(function(k){(Array.isArray(st[k])?st[k]:[]).forEach(function(v){if(v&&v.profile&&(!v.schoolId||String(v.schoolId)===schoolId()))out.push(v);});});
+    return out;
+  }
+  function uniqueProfiles(){
+    var seen={}, names=[];
+    payloads().forEach(function(v){var n=String(v.profile||'').trim(),k=n.toLocaleLowerCase();if(n&&!seen[k]){seen[k]=true;names.push(n);}});
+    return names.sort(function(a,b){return a.localeCompare(b);});
+  }
+  function renderPanel(){
+    if(!isAdmin())return;
+    var p=ensurePanel(), body=p.querySelector('.enss-cup-body'), names=uniqueProfiles();
+    body.innerHTML=ready?(names.length?'<div class="enss-cup-count">Total: <strong>'+names.length+'</strong></div><ul>'+names.map(function(n){return '<li>👤 '+escapeHtml(n)+'</li>';}).join('')+'</ul>':'<div class="enss-cup-empty">Pa gen lòt pwofil ki parèt konekte kounye a.</div>'):'<div class="enss-cup-empty">Lis anliy la pa disponib kounye a. Verifye koneksyon entènèt ak sèvis Realtime Supabase la.</div>';
+    p.style.display='block';
+  }
+  function refresh(){
+    var b=ensureCounter();if(!b)return;
+    var names=uniqueProfiles();
+    b.textContent='👥 Konekte: '+(ready?names.length:'—');
+    b.title=ready?'Kantite pwofil konekte: '+names.length+(isAdmin()?' — klike pou wè lis la':''):'Kantite a poko disponib; verifye koneksyon an.';
+    b.setAttribute('aria-label',b.title);
+    var p=document.getElementById('enssConnectedUsersPanel');if(p&&p.style.display!=='none'&&isAdmin())renderPanel();
+  }
+  function showConnectedUsers(){if(!isAdmin())return;renderPanel();}
+  window.showConnectedUsers=showConnectedUsers;
+  async function stop(){var c=channel,cl=client;channel=null;client=null;ready=false;if(c&&cl){try{await c.untrack();}catch(e){}try{await cl.removeChannel(c);}catch(e){}}refresh();}
+  async function start(){
+    ensureCounter();
+    var name=profileName();
+    if(!name){await stop();return;}
+    try{
+      if(typeof window.ensureCentralClient!=='function')throw new Error('Supabase pa disponib nan fichye a');
+      var cl=window.ensureCentralClient();if(!cl)throw new Error('Konfigirasyon Supabase pa disponib');
+      if(channel&&client===cl){try{await channel.track({profile:name,schoolId:schoolId(),tab:tabKey,updated_at:new Date().toISOString()});}catch(e){}return;}
+      await stop();client=cl;ready=false;refresh();
+      channel=cl.channel('enss-online-'+schoolId(),{config:{presence:{key:tabKey}}});
+      channel.on('presence',{event:'sync'},function(){ready=true;refresh();});
+      channel.on('presence',{event:'join'},function(){ready=true;refresh();});
+      channel.on('presence',{event:'leave'},function(){refresh();});
+      channel.subscribe(async function(status){
+        if(status==='SUBSCRIBED'){
+          try{await channel.track({profile:profileName(),schoolId:schoolId(),tab:tabKey,updated_at:new Date().toISOString()});ready=true;}catch(e){ready=false;}
+          refresh();
+        }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){ready=false;refresh();}
+      });
+    }catch(e){ready=false;refresh();console.warn('ENSS connected profiles:',e&&e.message||e);}
+  }
+  function attach(){
+    ensureCounter();
+    if(!retryTimer)retryTimer=setInterval(function(){ensureCounter();},1500);
+    if(window.MutationObserver&&!window.__enssConnectedCounterObserver){
+      window.__enssConnectedCounterObserver=new MutationObserver(function(){if(!document.getElementById('enssConnectedUsersBadge'))ensureCounter();});
+      window.__enssConnectedCounterObserver.observe(document.body,{childList:true,subtree:true});
+    }
+    if(profileName())start();
+  }
+  function wrapLoginLogout(){
+    ['inlineLogin','logout'].forEach(function(fn){var old=window[fn];if(typeof old!=='function'||old.__enssConnectedWrap)return;
+      var wrapped=function(){var result=old.apply(this,arguments);setTimeout(function(){ensureCounter();if(profileName())start();else stop();},250);return result;};wrapped.__enssConnectedWrap=true;window[fn]=wrapped;
+    });
+  }
+  var css=document.createElement('style');css.textContent='.enss-connected-users-panel{position:fixed;top:70px;right:16px;z-index:99999;width:min(360px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:#fff;color:#172b43;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.24);padding:.65rem}.enss-cup-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.2rem .1rem .5rem;border-bottom:1px solid #e5e7eb}.enss-cup-close{border:0;background:transparent;font-size:1.35rem;line-height:1;cursor:pointer}.enss-cup-body ul{list-style:none;margin:.25rem 0 0;padding:0}.enss-cup-body li{font-size:.78rem;padding:.4rem .2rem;border-bottom:1px solid #eef2f7}.enss-cup-count,.enss-cup-empty{font-size:.78rem;padding:.55rem .2rem}@media(max-width:700px){#enssConnectedUsersBadge{font-size:.59rem!important;padding:.22rem .3rem!important;max-width:105px;overflow:hidden;text-overflow:ellipsis}}';document.head.appendChild(css);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){wrapLoginLogout();attach();});else{wrapLoginLogout();attach();}
+  window.addEventListener('load',function(){wrapLoginLogout();attach();});
+  // Reverify the current session after the app finishes initializing.
+  setTimeout(function(){wrapLoginLogout();attach();},800);
+})();
+</script>
 </body>
 </html>
