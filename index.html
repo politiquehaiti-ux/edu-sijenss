@@ -1934,7 +1934,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="(function(){var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2';s.onload=function(){if(typeof window.initCentralSync==='function'){window.initCentralSync();}};s.onerror=function(){console.error('ENSS: Bibliyotèk Supabase pa t kapab chaje sou CDN prensipal ni sou CDN sekou.');};document.head.appendChild(s);})()"></script>
 <script>
         // ============================================================
         // KÒD JAVASCRIPT KOMPLÈ (Tout fonksyon yo)
@@ -2423,7 +2423,7 @@
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
         var ENSS_APP_VERSION = 'V84';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
-        var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null };
+        var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null };
 
         function getCentralConfig() {
             try {
@@ -2492,6 +2492,7 @@
                 ENSS_CENTRAL.session=r.data.session;
                 centralStatus('✓ Koneksyon santral la aktive.', true);
                 await centralPullState(true);
+                centralSubscribeRealtime();
                 spawnHearts();
                 return true;
             }catch(e){ centralStatus('Erè koneksyon: '+(e.message||e), false); alert('Koneksyon santral la echwe. Verifye email, mo de pase ak pwojè Supabase la.'); return false; }
@@ -2506,13 +2507,15 @@
                 var client=ensureCentralClient();
                 var r=await client.auth.signUp({email:email,password:password});
                 if(r.error) throw r.error;
-                if(r.data && r.data.session){ ENSS_CENTRAL.session=r.data.session; await centralPullState(true); centralStatus('✓ Kont santral la kreye epi konekte.', true); }
+                if(r.data && r.data.session){ ENSS_CENTRAL.session=r.data.session; await centralPullState(true); centralSubscribeRealtime(); centralStatus('✓ Kont santral la kreye epi konekte.', true); }
                 else centralStatus('✓ Kont lan kreye. Verifye email la si pwojè a mande konfimasyon.', true);
                 return true;
             }catch(e){ centralStatus('Kreyasyon kont echwe: '+(e.message||e), false); alert('Kreyasyon kont santral la echwe: '+(e.message||e)); return false; }
         }
 
         async function centralSignOut(){
+            try{ if(ENSS_CENTRAL.channel && ENSS_CENTRAL.client) await ENSS_CENTRAL.client.removeChannel(ENSS_CENTRAL.channel); }catch(e){}
+            ENSS_CENTRAL.channel=null;
             try{ if(ENSS_CENTRAL.client) await ENSS_CENTRAL.client.auth.signOut(); }catch(e){}
             ENSS_CENTRAL.session=null; ENSS_CENTRAL.ready=false; centralStatus('Sesyon baz santral la fèmen.', null);
         }
@@ -2725,6 +2728,36 @@
             if(ok) spawnHearts();
             return ok;
         }
+        function centralSubscribeRealtime(){
+            try{
+                var client=ensureCentralClient();
+                var c=getCentralConfig();
+                if(!client || !ENSS_CENTRAL.session || typeof client.channel!=='function') return false;
+                if(ENSS_CENTRAL.channel){
+                    try{ client.removeChannel(ENSS_CENTRAL.channel); }catch(ignore){}
+                    ENSS_CENTRAL.channel=null;
+                }
+                ENSS_CENTRAL.channel=client.channel('enss-school-state-'+c.schoolId)
+                    .on('postgres_changes',{
+                        event:'*', schema:'public', table:ENSS_CENTRAL_TABLE,
+                        filter:'school_id=eq.'+c.schoolId
+                    },function(){
+                        // Rele done yo rapidman sou lòt aparèy; polling ki anba a rete kòm sekou.
+                        setTimeout(function(){
+                            if(ENSS_CENTRAL.session && !ENSS_CENTRAL.syncing) centralPullForAll();
+                        },250);
+                    })
+                    .subscribe(function(status){
+                        if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
+                            console.warn('ENSS: Realtime pa disponib; senkronizasyon otomatik peryodik la rete aktif.');
+                        }
+                    });
+                return true;
+            }catch(e){
+                console.warn('ENSS: Realtime pa aktive; senkronizasyon peryodik la rete aktif.',e);
+                return false;
+            }
+        }
         async function initCentralSync(){
             try{
                 if(!hasCentralConfig()) return;
@@ -2733,6 +2766,7 @@
                 if(ENSS_CENTRAL.session){
                     await centralPullState(true);
                     ENSS_CENTRAL.ready=true;
+                    centralSubscribeRealtime();
                 }
                 updateCentralPanel();
             }catch(e){ centralStatus('Baz santral pa konekte: '+(e.message||e), false); }
@@ -8176,9 +8210,13 @@
             body.innerHTML=(STATE.personnel||[]).map(function(p,idx){
                 var cells=cols.map(function(c){return '<td style="font-size:0.6rem;">'+escapeHtml(personnelCellValue(p,c[0]))+'</td>';}).join('');
                 var id=String(p.id||'');
+                /* ID la rete nan data-attribute; sa evite konfli ant guillemets nan onclick HTML. */
+                var safeId=escapeHtml(id);
                 return '<tr><td style="font-size:0.6rem;">'+(idx+1)+'</td>'+cells+
-                    '<td style="font-size:0.6rem;white-space:nowrap;"><button onclick="openEditPersonnel('+JSON.stringify(id)+')" style="padding:0.05rem 0.2rem;font-size:0.55rem;">✏️</button> '+
-                    '<button class="danger" onclick="if(confirm(\'Supprimer ?\')){STATE.personnel=STATE.personnel.filter(function(x){return x.id!=='+JSON.stringify(id)+';});saveState();renderPersonnel();}" style="padding:0.05rem 0.2rem;font-size:0.55rem;color:#e74c3c;">🗑️</button></td></tr>';
+                    '<td style="font-size:0.6rem;white-space:nowrap;"><button type="button" onclick="openEditPersonnel(this.getAttribute(\'data-personnel-id\'))" data-personnel-id="'+safeId+'" style="padding:0.05rem 0.2rem;font-size:0.65rem;cursor:pointer;" title="Modifier" aria-label="Modifier">✏️ Modifier</button> '+
+                    '<button type="button" class="danger" onclick="deletePersonnelRecord(this.getAttribute(\'data-personnel-id\'))" data-personnel-id="'+safeId+'" style="padding:0.05rem 0.2rem;font-size:0.65rem;color:#e74c3c;cursor:pointer;" title="Supprimer" aria-label="Supprimer">🗑️ Supprimer</button> '+
+                    '<button type="button" onclick="printPersonnelRecord(this.getAttribute(\'data-personnel-id\'))" data-personnel-id="'+safeId+'" style="padding:0.05rem 0.2rem;font-size:0.65rem;cursor:pointer;" title="PDF / Imprimer" aria-label="PDF / Imprimer">🖨️ PDF</button> '+
+                    '<button type="button" onclick="exportPersonnelRecordWord(this.getAttribute(\'data-personnel-id\'))" data-personnel-id="'+safeId+'" style="padding:0.05rem 0.2rem;font-size:0.65rem;cursor:pointer;" title="Exporter Word" aria-label="Exporter Word">📄 Word</button></td></tr>';
             }).join('');
             applyTranslations();
         }
@@ -8291,6 +8329,29 @@
             editPersonnelId = id;
             var p = STATE.personnel.find(function(x) { return x.id === id; });
             if (p) openPersonnelModal(p);
+        }
+
+        // Suppression explicite par ID : conserve les autres dossiers et leurs données inchangées.
+        function deletePersonnelRecord(id) {
+            if (!id || !Array.isArray(STATE.personnel)) return;
+            var target = STATE.personnel.find(function(x) { return String(x && x.id || '') === String(id); });
+            if (!target) { alert('Dosye pèsonèl sa a pa jwenn. Rafrechi lis la epi eseye ankò.'); return; }
+            var label = ((target.nom || '') + ' ' + (target.prenom || '')).trim() || String(id);
+            if (!confirm('Èske ou vle efase dosye pèsonèl sa a: ' + label + ' ?')) return;
+            STATE.personnel = STATE.personnel.filter(function(x) { return String(x && x.id || '') !== String(id); });
+            try {
+                if (STATE.securite && Array.isArray(STATE.securite.users)) {
+                    STATE.securite.users.forEach(function(u) {
+                        if (u && String(u.personnelId || '') === String(id)) u.personnelId = '';
+                    });
+                }
+                if (typeof saveState === 'function') saveState();
+                if (typeof renderPersonnel === 'function') renderPersonnel();
+                if (typeof syncTeacherAccounts === 'function') syncTeacherAccounts();
+            } catch (e) {
+                console.error('Suppression personnel', e);
+                alert('Gen yon pwoblèm pandan anrejistreman efasman an. Verifye done yo anvan ou eseye ankò.');
+            }
         }
 
         function openPersonnelModal(person) {
@@ -8409,6 +8470,41 @@
                 closeModal();
                 spawnHearts();
             });
+        }
+
+        // Rapò endividyèl pou yon sèl dosye pèsonèl: PDF atravè fenèt enpresyon navigatè a.
+        function personnelRecordDocument(id) {
+            var person = (STATE.personnel || []).find(function(x){ return String(x && x.id || '') === String(id || ''); });
+            if (!person) { alert('Dosye pèsonèl sa a pa jwenn. Rafrechi lis la epi eseye ankò.'); return null; }
+            var cols = personnelColumns();
+            var rows = cols.map(function(c){
+                var label = c[1] || c[0];
+                var value = personnelCellValue(person, c[0]);
+                return '<tr><th>'+escapeHtml(label)+'</th><td>'+escapeHtml(value == null || value === '' ? '—' : value)+'</td></tr>';
+            }).join('');
+            var name = ((person.nom || '') + ' ' + (person.prenom || '')).trim() || 'Personnel';
+            var title = 'Fiche individuelle du personnel — ' + name;
+            var html = '<!doctype html><html><head><meta charset="utf-8"><title>'+escapeHtml(title)+'</title>'+
+                '<style>body{font-family:Arial,sans-serif;color:#172b43;margin:28px;font-size:12pt}.school{text-align:center;border-bottom:2px solid #174a73;padding-bottom:12px;margin-bottom:18px}.school h1{font-size:17pt;margin:0 0 5px;color:#174a73}.school p{margin:3px}.report-title{text-align:center;font-size:15pt;margin:18px 0}table{width:100%;border-collapse:collapse}th,td{border:1px solid #b8c7d6;padding:8px;text-align:left;vertical-align:top}th{width:34%;background:#eaf2f8}footer{margin-top:20px;border-top:1px solid #cbd5e1;padding-top:8px;text-align:center;font-size:10pt;color:#64748b}@media print{body{margin:15mm}}</style></head><body>'+
+                '<div class="school"><h1>ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)</h1><p>Cite Richard, centre-ville, Sainte-Suzanne</p><p>Tél. +509 42825377 | ecolenationalesaintesuzanne@gmail.com</p><p>Code école : 043 290 100 808</p></div>'+
+                '<div class="report-title">FICHE INDIVIDUELLE DU PERSONNEL</div><h2>'+escapeHtml(name)+'</h2><table>'+rows+'</table><footer>Document généré le '+escapeHtml(new Date().toLocaleDateString())+'</footer></body></html>';
+            return {person:person, name:name, title:title, html:html};
+        }
+        function printPersonnelRecord(id) {
+            if (!canPrintOrExport('personnel')) return requireLogin('enprime/telechaje fich pèsonèl la', 'personnel');
+            var report = personnelRecordDocument(id); if (!report) return;
+            var win = window.open('', '_blank');
+            if (!win) { alert('Navigatè a bloke fenèt enpresyon an. Pèmèt pop-up pou platfòm nan epi eseye ankò.'); return; }
+            win.document.open(); win.document.write(report.html.replace('</body>', '<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body>')); win.document.close();
+        }
+        function exportPersonnelRecordWord(id) {
+            if (!canPrintOrExport('personnel')) return requireLogin('telechaje fich pèsonèl Word la', 'personnel');
+            var report = personnelRecordDocument(id); if (!report) return;
+            var blob = new Blob(['\ufeff', report.html], {type:'application/msword'});
+            var url = URL.createObjectURL(blob), a = document.createElement('a');
+            var filename = ('Fiche_personnel_' + report.name).replace(/[^a-z0-9_-]+/gi, '_');
+            a.href = url; a.download = filename + '.doc'; document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
         }
 
         function printPersonnel() {
@@ -13461,6 +13557,7 @@
         window.openEditMatiere = openEditMatiere;
         window.openAddPersonnel = openAddPersonnel;
         window.openEditPersonnel = openEditPersonnel;
+        window.deletePersonnelRecord = deletePersonnelRecord;
         window.importAdvancedStudents = importAdvancedStudents;
         window.importAdvancedPersonnel = importAdvancedPersonnel;
         window.importPersonnelCSV = importPersonnelCSV;
@@ -17309,5 +17406,74 @@
   setTimeout(function(){wrapLoginLogout();attach();},800);
 })();
 </script>
+
+<!-- ENSS OFFICIAL DOCUMENT OUTPUT STANDARD: print windows and HTML-based Word exports -->
+<script>
+(function(){
+  if (window.__ENSS_OFFICIAL_EXPORT_STANDARD__) return;
+  window.__ENSS_OFFICIAL_EXPORT_STANDARD__ = true;
+  function standardizeOfficialDocument(html){
+    if (typeof html !== 'string' || !/<html[\s>]/i.test(html) || !/<body[\s>]/i.test(html)) return html;
+    try {
+      var hasOfficialHeader = /RÉPUBLIQUE\s+D['’]HA[IÏ]TI|REPUBLIQUE\s+D['’]HA[IÏ]TI/i.test(html);
+      var header = (!hasOfficialHeader && typeof buildOfficialHeaderHtml === 'function') ? buildOfficialHeaderHtml() : '';
+      var hasSignature = /buildSignatureBlockHtml|Signature\s*:\s*<strong|Signature Direction|Sceau de l['’]école|class=["'][^"']*signature/i.test(html);
+      var signature = (!hasSignature && typeof buildSignatureBlockHtml === 'function') ? buildSignatureBlockHtml('Signature de la Direction') : '';
+      var style = '<style id="enss-official-document-standard">' +
+        '@page{margin:14mm 12mm;} body{font-family:Arial,"Times New Roman",serif;color:#172b43;}'+
+        '.enss-official-signatures{break-inside:avoid;page-break-inside:avoid;}'+
+        'img{max-width:100%;} table{max-width:100%;} thead{display:table-header-group;}'+
+        'tr{break-inside:avoid;page-break-inside:avoid;} .no-print,button{display:none!important;}'+
+        '@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;} .enss-official-signatures{margin-top:18mm!important;}}'+
+        '</style>';
+      if (!/id=["']enss-official-document-standard["']/.test(html)) {
+        html = html.replace(/<head([^>]*)>/i, function(m,a){return '<head'+a+'>'+style;});
+      }
+      if (header) html = html.replace(/(<body[^>]*>)/i, '$1' + header);
+      if (signature) html = html.replace(/<\/body>/i, '<div class="enss-official-signatures">'+signature+'</div></body>');
+    } catch(e) { /* Keep the original document intact if a legacy report cannot be standardized. */ }
+    return html;
+  }
+  // Standardize print/PDF preview windows while preserving each report's own table and content.
+  var nativeOpen = window.open;
+  if (typeof nativeOpen === 'function') {
+    window.open = function(){
+      var w = nativeOpen.apply(this, arguments);
+      if (w && w.document && !w.__enssWriteWrapped) {
+        try {
+          var doc = w.document, nativeWrite = doc.write.bind(doc);
+          doc.write = function(){
+            var args = Array.prototype.slice.call(arguments);
+            if (args.length === 1 && typeof args[0] === 'string' && /<html[\s>]/i.test(args[0]) && /<body[\s>]/i.test(args[0])) args[0] = standardizeOfficialDocument(args[0]);
+            return nativeWrite.apply(doc, args);
+          };
+          w.__enssWriteWrapped = true;
+        } catch(e) {}
+      }
+      return w;
+    };
+  }
+  // Standardize HTML documents exported as Word, without touching CSV, Excel data, or library files.
+  var NativeBlob = window.Blob;
+  if (typeof NativeBlob === 'function') {
+    window.Blob = function(parts, options){
+      try {
+        var type = String(options && options.type || '').toLowerCase();
+        if ((type.indexOf('msword') >= 0 || type.indexOf('wordprocessingml') >= 0 || type.indexOf('text/html') >= 0) && Array.isArray(parts)) {
+          var joined = parts.map(function(x){return typeof x === 'string' ? x : '';}).join('');
+          if (/<html[\s>]/i.test(joined) && /<body[\s>]/i.test(joined)) {
+            var standardized = standardizeOfficialDocument(joined);
+            parts = ['\ufeff', standardized];
+          }
+        }
+      } catch(e) {}
+      return new NativeBlob(parts, options);
+    };
+    window.Blob.prototype = NativeBlob.prototype;
+    try { Object.setPrototypeOf(window.Blob, NativeBlob); } catch(e) {}
+  }
+})();
+</script>
+
 </body>
 </html>
