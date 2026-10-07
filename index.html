@@ -63,16 +63,19 @@
         .relative { position: relative; }
 
         /* ===== SCROLL ===== */
-        .scroll-horizontal { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
-        .scroll-horizontal::-webkit-scrollbar { height: 8px; }
-        .scroll-horizontal::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
-        .scroll-horizontal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .scroll-horizontal::-webkit-scrollbar-thumb:hover { background: var(--primary-light); }
-        .scroll-vertical { overflow-y: auto; max-height: 500px; }
-        .scroll-vertical::-webkit-scrollbar { width: 8px; }
-        .scroll-vertical::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
-        .scroll-vertical::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .scroll-vertical::-webkit-scrollbar-thumb:hover { background: var(--primary-light); }
+        .scroll-horizontal { overflow-x:auto; overflow-y:visible; -webkit-overflow-scrolling:touch; }
+        .scroll-horizontal::-webkit-scrollbar { height:12px; }
+        .scroll-horizontal::-webkit-scrollbar-track { background:#d5dbe3; border-radius:6px; border:1px solid #b8c0cc; }
+        .scroll-horizontal::-webkit-scrollbar-thumb { background:#334155; border-radius:6px; border:2px solid #d5dbe3; min-width:44px; }
+        .scroll-horizontal::-webkit-scrollbar-thumb:hover { background:#172033; }
+        .scroll-vertical { overflow-y:auto; max-height:500px; }
+        .scroll-vertical::-webkit-scrollbar { width:12px; }
+        .scroll-vertical::-webkit-scrollbar-track { background:#d5dbe3; border-radius:6px; border:1px solid #b8c0cc; }
+        .scroll-vertical::-webkit-scrollbar-thumb { background:#334155; border-radius:6px; border:2px solid #d5dbe3; min-height:44px; }
+        .scroll-vertical::-webkit-scrollbar-thumb:hover { background:#172033; }
+        .scroll-horizontal,.scroll-vertical { scrollbar-width:auto; scrollbar-color:#334155 #d5dbe3; }
+        .scroll-horizontal:nth-of-type(3n)::-webkit-scrollbar-thumb,.scroll-vertical:nth-of-type(3n)::-webkit-scrollbar-thumb{background:#1d4ed8}
+        .scroll-horizontal:nth-of-type(4n)::-webkit-scrollbar-thumb,.scroll-vertical:nth-of-type(4n)::-webkit-scrollbar-thumb{background:#047857}
 
         /* ===== TRADUCTION DRAPO ===== */
         .lang-selector { display: flex; gap: 0.2rem; align-items: center; }
@@ -265,7 +268,7 @@
         /* ===== MODULE QUIZ ENSS ===== */
         .quiz-shell{background:var(--card);border-radius:var(--radius);padding:.8rem;box-shadow:var(--shadow);}
         .quiz-filters{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:.45rem;margin-bottom:.7rem;}
-        .quiz-question-card{border:2px solid #93c5fd;border-radius:12px;padding:.9rem;background:linear-gradient(135deg,#eff6ff,#ffffff);min-height:180px;}
+        .quiz-audio-btn{font-size:.68rem!important;padding:.2rem .45rem!important;margin-right:.35rem;vertical-align:middle;font-weight:700;} .quiz-question-card{border:2px solid #93c5fd;border-radius:12px;padding:.9rem;background:linear-gradient(135deg,#eff6ff,#ffffff);min-height:180px;}
         .quiz-question{font-size:1rem;font-weight:800;line-height:1.5;color:#0f172a;margin:.6rem 0;}
         .quiz-answer{display:none;border-radius:8px;padding:.55rem;margin-top:.55rem;font-size:.78rem;line-height:1.45;}
         .quiz-answer.show{display:block;}
@@ -1605,7 +1608,7 @@
                                 <div class="flex gap-1" style="flex-wrap:wrap;">
                                     <button class="btn" onclick="document.getElementById('paramEmblemFile').click()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">📁 Amwari</button>
                                     <input type="file" id="paramEmblemFile" accept="image/*" style="display:none;" onchange="importOfficialEmblem(event)" />
-                                    <button class="btn btn-danger" onclick="removeOfficialEmblem()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
+                                    <button class="btn btn-danger" id="removeOfficialEmblemBtn" class="btn btn-danger official-admin-only" onclick="removeOfficialEmblem()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button><button class="btn btn-primary" onclick="saveOfficialAsset(\'emblem\')" style="padding:0.15rem 0.4rem;font-size:0.7rem;">💾 Anrejistre</button>
                                 </div>
                                 <label style="font-size:0.62rem;">Gwosè: <span id="embSizeVal">70</span>px</label>
                                 <input type="range" id="paramEmblemSize" min="30" max="160" value="70" oninput="setImgSize('emblem', this.value)" style="width:100%;" />
@@ -1618,7 +1621,7 @@
                                 <div class="flex gap-1" style="flex-wrap:wrap;">
                                     <button class="btn" onclick="document.getElementById('paramSignatureFile').click()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">📁 Siyati</button>
                                     <input type="file" id="paramSignatureFile" accept="image/*" style="display:none;" onchange="importDirectorSignature(event)" />
-                                    <button class="btn btn-danger" onclick="removeDirectorSignature()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
+                                    <button class="btn btn-danger" id="removeDirectorSignatureBtn" class="btn btn-danger official-admin-only" onclick="removeDirectorSignature()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button><button class="btn btn-primary" onclick="saveOfficialAsset(\'signature\')" style="padding:0.15rem 0.4rem;font-size:0.7rem;">💾 Anrejistre</button>
                                 </div>
                                 <label style="font-size:0.62rem;">Gwosè: <span id="sigSizeVal">45</span>px</label>
                                 <input type="range" id="paramSignatureSize" min="20" max="120" value="45" oninput="setImgSize('signature', this.value)" style="width:100%;" />
@@ -1631,7 +1634,7 @@
                                 <div class="flex gap-1" style="flex-wrap:wrap;">
                                     <button class="btn" onclick="document.getElementById('paramSealFile').click()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">📁 Sceau</button>
                                     <input type="file" id="paramSealFile" accept="image/*" style="display:none;" onchange="importSchoolSeal(event)" />
-                                    <button class="btn btn-danger" onclick="removeSchoolSeal()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button>
+                                    <button class="btn btn-danger" id="removeSchoolSealBtn" class="btn btn-danger official-admin-only" onclick="removeSchoolSeal()" style="padding:0.15rem 0.4rem;font-size:0.7rem;">🗑</button><button class="btn btn-primary" onclick="saveOfficialAsset(\'seal\')" style="padding:0.15rem 0.4rem;font-size:0.7rem;">💾 Anrejistre</button>
                                 </div>
                                 <label style="font-size:0.62rem;">Gwosè: <span id="sealSizeVal">70</span>px</label>
                                 <input type="range" id="paramSealSize" min="30" max="160" value="70" oninput="setImgSize('seal', this.value)" style="width:100%;" />
@@ -1921,6 +1924,35 @@
             </div>
 
         </main>
+<!-- ENSS COPYRIGHT FOOTER: localized, persistent bottom-of-platform notice -->
+<style id="enss-copyright-footer-style">
+#enssCopyrightFooter{box-sizing:border-box;width:100%;margin:1.25rem auto 0;padding:.72rem 1rem calc(.72rem + env(safe-area-inset-bottom,0px));text-align:center;background:#123653;color:#fff;border-top:3px solid #c49a42;font-size:.78rem;line-height:1.55;letter-spacing:.01em;box-shadow:0 -2px 8px rgba(15,35,55,.10)}
+#enssCopyrightFooter .enss-footer-title{font-weight:700;color:#fff}#enssCopyrightFooter .enss-footer-rights{opacity:.94}#enssCopyrightFooter .enss-footer-balance{display:inline-block;margin-right:.35rem;color:#f1d28a;font-size:1rem;vertical-align:-.04em}
+@media(max-width:600px){#enssCopyrightFooter{font-size:.7rem;padding:.65rem .55rem;line-height:1.6}}
+</style>
+<footer id="enssCopyrightFooter" role="contentinfo" aria-live="polite"></footer>
+<script>
+(function(){
+  var footer=document.getElementById('enssCopyrightFooter');if(!footer)return;
+  function lang(){try{return (typeof currentLang!=='undefined'&&currentLang)||localStorage.getItem('ENSS_LANG')||'ht';}catch(e){return 'ht';}}
+  function render(){
+    var l=lang(),year=(new Date()).getFullYear(),text;
+    if(l==='fr') text='<span class="enss-footer-balance" aria-hidden="true">⚖</span><span class="enss-footer-title">Plateforme de l’École Nationale de Sainte-Suzanne (ENSS)</span> © 2017–'+year+' · Développée par <strong>Directeur Joseph Mary Charles</strong>. <span class="enss-footer-rights">Tous droits réservés.</span>';
+    else if(l==='en') text='<span class="enss-footer-balance" aria-hidden="true">⚖</span><span class="enss-footer-title">École Nationale de Sainte-Suzanne (ENSS) School Platform</span> © 2017–'+year+' · Developed by <strong>Director Joseph Mary Charles</strong>. <span class="enss-footer-rights">All rights reserved.</span>';
+    else if(l==='es') text='<span class="enss-footer-balance" aria-hidden="true">⚖</span><span class="enss-footer-title">Plataforma de la Escuela Nacional de Sainte-Suzanne (ENSS)</span> © 2017–'+year+' · Desarrollada por <strong>Director Joseph Mary Charles</strong>. <span class="enss-footer-rights">Todos los derechos reservados.</span>';
+    else text='<span class="enss-footer-balance" aria-hidden="true">⚖</span><span class="enss-footer-title">Platfòm Lekòl Nasyonal Sent Sizann (ENSS)</span> © 2017–'+year+' · Devlope pa <strong>Direktè Joseph Mary Charles</strong>. <span class="enss-footer-rights">Tout dwa rezève.</span>';
+    footer.innerHTML=text;
+  }
+  // Remove accidental literal artifacts such as n/n/n from visible page text.
+  function cleanArtifacts(root){
+    try{var walker=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT),nodes=[],n;while((n=walker.nextNode()))if(/^\s*n\s*\/\s*n\s*\/\s*n\s*$/i.test(n.nodeValue||''))nodes.push(n);nodes.forEach(function(x){x.nodeValue='';});}catch(e){}
+  }
+  var oldSetLang=window.setLang;
+  if(typeof oldSetLang==='function'&&!oldSetLang.__enssFooterWrapped){var wrapped=function(){var r=oldSetLang.apply(this,arguments);render();return r;};wrapped.__enssFooterWrapped=true;window.setLang=wrapped;}
+  render();cleanArtifacts(document.body);
+  if(window.MutationObserver){var obs=new MutationObserver(function(){cleanArtifacts(document.body);});obs.observe(document.body,{childList:true,subtree:true,characterData:true});}
+})();
+</script>
     </div>
 
     <!-- ===== MODAL GENERIC ===== -->
@@ -4052,6 +4084,69 @@
             var live=document.getElementById('quizLiveScore');if(live)live.textContent='Pwen: 0 / '+nb;
             renderQuizQuestion();
         }
+        /* Lecture vocale: français et kreyòl avec sélection intelligente de la voix disponible.
+           Le navigateur/Windows peut ne pas fournir de voix HT native; dans ce cas, on utilise une voix
+           française de bonne qualité comme secours plutôt qu'une voix anglaise. */
+        function detectQuestionAnswerLanguage(question, answer){
+            var text=String(question||'')+' '+String(answer||'');
+            var low=text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+            var frWords=['le','la','les','un','une','des','du','de','dans','sur','avec','pour','par','est','sont','et','ou','mais','donc','que','qui','quoi','quel','quelle','quels','quelles','comment','pourquoi','quand','combien','où','avec','sans','entre','cette','ce','ces','son','sa','ses','leur','leurs','nous','vous','ils','elles','je','tu','il','elle','on','fait','faire','réponse','reponse','question','bonne','mauvaise','vrai','faux','année','annee','école','ecole','matière','matiere','élève','eleve'];
+            var htWords=['ki','kisa','kijan','poukisa','kilè','kile','konbyen','ki kote','ak','nan','an','sou','pou','pa','se','yon','yo','ou','mwen','nou','li','sa','sè','se','lè','le','èske','eske','kote','avèk','avek','men','paske','konsa','chak','tout','gen','fè','fe','te','va','pral','kapab','bon','move','repons','kesyon','lekòl','lekol','ane','elèv','elev','matyè','matye','ki jan','poukisa','ki sa'];
+            var fr=0,ht=0;
+            frWords.forEach(function(w){var re=new RegExp('(?:^|\\s|[.,;:!?()\\-])'+w+'(?:$|\\s|[.,;:!?()\\-])','g');fr+=(low.match(re)||[]).length;});
+            htWords.forEach(function(w){var re=new RegExp('(?:^|\\s|[.,;:!?()\\-])'+w+'(?:$|\\s|[.,;:!?()\\-])','g');ht+=(low.match(re)||[]).length;});
+            if(/[àâçéèêëîïôûùüÿœ]/i.test(text)) fr+=0.6;
+            if(/[òè]/i.test(text)) ht+=0.2;
+            if(/\b(èske|poukisa|kijan|ki jan|ki sa|kisa|nan|pou|avèk|avek|mwen|nou|yo|yon|repons|kesyon)\b/i.test(text)) ht+=2;
+            if(/\b(le|la|les|une|des|dans|pourquoi|comment|quelle|quels|quelles|réponse|reponse|école|ecole|élève|eleve)\b/i.test(text)) fr+=2;
+            return ht>fr ? 'ht-HT' : 'fr-FR';
+        }
+        function getSpeechLangForQuestion(q){return detectQuestionAnswerLanguage(q&&q.question,q&&q.reponse);}
+        function getSpeechVoice(lang){
+            if(!('speechSynthesis' in window)||typeof window.speechSynthesis.getVoices!=='function')return null;
+            var voices=window.speechSynthesis.getVoices()||[];
+            if(!voices.length)return null;
+            var wanted=String(lang||'').toLowerCase(),base=wanted.split('-')[0];
+            var exact=voices.filter(function(v){return String(v.lang||'').toLowerCase()===wanted;});
+            if(exact.length)return exact[0];
+            var same=voices.filter(function(v){return String(v.lang||'').toLowerCase().split('-')[0]===base;});
+            if(same.length)return same[0];
+            if(base==='ht'){
+                var htLike=voices.filter(function(v){return /^(ht|ht[-_])/i.test(String(v.lang||''));});
+                if(htLike.length)return htLike[0];
+                var fr=voices.filter(function(v){return /^fr(-|$)/i.test(String(v.lang||''));});
+                if(fr.length)return fr[0];
+            }
+            return null;
+        }
+        function speechPrefixForLang(lang){return /^fr/i.test(lang)?'Question.':'Kesyon.';}
+        function speechCorrectForLang(lang){return /^fr/i.test(lang)?'Bonne réponse. Bravo ! Vous avez obtenu un point.':'Bon repons. Bravo! Ou jwenn yon pwen.';}
+        function speechIncorrectForLang(lang,answer){return /^fr/i.test(lang)?'Mauvaise réponse. La bonne réponse est '+answer:'Move repons. Bon repons lan se '+answer;}
+        function speakQuizText(text,after,langOverride){
+            if(!text||!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){if(typeof after==='function')after();return;}
+            try{
+                window.speechSynthesis.cancel();
+                var lang=langOverride||'fr-FR',voice=getSpeechVoice(lang),u=new SpeechSynthesisUtterance(String(text));
+                u.lang=voice?voice.lang:lang;
+                if(voice)u.voice=voice;
+                u.rate=/^fr/i.test(lang)?0.88:0.82;
+                u.pitch=1;u.volume=1;
+                u.onend=function(){if(typeof after==='function')after();};
+                u.onerror=function(){if(typeof after==='function')after();};
+                window.speechSynthesis.speak(u);
+            }catch(e){if(typeof after==='function')after();}
+        }
+        function readCurrentQuizQuestion(){if(!quizSession)return;var q=quizSession.questions[quizSession.index];if(q){var lang=getSpeechLangForQuestion(q);speakQuizText(speechPrefixForLang(lang)+' '+q.question,null,lang);}}
+        function readCurrentQuizFeedback(){if(!quizSession||!quizSession.currentAnswered)return;var q=quizSession.questions[quizSession.index],r=quizSession.results[quizSession.index];if(q){var lang=getSpeechLangForQuestion(q);if(r&&r.ok)speakQuizText(speechCorrectForLang(lang),null,lang);else speakQuizText(speechIncorrectForLang(lang,q.reponse),null,lang);}}
+        function readCurrentEvaluationQuestion(){if(!evalSession)return;var q=evalSession.questions[evalSession.index];if(q){var lang=getSpeechLangForQuestion(q);speakQuizText(speechPrefixForLang(lang)+' '+q.question,null,lang);}}
+        function readCurrentEvaluationFeedback(){if(!evalSession||!evalSession.currentAnswered)return;var q=evalSession.questions[evalSession.index],last=evalSession.results[evalSession.results.length-1];if(q){var lang=getSpeechLangForQuestion(q);if(last&&last.ok)speakQuizText(speechCorrectForLang(lang),null,lang);else speakQuizText(speechIncorrectForLang(lang,q.reponse),null,lang);}}
+        function readLibraryQuestionAnswer(id){
+            var q=(window.ENSS_QUIZ_BANK||[]).find(function(x){return x&&String(x.id)===String(id);});
+            if(!q)return;
+            var lang=getSpeechLangForQuestion(q);
+            speakQuizText(speechPrefixForLang(lang)+' '+q.question+' '+(/^fr/i.test(lang)?'Réponse. ':'Repons. ')+q.reponse,null,lang);
+        }
+
         function renderQuizQuestion(){
             if(!quizSession)return;
             if(quizSession.index>=quizSession.questions.length){finishQuiz();return;}
@@ -4063,8 +4158,9 @@
             document.getElementById('quizProgressBar').style.width=pct+'%';
             document.getElementById('quizStatus').textContent='Kesyon '+(quizSession.index+1)+' / '+quizSession.questions.length+' — '+(quizSession.student?((quizSession.student.prenom||'')+' '+(quizSession.student.nom||'')):quizSession.nisu)+' — Pwen: '+quizSession.score;
             var options=quizBuildOptions(q);
-            document.getElementById('quizQuestionArea').innerHTML='<div class="quiz-question-card"><div><span class="quiz-level '+quizEscape(q.niveau)+'">'+quizEscape(q.niveau)+'</span> <span style="font-size:.65rem;color:#64748b;">'+quizEscape(q.matiere)+'</span></div><div class="quiz-question">'+quizEscape(q.question)+'</div><div class="quiz-options" id="quizOptions">'+options.map(function(o,i){return '<label class="quiz-option" id="quizOpt-'+i+'"><input type="radio" name="quizAnswer" value="'+i+'" onchange="selectQuizAnswer('+i+')"><span><b>'+String.fromCharCode(65+i)+'.</b> '+quizEscape(o.text)+'</span></label>';}).join('')+'</div><div id="quizAnswer" class="quiz-answer"></div><div class="quiz-next-wrap"><button id="quizNextBtn" class="btn btn-primary" onclick="nextQuizQuestion()" disabled style="padding:.3rem .7rem;font-size:.72rem;">➡️ Pwochen kesyon</button><button class="btn btn-danger" onclick="stopQuizSession()" style="padding:.3rem .7rem;font-size:.72rem;">⏹️ Kanpe / Sòti</button></div></div>';
+            document.getElementById('quizQuestionArea').innerHTML='<div class="quiz-question-card"><div><span class="quiz-level '+quizEscape(q.niveau)+'">'+quizEscape(q.niveau)+'</span> <span style="font-size:.65rem;color:#64748b;">'+quizEscape(q.matiere)+'</span></div><div class="quiz-question"><button class="btn quiz-audio-btn" type="button" onclick="readCurrentQuizQuestion()" title="Li kesyon an a haute vwa">🔊 Li kesyon an</button> '+quizEscape(q.question)+'</div><div class="quiz-options" id="quizOptions">'+options.map(function(o,i){return '<label class="quiz-option" id="quizOpt-'+i+'"><input type="radio" name="quizAnswer" value="'+i+'" onchange="selectQuizAnswer('+i+')"><span><b>'+String.fromCharCode(65+i)+'.</b> '+quizEscape(o.text)+'</span></label>';}).join('')+'</div><div id="quizAnswer" class="quiz-answer"></div><div class="quiz-next-wrap"><button id="quizNextBtn" class="btn btn-primary" onclick="nextQuizQuestion()" disabled style="padding:.3rem .7rem;font-size:.72rem;">➡️ Pwochen kesyon</button><button class="btn btn-danger" onclick="stopQuizSession()" style="padding:.3rem .7rem;font-size:.72rem;">⏹️ Kanpe / Sòti</button></div></div>';
             quizSession.currentOptions=options;
+            setTimeout(function(){readCurrentQuizQuestion();},120);
             startQuizQuestionTimer();
         }
         function selectQuizAnswer(index){
@@ -4085,6 +4181,7 @@
             var a=document.getElementById('quizAnswer');
             if(a){a.className='quiz-answer show '+(ok?'good':'bad');a.innerHTML=ok?'✅ Bon repons! Ou jwenn 1 pwen.':'❌ Repons lan pa bon.<br><b>Bon repons lan:</b> '+quizEscape(q.reponse)+'<br><span style="font-weight:600;">💡 Eksplikasyon pou aprann:</span> Bon repons lan se <b>'+quizEscape(q.reponse)+'</b>. Revize konsèp sa a nan leson/matye a pou w ka sonje li pi byen.';}
             var next=document.getElementById('quizNextBtn');if(next)next.disabled=false;
+            readCurrentQuizFeedback();
             if(STATE.quizConfig && STATE.quizConfig.autoNext!==false){ quizSession.autoNextHandle=setTimeout(function(){ if(quizSession&&quizSession.currentAnswered&&quizSession.index===quizSession.questions.indexOf(q)) nextQuizQuestion(); }, 1800); }
             var live=document.getElementById('quizLiveScore');if(live)live.textContent='Pwen: '+quizSession.score+' / '+quizSession.questions.length;
             document.getElementById('quizStatus').textContent='Kesyon '+(quizSession.index+1)+' / '+quizSession.questions.length+' — '+(ok?'✅ Bon repons':'❌ Repons pa bon')+' — Pwen: '+quizSession.score;
@@ -4214,8 +4311,8 @@
             var live=document.getElementById('evalLiveScore');if(live)live.textContent='Pwen: 0';
             var area=document.getElementById('evalQuestionArea');if(area)area.innerHTML='<div class="card" style="padding:.8rem;text-align:center;"><b>⏹️ Évaluation kanpe.</b><br><span style="font-size:.7rem;">Ou ka rekòmanse yon nouvo Évaluation lè ou pare.</span></div>';
         }
-        function renderEvaluationQuestion(){if(!evalSession)return;if(evalSession.index>=evalSession.questions.length){finishEvaluation();return;}stopEvalTimer();evalSession.currentAnswered=false;var q=evalSession.questions[evalSession.index],pct=Math.round(evalSession.index*100/evalSession.questions.length);document.getElementById('evalProgressBar').style.width=pct+'%';document.getElementById('evalLiveScore').textContent='Pwen: '+evalSession.score+' / '+evalSession.questions.length;var t=evalSession.type;if(t==='mix'){var modes=['qcm','complete','match','written'];t=modes[evalSession.index%4];}evalSession.currentType=t;var html='<div class="quiz-question-card"><div><span class="quiz-level '+quizEscape(q.niveau)+'">'+quizEscape(q.niveau)+'</span> <span style="font-size:.65rem;color:#64748b;">'+quizEscape(q.matiere)+' — '+(t==='qcm'?'I — Chwa miltip':t==='complete'?'II — Konplete':t==='match'?'III — Kople kolòn':'IV — Ekri repons')+'</span></div><div class="quiz-question">'+quizEscape(q.question)+'</div>';if(t==='qcm'){var opts=evalOptions(q);evalSession.currentOptions=opts;html+='<div class="quiz-options">'+opts.map(function(o,i){return '<label class="quiz-option" id="evalOpt-'+i+'"><input type="radio" name="evalAnswer" value="'+i+'" onchange="answerEvaluation('+i+',false)"><span><b>'+String.fromCharCode(65+i)+'.</b> '+quizEscape(o.text)+'</span></label>';}).join('')+'</div>';}else if(t==='complete'){html+='<input id="evalTextAnswer" type="text" placeholder="Ekri repons ou an..." onkeydown="if(event.key===\'Enter\') answerEvaluation()" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:7px;font-size:.8rem;">';}else if(t==='written'){html+='<textarea id="evalTextAnswer" rows="4" placeholder="Ekri repons ou an an kreyòl oswa an franse..." style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:7px;font-size:.8rem;"></textarea>';}else{var set=evalBuildMatch(evalSession.questions.slice(evalSession.index,evalSession.index+4));evalSession.matchSet=set;html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.72rem;"><div><b>Colòn A</b>'+set.left.map(function(x,i){return '<div style="padding:.35rem;border:1px solid var(--border);margin:.2rem 0;border-radius:5px;">'+(i+1)+'. '+quizEscape(x.question)+'</div>';}).join('')+'</div><div><b>Colòn B</b>'+set.right.map(function(x,i){return '<div style="padding:.35rem;border:1px solid var(--border);margin:.2rem 0;border-radius:5px;">'+String.fromCharCode(65+i)+'. '+quizEscape(x)+'</div>';}).join('')+'</div></div><div style="margin-top:.5rem;">'+set.left.map(function(x,i){return '<label style="display:block;margin:.25rem 0;">'+(i+1)+' → <select class="evalMatchSel" data-i="'+i+'" style="padding:.25rem;"><option value="">—</option>'+set.right.map(function(r,j){return '<option value="'+j+'">'+String.fromCharCode(65+j)+'</option>';}).join('')+'</select></label>';}).join('')+'</div>';}html+='<div id="evalAnswer" class="quiz-answer"></div><div class="quiz-next-wrap"><button id="evalSubmitBtn" class="btn btn-primary" onclick="answerEvaluation()" style="padding:.3rem .7rem;font-size:.72rem;">Valider repons</button><button id="evalNextBtn" class="btn btn-primary" onclick="nextEvaluationQuestion()" disabled style="padding:.3rem .7rem;font-size:.72rem;">➡️ Pwochen</button><button class="btn btn-danger" onclick="stopEvaluationSession()" style="padding:.3rem .7rem;font-size:.72rem;">⏹️ Kanpe / Sòti</button></div></div>';document.getElementById('evalQuestionArea').innerHTML=html;startEvalTimer();}
-        function answerEvaluation(choice,timedOut){if(!evalSession||evalSession.currentAnswered)return;var q=evalSession.questions[evalSession.index],t=evalSession.currentType,ok=false,chosen='';if(t==='qcm'){var opts=evalSession.currentOptions||[];if(choice===null||choice===undefined){var checked=document.querySelector('input[name="evalAnswer"]:checked');choice=checked?Number(checked.value):null;}if(choice!==null&&opts[choice]){ok=!!opts[choice].correct;chosen=opts[choice].text;opts.forEach(function(o,i){var el=document.getElementById('evalOpt-'+i);if(el){var inp=el.querySelector('input');if(inp)inp.disabled=true;if(i===choice)el.classList.add(ok?'correct':'incorrect');if(!ok&&o.correct)el.classList.add('correct');}});}}else if(t==='complete'||t==='written'){var inp=document.getElementById('evalTextAnswer');chosen=inp?inp.value.trim():'';ok=evalCorrectWritten(chosen,q);if(inp)inp.disabled=true;}else{var sels=Array.from(document.querySelectorAll('.evalMatchSel')),pairs=sels.map(function(x){return Number(x.value);}),valid=pairs.length===evalSession.matchSet.left.length&&pairs.every(function(v){return Number.isInteger(v)&&v>=0&&v<evalSession.matchSet.right.length;});ok=valid&&pairs.every(function(v,i){return evalNormalize(evalSession.matchSet.right[v])===evalNormalize(evalSession.matchSet.left[i].reponse);});chosen=pairs.join(',');sels.forEach(function(x){x.disabled=true;});}if(timedOut){ok=false;chosen='Temps écoulé';}evalSession.currentAnswered=true;if(ok)evalSession.score++;evalSession.results.push({id:q.id,matiere:q.matiere,type:t,ok:ok,choice:chosen,correct:q.reponse,timedOut:!!timedOut});var a=document.getElementById('evalAnswer');if(a){a.className='quiz-answer show '+(ok?'good':'bad');a.innerHTML=(timedOut?'⏱️ Tan an fini.<br>':'')+(ok?'✅ Bon repons! +1 pwen.':'❌ Repons pa bon.')+'<br><b>Bon repons:</b> '+quizEscape(q.reponse)+'<br><span style="font-weight:600;">💡 Eksplikasyon:</span> Revize konsèp sa a nan bibliyotèk la pou w sonje li.';}var sub=document.getElementById('evalSubmitBtn');if(sub)sub.disabled=true;var nx=document.getElementById('evalNextBtn');if(nx)nx.disabled=false;document.getElementById('evalLiveScore').textContent='Pwen: '+evalSession.score+' / '+evalSession.questions.length;if(STATE.evalConfig&&STATE.evalConfig.autoNext!==false)evalSession.autoNextHandle=setTimeout(function(){if(evalSession&&evalSession.currentAnswered)nextEvaluationQuestion();},1800);}
+        function renderEvaluationQuestion(){if(!evalSession)return;if(evalSession.index>=evalSession.questions.length){finishEvaluation();return;}stopEvalTimer();evalSession.currentAnswered=false;var q=evalSession.questions[evalSession.index],pct=Math.round(evalSession.index*100/evalSession.questions.length);document.getElementById('evalProgressBar').style.width=pct+'%';document.getElementById('evalLiveScore').textContent='Pwen: '+evalSession.score+' / '+evalSession.questions.length;var t=evalSession.type;if(t==='mix'){var modes=['qcm','complete','match','written'];t=modes[evalSession.index%4];}evalSession.currentType=t;var html='<div class="quiz-question-card"><div><span class="quiz-level '+quizEscape(q.niveau)+'">'+quizEscape(q.niveau)+'</span> <span style="font-size:.65rem;color:#64748b;">'+quizEscape(q.matiere)+' — '+(t==='qcm'?'I — Chwa miltip':t==='complete'?'II — Konplete':t==='match'?'III — Kople kolòn':'IV — Ekri repons')+'</span></div><div class="quiz-question"><button class="btn quiz-audio-btn" type="button" onclick="readCurrentEvaluationQuestion()" title="Li kesyon an a haute vwa">🔊 Li kesyon an</button> '+quizEscape(q.question)+'</div>';if(t==='qcm'){var opts=evalOptions(q);evalSession.currentOptions=opts;html+='<div class="quiz-options">'+opts.map(function(o,i){return '<label class="quiz-option" id="evalOpt-'+i+'"><input type="radio" name="evalAnswer" value="'+i+'" onchange="answerEvaluation('+i+',false)"><span><b>'+String.fromCharCode(65+i)+'.</b> '+quizEscape(o.text)+'</span></label>';}).join('')+'</div>';}else if(t==='complete'){html+='<input id="evalTextAnswer" type="text" placeholder="Ekri repons ou an..." onkeydown="if(event.key===\'Enter\') answerEvaluation()" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:7px;font-size:.8rem;">';}else if(t==='written'){html+='<textarea id="evalTextAnswer" rows="4" placeholder="Ekri repons ou an an kreyòl oswa an franse..." style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:7px;font-size:.8rem;"></textarea>';}else{var set=evalBuildMatch(evalSession.questions.slice(evalSession.index,evalSession.index+4));evalSession.matchSet=set;html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.72rem;"><div><b>Colòn A</b>'+set.left.map(function(x,i){return '<div style="padding:.35rem;border:1px solid var(--border);margin:.2rem 0;border-radius:5px;">'+(i+1)+'. '+quizEscape(x.question)+'</div>';}).join('')+'</div><div><b>Colòn B</b>'+set.right.map(function(x,i){return '<div style="padding:.35rem;border:1px solid var(--border);margin:.2rem 0;border-radius:5px;">'+String.fromCharCode(65+i)+'. '+quizEscape(x)+'</div>';}).join('')+'</div></div><div style="margin-top:.5rem;">'+set.left.map(function(x,i){return '<label style="display:block;margin:.25rem 0;">'+(i+1)+' → <select class="evalMatchSel" data-i="'+i+'" style="padding:.25rem;"><option value="">—</option>'+set.right.map(function(r,j){return '<option value="'+j+'">'+String.fromCharCode(65+j)+'</option>';}).join('')+'</select></label>';}).join('')+'</div>';}html+='<div id="evalAnswer" class="quiz-answer"></div><div class="quiz-next-wrap"><button id="evalSubmitBtn" class="btn btn-primary" onclick="answerEvaluation()" style="padding:.3rem .7rem;font-size:.72rem;">Valider repons</button><button id="evalNextBtn" class="btn btn-primary" onclick="nextEvaluationQuestion()" disabled style="padding:.3rem .7rem;font-size:.72rem;">➡️ Pwochen</button><button class="btn btn-danger" onclick="stopEvaluationSession()" style="padding:.3rem .7rem;font-size:.72rem;">⏹️ Kanpe / Sòti</button></div></div>';document.getElementById('evalQuestionArea').innerHTML=html;setTimeout(function(){readCurrentEvaluationQuestion();},120);startEvalTimer();}
+        function answerEvaluation(choice,timedOut){if(!evalSession||evalSession.currentAnswered)return;var q=evalSession.questions[evalSession.index],t=evalSession.currentType,ok=false,chosen='';if(t==='qcm'){var opts=evalSession.currentOptions||[];if(choice===null||choice===undefined){var checked=document.querySelector('input[name="evalAnswer"]:checked');choice=checked?Number(checked.value):null;}if(choice!==null&&opts[choice]){ok=!!opts[choice].correct;chosen=opts[choice].text;opts.forEach(function(o,i){var el=document.getElementById('evalOpt-'+i);if(el){var inp=el.querySelector('input');if(inp)inp.disabled=true;if(i===choice)el.classList.add(ok?'correct':'incorrect');if(!ok&&o.correct)el.classList.add('correct');}});}}else if(t==='complete'||t==='written'){var inp=document.getElementById('evalTextAnswer');chosen=inp?inp.value.trim():'';ok=evalCorrectWritten(chosen,q);if(inp)inp.disabled=true;}else{var sels=Array.from(document.querySelectorAll('.evalMatchSel')),pairs=sels.map(function(x){return Number(x.value);}),valid=pairs.length===evalSession.matchSet.left.length&&pairs.every(function(v){return Number.isInteger(v)&&v>=0&&v<evalSession.matchSet.right.length;});ok=valid&&pairs.every(function(v,i){return evalNormalize(evalSession.matchSet.right[v])===evalNormalize(evalSession.matchSet.left[i].reponse);});chosen=pairs.join(',');sels.forEach(function(x){x.disabled=true;});}if(timedOut){ok=false;chosen='Temps écoulé';}evalSession.currentAnswered=true;if(ok)evalSession.score++;evalSession.results.push({id:q.id,matiere:q.matiere,type:t,ok:ok,choice:chosen,correct:q.reponse,timedOut:!!timedOut});readCurrentEvaluationFeedback();var a=document.getElementById('evalAnswer');if(a){a.className='quiz-answer show '+(ok?'good':'bad');a.innerHTML=(timedOut?'⏱️ Tan an fini.<br>':'')+(ok?'✅ Bon repons! +1 pwen.':'❌ Repons pa bon.')+'<br><b>Bon repons:</b> '+quizEscape(q.reponse)+'<br><span style="font-weight:600;">💡 Eksplikasyon:</span> Revize konsèp sa a nan bibliyotèk la pou w sonje li.';}var sub=document.getElementById('evalSubmitBtn');if(sub)sub.disabled=true;var nx=document.getElementById('evalNextBtn');if(nx)nx.disabled=false;document.getElementById('evalLiveScore').textContent='Pwen: '+evalSession.score+' / '+evalSession.questions.length;if(STATE.evalConfig&&STATE.evalConfig.autoNext!==false)evalSession.autoNextHandle=setTimeout(function(){if(evalSession&&evalSession.currentAnswered)nextEvaluationQuestion();},1800);}
         function nextEvaluationQuestion(){if(!evalSession||!evalSession.currentAnswered)return;if(evalSession.autoNextHandle){clearTimeout(evalSession.autoNextHandle);evalSession.autoNextHandle=null;}evalSession.index++;renderEvaluationQuestion();}
         function finishEvaluation(){stopEvalTimer();var total=evalSession.questions.length,pct=total?Math.round(evalSession.score*100/total):0,name=evalSession.student?((evalSession.student.prenom||'')+' '+(evalSession.student.nom||'')):evalSession.nisu;document.getElementById('evalQuestionArea').innerHTML='<div class="quiz-result-box '+(pct>=50?'quiz-score-green':'quiz-score-red')+'"><h3 style="font-size:.95rem;margin:0 0 .4rem;">📊 Rezilta Evalyasyon</h3><div class="quiz-stat-grid"><div class="quiz-stat"><b>'+evalSession.score+'</b><span>Bon</span></div><div class="quiz-stat"><b>'+(total-evalSession.score)+'</b><span>Pa bon</span></div><div class="quiz-stat"><b>'+total+'</b><span>Total</span></div><div class="quiz-stat"><b>'+pct+'%</b><span>'+ (pct>=50?'BON':'A AMELYORE')+'</span></div></div><p style="font-size:.7rem;"><b>Élève:</b> '+quizEscape(name)+' — <b>Klas:</b> '+quizEscape(evalSession.classe)+'</p><button class="btn btn-success" onclick="saveEvaluationResult()" style="padding:.25rem .6rem;font-size:.7rem;">💾 Anrejistre</button></div>';}
         function saveEvaluationResult(){if(!evalSession)return;var nis=evalSession.nisu;if(getRole()==='eleve'&&(!getCurrentUserObj()||getCurrentUserObj().studentNisu!==nis))return;var rec={id:'er-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date:new Date().toISOString(),year:STATE.anneeCourante||'2025-2026',nisu:nis,classe:evalSession.classe,scope:evalSession.scope,matiere:evalSession.scope==='toutes'?'Toutes les matières':evalSession.matiere,total:evalSession.questions.length,score:evalSession.score,pct:evalSession.questions.length?Math.round(evalSession.score*100/evalSession.questions.length):0,details:evalSession.results||[]};STATE.evalResults=Array.isArray(STATE.evalResults)?STATE.evalResults:[];STATE.evalResults.push(rec);saveState();renderEvaluationResults();showAccessNotice('✅ Rezilta evalyasyon an anrejistre.', 'evaluation-saved-once');}
@@ -4261,7 +4358,7 @@
                 '<span class="badge" style="background:#dcfce7;color:#166534;">'+qs.length+' kesyon</span>'+ (chosen==='__ALL__'?'<span class="badge" style="background:#e0f2fe;color:#075985;">Tout klas</span>':'<span class="badge" style="background:#ede9fe;color:#5b21b6;">'+quizEscape(chosen)+'</span>') + (mat?'<span class="badge" style="background:#fef3c7;color:#92400e;">'+quizEscape(mat)+'</span>':'')+'</div>';
             Object.keys(grouped).sort().forEach(function(c){
                 parts+='<h4 style="font-size:.78rem;margin:.5rem 0 .3rem;">🏫 '+quizEscape(libraryClassCycleLabel(c))+'</h4>';
-                parts+='<div class="table-wrap scroll-horizontal scroll-vertical" style="max-height:320px;margin-bottom:.5rem;"><table><thead><tr><th>#</th><th>Matière</th><th>Kesyon</th><th>Repons</th></tr></thead><tbody>'+grouped[c].map(function(q,i){return '<tr><td>'+ (i+1) +'</td><td>'+quizEscape(q.matiere)+'</td><td>'+quizEscape(q.question)+'</td><td>'+quizEscape(q.reponse)+'</td></tr>';}).join('')+'</tbody></table></div>';
+                parts+='<div class="table-wrap scroll-horizontal scroll-vertical" style="max-height:320px;margin-bottom:.5rem;"><table><thead><tr><th>#</th><th>Matière</th><th>Kesyon</th><th>Repons</th><th>Odyo</th></tr></thead><tbody>'+grouped[c].map(function(q,i){return '<tr><td>'+ (i+1) +'</td><td>'+quizEscape(q.matiere)+'</td><td>'+quizEscape(q.question)+'</td><td>'+quizEscape(q.reponse)+'</td><td><button class="btn quiz-audio-btn" type="button" onclick="readLibraryQuestionAnswer(&quot;'+quizEscape(q.id)+'&quot;)">🔊 Li</button></td></tr>';}).join('')+'</tbody></table></div>';
             });
             if(!qs.length) parts+='<div class="text-muted" style="font-size:.7rem;">Pa gen kesyon ki disponib pou seleksyon sa a.</div>';
             parts+='</div>';
@@ -4295,7 +4392,7 @@
         }
 
         function renderEvaluationLibrary(){var box=document.getElementById('evaluationLibrary');if(!box)return;var cl=(document.getElementById('evalClasse')||{}).value||'',cycle=quizCycleForClass(cl);var qs=ENSS_QUIZ_BANK.filter(function(q){return !cycle||q.cycle===cycle;});var mats=Array.from(new Set(qs.map(function(q){return q.matiere;})));var html='<div style="font-size:.68rem;color:#64748b;margin-bottom:.4rem;">Kesyon ak repons ki disponib pou klas sa a. Bibliyotèk la ka resevwa Word/PDF; bank kestyon yo sèvi kòm baz pou Quiz ak Évaluation.</div><div class="flex gap-1" style="flex-wrap:wrap;margin-bottom:.5rem;"><select id="libraryMatiere" style="padding:.25rem;font-size:.7rem;"><option value="">Tout matyè</option>'+mats.map(function(m){return '<option value="'+quizEscape(m)+'">'+quizEscape(m)+'</option>';}).join('')+'</select><button class="btn" onclick="showLibraryStudy()" style="padding:.2rem .5rem;font-size:.68rem;">📖 Afiche kesyon + repons</button></div><div id="libraryStudyList"></div>'+(isPrivilegedModifier()?'<div style="margin-top:.5rem;padding:.5rem;border-top:1px solid var(--border);"><label style="font-size:.68rem;font-weight:700;">📤 Uplòde contenu Word/PDF</label><input id="libraryFileInput" type="file" accept=".doc,.docx,.pdf" onchange="uploadLibraryFile(this)" style="display:block;margin-top:.3rem;font-size:.68rem;"><div id="libraryUploadStatus" class="text-muted" style="font-size:.62rem;margin-top:.25rem;"></div></div>':'')+'<div id="libraryUploadedFiles" style="margin-top:.5rem;"></div>';box.innerHTML=html;listLibraryFilesIndexedDB().then(function(list){var out=document.getElementById('libraryUploadedFiles');if(!out)return;out.innerHTML=list.length?'<div style="font-size:.68rem;font-weight:700;margin-bottom:.25rem;">📁 Fichye ajoute yo</div>'+list.map(function(f){return '<div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;padding:.25rem 0;border-bottom:1px solid var(--border);font-size:.65rem;"><span>📄 '+quizEscape(f.name)+'</span><span class="text-muted">'+Math.round(f.size/1024)+' Ko</span><button class="btn" onclick="downloadLibraryFile(\''+quizEscape(f.id)+'\')" style="padding:.12rem .35rem;font-size:.6rem;">⬇️</button>'+(isPrivilegedModifier()?'<button class="btn btn-danger" onclick="deleteLibraryFile(\''+quizEscape(f.id)+'\')" style="padding:.12rem .35rem;font-size:.6rem;">🗑️</button>':'')+'</div>';}).join(''):'<span class="text-muted" style="font-size:.62rem;">Pa gen fichye Word/PDF ajoute ankò.</span>';}).catch(function(e){console.warn('Bibliyotèk file error',e);});}
-        function showLibraryStudy(){var box=document.getElementById('libraryStudyList'),sel=document.getElementById('libraryMatiere'),cl=(document.getElementById('evalClasse')||{}).value||'',cycle=quizCycleForClass(cl),mat=sel?sel.value:'';if(!box)return;var qs=ENSS_QUIZ_BANK.filter(function(q){return q.cycle===cycle&&(!mat||q.matiere===mat);});box.innerHTML='<div class="table-wrap scroll-horizontal" style="max-height:380px;overflow:auto;"><table><thead><tr><th>#</th><th>Matière</th><th>Kesyon</th><th>Repons</th></tr></thead><tbody>'+qs.map(function(q,i){return '<tr><td>'+((i+1))+'</td><td>'+quizEscape(q.matiere)+'</td><td>'+quizEscape(q.question)+'</td><td>'+quizEscape(q.reponse)+'</td></tr>';}).join('')+'</tbody></table></div>'+(qs.length?'':'<p class="text-muted">Pa gen kesyon pou klas sa a.</p>');}
+        function showLibraryStudy(){var box=document.getElementById('libraryStudyList'),sel=document.getElementById('libraryMatiere'),cl=(document.getElementById('evalClasse')||{}).value||'',cycle=quizCycleForClass(cl),mat=sel?sel.value:'';if(!box)return;var qs=ENSS_QUIZ_BANK.filter(function(q){return q.cycle===cycle&&(!mat||q.matiere===mat);});box.innerHTML='<div class="table-wrap scroll-horizontal" style="max-height:380px;overflow:auto;"><table><thead><tr><th>#</th><th>Matière</th><th>Kesyon</th><th>Repons</th><th>Odyo</th></tr></thead><tbody>'+qs.map(function(q,i){return '<tr><td>'+((i+1))+'</td><td>'+quizEscape(q.matiere)+'</td><td>'+quizEscape(q.question)+'</td><td>'+quizEscape(q.reponse)+'</td><td><button class="btn quiz-audio-btn" type="button" onclick="readLibraryQuestionAnswer(&quot;'+quizEscape(q.id)+'&quot;)">🔊 Li</button></td></tr>';}).join('')+'</tbody></table></div>'+(qs.length?'':'<p class="text-muted">Pa gen kesyon pou klas sa a.</p>');}
         function uploadLibraryFile(input){if(!isPrivilegedModifier()||!input||!input.files||!input.files[0])return;var f=input.files[0];var max=50*1024*1024;if(f.size>max){alert('Fichye a twò gwo. Limit lokal: 50 MB.');input.value='';return;}var meta={id:'lib-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name:f.name,size:f.size,type:f.type,uploadedAt:new Date().toISOString()};saveLibraryFileIndexedDB(f,meta).then(function(){STATE.libraryUploads=Array.isArray(STATE.libraryUploads)?STATE.libraryUploads:[];STATE.libraryUploads.push(meta);saveState();var st=document.getElementById('libraryUploadStatus');if(st)st.textContent='Fichye '+f.name+' anrejistre nan bibliyotèk la. Pou fè kestyon yo antre nan bank Quiz/Evaluation, kontni an dwe valide/importé kòm kestyon.';renderEvaluationLibrary();}).catch(function(e){console.error(e);alert('Fichye a pa t kapab anrejistre.');});}
 
         function renderPage(page) {
@@ -10764,6 +10861,7 @@
         function renderParametres() {
             ensureSchoolWebsiteField();
             var p = STATE.parametres;
+            updateOfficialAssetAdminControls();
             ensureDirectionAccessState();
             var dirProfilEl = document.getElementById('directionAccessProfil');
             var dirMdpEl = document.getElementById('directionAccessMdp');
@@ -11397,6 +11495,19 @@
             saveState();
             updateSignatureSealDisplay();
             spawnHearts();
+        }
+        function saveOfficialAsset(key) {
+            if (!requireAdmin('anrejistre resous ofisyèl yo')) return;
+            var labels={emblem:'Amwari',signature:'Siyati',seal:'Sceau'}, map={emblem:'officialEmblem',signature:'directorSignature',seal:'schoolSeal'};
+            var stateKey=map[key]; if(!stateKey) return;
+            if(!STATE.parametres[stateKey]){alert((labels[key]||'Imaj')+' la poko chwazi.');return;}
+            saveState(); updateSignatureSealDisplay();
+            var st=document.getElementById('sharedResourcesStatus'); if(st) st.textContent=(labels[key]||'Resous')+' la anrejistre epi li pare pou senkronizasyon sou tout aparèy ENSS yo.';
+        }
+        function updateOfficialAssetAdminControls(){
+            var isAdmin=!!(typeof isAdminUser==='function'&&isAdminUser());
+            document.querySelectorAll('.official-admin-only').forEach(function(el){el.style.display=isAdmin?'':'none';});
+            ['paramEmblemFile','paramSignatureFile','paramSealFile','paramEmblemSize','paramSignatureSize','paramSealSize'].forEach(function(id){var el=document.getElementById(id);if(el)el.disabled=!isAdmin;});
         }
 
         function importOfficialEmblem(event) {
