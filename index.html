@@ -1947,8 +1947,8 @@
   function cleanArtifacts(root){
     try{var walker=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT),nodes=[],n;while((n=walker.nextNode()))if(/^\s*n\s*\/\s*n\s*\/\s*n\s*$/i.test(n.nodeValue||''))nodes.push(n);nodes.forEach(function(x){x.nodeValue='';});}catch(e){}
   }
-  var oldSetLang=window.setLang;
-  if(typeof oldSetLang==='function'&&!oldSetLang.__enssFooterWrapped){var wrapped=function(){var r=oldSetLang.apply(this,arguments);render();return r;};wrapped.__enssFooterWrapped=true;window.setLang=wrapped;}
+  // Expose the renderer so the platform's actual language-switch function can refresh it.
+  window.renderENSSCopyrightFooter=render;
   render();cleanArtifacts(document.body);
   if(window.MutationObserver){var obs=new MutationObserver(function(){cleanArtifacts(document.body);});obs.observe(document.body,{childList:true,subtree:true,characterData:true});}
 })();
@@ -2315,6 +2315,8 @@
             applyTranslations();
             applyLinkLabelTranslations();
             localStorage.setItem('ENSS_LANG',currentLang);
+            // Keep the fixed bottom copyright bar synchronized with the selected platform language.
+            if(typeof window.renderENSSCopyrightFooter==='function') window.renderENSSCopyrightFooter();
         }
 
         if(typeof MutationObserver!=='undefined'){
