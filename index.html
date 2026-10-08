@@ -3040,6 +3040,7 @@
             cleanMatieresData();
             if (!STATE.parametres.visitorCount) STATE.parametres.visitorCount = 0;
             if (STATE.parametres.autoLogin === undefined) STATE.parametres.autoLogin = false;
+            if (!STATE.parametres.sharedResourcesUrl) STATE.parametres.sharedResourcesUrl = ENSS_SHARED_RESOURCES_DEFAULT_URL;
             if (STATE.parametres.angEsp1a6 === undefined) STATE.parametres.angEsp1a6 = false;
             if (!STATE.matieresPrescolaire || STATE.matieresPrescolaire.length === 0 || STATE.prescolaireMatVersion !== 'v2') {
                 STATE.prescolaireMatVersion = 'v2';
@@ -10921,6 +10922,9 @@
         function renderParametres() {
             ensureSchoolWebsiteField();
             var p = STATE.parametres;
+            if (!p.sharedResourcesUrl) p.sharedResourcesUrl = ENSS_SHARED_RESOURCES_DEFAULT_URL;
+            var sharedUrlEl = document.getElementById('sharedResourcesUrl');
+            if (sharedUrlEl) sharedUrlEl.value = p.sharedResourcesUrl;
             updateOfficialAssetAdminControls();
             ensureDirectionAccessState();
             var dirProfilEl = document.getElementById('directionAccessProfil');
@@ -11434,6 +11438,12 @@
                 personnelCsvExtraColumns: Object.keys(cols)
             };
         }
+        // ===== ENSS — SOURCE CENTRALE DES RESSOURCES PARTAGEES =====
+        // URL de branche : suit la dernière version commitée dans main.
+        var ENSS_SHARED_RESOURCES_DEFAULT_URL = 'https://raw.githubusercontent.com/politiquehaiti-ux/edu-sijenss/main/ENSS_SHARED_RESOURCES.json';
+        // URL du commit fourni : conservée comme secours si la branche main n'est momentanément pas disponible.
+        var ENSS_SHARED_RESOURCES_FALLBACK_URL = 'https://raw.githubusercontent.com/politiquehaiti-ux/edu-sijenss/b611fee0d6ee9eb32e240bf7d4ac3868d2444094/ENSS_SHARED_RESOURCES.json';
+
         function exportSharedResourcesPackage() {
             if (!requireAdmin('exporte resous pataje yo')) return;
             var data = JSON.stringify(sharedResourceSnapshot(), null, 2);
@@ -11444,9 +11454,10 @@
             var st=document.getElementById('sharedResourcesStatus');
             if(st) st.textContent='Paquet resous pataje a ekspòte. Li gen logo, amwari, so, siyati, personnel ak kolòn CSV siplemantè yo.';
         }
-        function applySharedResourceSnapshot(data) {
+        function applySharedResourceSnapshot(data, options) {
+            options = options || {};
             if(!data || data.format!=='ENSS_SHARED_RESOURCES_V1') throw new Error('Format resous pataje pa rekonèt.');
-            if(!requireAdmin('enpòte resous pataje yo')) return;
+            if(!options.auto && !requireAdmin('enpòte resous pataje yo')) return;
             if(!STATE.parametres) STATE.parametres={};
             var a=data.assets||{};
             ['logo','logoShape','officialEmblem','schoolSeal','directorSignature','directorNom','imageSizes'].forEach(function(k){ if(a[k]!==undefined) STATE.parametres[k]=a[k]; });
@@ -11464,15 +11475,58 @@
         }
         function loadSharedResourcesFromUrl() {
             if(!requireAdmin('chaje resous pataje yo') ) return;
-            var input=document.getElementById('sharedResourcesUrl'), url=input && input.value.trim();
-            if(!url){ alert('Mete URL JSON resous pataje a anvan.'); return; }
+            var input=document.getElementById('sharedResourcesUrl');
+            var url=input && input.value.trim();
+            if(!url) url=ENSS_SHARED_RESOURCES_DEFAULT_URL;
             var st=document.getElementById('sharedResourcesStatus');
             if(st) st.textContent='Chajman resous pataje an kou...';
-            fetch(url,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(data){
+            fetch(url,{cache:'no-store'}).then(function(r){
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                return r.json();
+            }).then(function(data){
                 applySharedResourceSnapshot(data);
                 if(STATE.parametres) STATE.parametres.sharedResourcesUrl=url;
                 saveState();
-            }).catch(function(err){ console.error(err); if(st) st.textContent='Pa t kapab chaje sous pataje a: '+err.message; alert('Sous pataje a pa disponib oswa li pa aksesib sou navigatè a.'); });
+            }).catch(function(err){
+                console.error(err);
+                if(st) st.textContent='Pa t kapab chaje sous pataje a: '+err.message;
+                alert('Sous pataje a pa disponib oswa li pa aksesib sou navigatè a.');
+            });
+        }
+
+        // Charge automatiquement les ressources centrales pour TOUS les profils/appareils.
+        // Aucun mot de passe admin n'est requis pour cette synchronisation en lecture.
+        function loadSharedResourcesAutomatically() {
+            var urls = [];
+            var configured = '';
+            try { configured = String((STATE && STATE.parametres && STATE.parametres.sharedResourcesUrl) || '').trim(); } catch(e) {}
+            if(configured) urls.push(configured);
+            if(urls.indexOf(ENSS_SHARED_RESOURCES_DEFAULT_URL) === -1) urls.push(ENSS_SHARED_RESOURCES_DEFAULT_URL);
+            if(urls.indexOf(ENSS_SHARED_RESOURCES_FALLBACK_URL) === -1) urls.push(ENSS_SHARED_RESOURCES_FALLBACK_URL);
+
+            var st=document.getElementById('sharedResourcesStatus');
+            if(st) st.textContent='Chajman otomatik resous pataje yo...';
+
+            function tryNext(i){
+                if(i>=urls.length){
+                    if(st) st.textContent='Resous pataje santral yo pa disponib kounye a. Done lokal yo rete konsève.';
+                    return;
+                }
+                var url=urls[i];
+                fetch(url,{cache:'no-store'}).then(function(r){
+                    if(!r.ok) throw new Error('HTTP '+r.status);
+                    return r.json();
+                }).then(function(data){
+                    applySharedResourceSnapshot(data,{auto:true});
+                    if(STATE.parametres) STATE.parametres.sharedResourcesUrl=ENSS_SHARED_RESOURCES_DEFAULT_URL;
+                    saveState();
+                    if(st) st.textContent='✓ Resous pataje ENSS yo soti nan sous santral la.';
+                }).catch(function(err){
+                    console.warn('ENSS shared resources source failed:',url,err);
+                    tryNext(i+1);
+                });
+            }
+            tryNext(0);
         }
 
         function importLogo(event) {
@@ -13625,6 +13679,10 @@
             initApp();
         }
 
+        // Ressources partagées ENSS : même source centrale pour tous les profils/appareils.
+        // Le chargement est en lecture seule côté source; si GitHub est indisponible, les données locales restent intactes.
+        setTimeout(function(){ loadSharedResourcesAutomatically(); }, 900);
+
         // Supabase se opsyonèl jiskaske konfigirasyon an fèt; li pa anpeche aplikasyon an demare lokalman.
         setTimeout(function(){ initCentralSync(); }, 600);
 
@@ -13640,6 +13698,8 @@
         window.canModifyData = canModifyData;
         window.requireLogin = requireLogin;
         window.requireAdmin = requireAdmin;
+        window.loadSharedResourcesFromUrl = loadSharedResourcesFromUrl;
+        window.loadSharedResourcesAutomatically = loadSharedResourcesAutomatically;
         window.getPublicPages = getPublicPages;
         window.togglePublicPage = togglePublicPage;
         window.renderPublicAccessSettings = renderPublicAccessSettings;
