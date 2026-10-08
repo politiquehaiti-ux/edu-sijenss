@@ -2497,7 +2497,7 @@
             var school=document.getElementById('enssCentralSchoolId'); if(school && school.value!==c.schoolId) school.value=c.schoolId;
             if (ENSS_CENTRAL.session) centralStatus('✓ Konekte ak baz santral la.', true);
             else if (!c.url || !c.key) centralStatus('Baz santral la poko konfigire.', null);
-            else centralStatus('Konfigirasyon an pare. Konekte ak kont santral la.', null);
+            else centralStatus('✓ Konfigirasyon santral la pare; chajman otomatik ap fèt sou aparèy sa a.', true);
         }
         function ensureCentralClient() {
             var c=getCentralConfig();
@@ -2655,11 +2655,15 @@
             return JSON.parse(JSON.stringify(local));
         }
 
-        async function centralPullState(allowMerge){
+        async function centralPullState(allowMerge, deferRender){
             if(ENSS_CENTRAL.syncing) return false;
             try{
                 var client=ensureCentralClient(); if(!client) return false;
-                await centralRefreshSession(); if(!ENSS_CENTRAL.session) return false;
+                // Lecture centrale possible sans session Supabase. Les écritures restent authentifiées.
+                try{ await centralRefreshSession(); }catch(sessionErr){
+                    ENSS_CENTRAL.session=null;
+                    console.warn('ENSS: session Supabase absente; tentative de lecture publique de school_state.', sessionErr);
+                }
                 var c=getCentralConfig();
                 ENSS_CENTRAL.syncing=true;
                 var r=await client.from(ENSS_CENTRAL_TABLE).select('state,schema_version,updated_at,revision').eq('school_id',c.schoolId).maybeSingle();
@@ -2687,7 +2691,7 @@
                 ENSS_CENTRAL.ready=true;
                 if (_v79RemoteMove && _v79RemoteMove.changed) { try { saveState(); } catch(e) {} }
                 centralStatus('✓ Done santral yo chaje sou aparèy sa a.', true);
-                try{ initApp(); }catch(e){}
+                if(!deferRender){ try{ initApp(); }catch(e){} }
                 return true;
             }catch(e){ centralStatus('Baz santral pa disponib: '+(e.message||e), false); return false; }
             finally{ ENSS_CENTRAL.syncing=false; }
@@ -2792,20 +2796,20 @@
                 return false;
             }
         }
-        async function initCentralSync(){
+        async function initCentralSync(deferRender){
             try{
-                if(!hasCentralConfig()) return;
+                if(!hasCentralConfig()) return false;
                 ensureCentralClient();
-                await centralRefreshSession();
-                if(ENSS_CENTRAL.session){
-                    await centralPullState(true);
+                var pulled=await centralPullState(true, !!deferRender);
+                if(pulled){
                     ENSS_CENTRAL.ready=true;
-                    centralSubscribeRealtime();
+                    if(ENSS_CENTRAL.session) centralSubscribeRealtime();
                 }
                 updateCentralPanel();
-            }catch(e){ centralStatus('Baz santral pa konekte: '+(e.message||e), false); }
+                return pulled;
+            }catch(e){ centralStatus('Baz santral pa konekte: '+(e.message||e), false); return false; }
         }
-        window.addEventListener('online',function(){ if(ENSS_CENTRAL.session) centralPullForAll(); });
+        window.addEventListener('online' ,function(){ if(ENSS_CENTRAL.session) centralPullForAll(); });
         document.addEventListener('visibilitychange',function(){ if(!document.hidden && ENSS_CENTRAL.session) centralPullForAll(); });
         setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden) centralPullForAll(); },30000);
         function loadState() {
@@ -13649,42 +13653,42 @@
             syncTeacherAccounts();
         }
 
-        // --- === DEMARAJ === ---
-        try {
-            initState();
-        } catch (e) {
-            console.error('⚠️ Erè kritik pandan chajman done yo:', e);
-            // En cas d'erreur, ne pas écraser un état déjà présent. Repli sur le backup avant le défaut.
+        // --- === DEMARAJ SANTRALIZE === ---
+        // Verifye eta santral la anvan premye afichaj final la pou tout aparèy yo
+        // montre menm ane/done lekòl la. Eta lokal la rete kòm sekou san okenn reset.
+        async function bootENSS(){
             try {
-                var _bk = localStorage.getItem(ENSS_BACKUP_KEY);
-                STATE = _bk ? JSON.parse(_bk) : getDefaultState();
-                nonDestructiveDefaults(STATE, getDefaultState());
+                initState();
+            } catch (e) {
+                console.error('⚠️ Erè kritik pandan chajman done yo:', e);
+                try {
+                    var _bk = localStorage.getItem(ENSS_BACKUP_KEY);
+                    STATE = _bk ? JSON.parse(_bk) : getDefaultState();
+                    nonDestructiveDefaults(STATE, getDefaultState());
+                    saveState();
+                } catch (_) { STATE = getDefaultState(); }
+            }
+            try {
+                STATE.utilisateur = null;
+                STATE.currentPage = 'accueil';
+                STATE.parametres.autoLogin = false;
+                localStorage.removeItem('ENSS_LOGIN');
                 saveState();
-            } catch (_) {
-                STATE = getDefaultState();
+
+                var centralLoaded=false;
+                if(hasCentralConfig()) centralLoaded=await initCentralSync(true);
+
+                // Se apre chajman santral la nou rann Akèy la.
+                initApp();
+                setTimeout(function(){ loadSharedResourcesAutomatically(); },250);
+                if(!centralLoaded) console.warn('ENSS: baz santral pa chaje; kopi lokal la rete kòm sekou.');
+            } catch(e) {
+                console.error('⚠️ Erè kritik pandan demaraj aplikasyon an:',e);
+                try{ initApp(); }catch(_){}
+                setTimeout(function(){ loadSharedResourcesAutomatically(); },250);
             }
         }
-
-        try {
-            // Sekirite: pa janm retabli yon sesyon ki te rete nan localStorage.
-            // Chak ouvèti/reload mande pwofil + modpas ankò. Done lekòl yo rete estoke; sesyon an pa rete konekte.
-            STATE.utilisateur = null;
-            STATE.currentPage = 'accueil';
-            STATE.parametres.autoLogin = false;
-            localStorage.removeItem('ENSS_LOGIN');
-            saveState();
-            initApp();
-        } catch (e) {
-            console.error('⚠️ Erè kritik pandan demaraj aplikasyon an:', e);
-            initApp();
-        }
-
-        // Ressources partagées ENSS : même source centrale pour tous les profils/appareils.
-        // Le chargement est en lecture seule côté source; si GitHub est indisponible, les données locales restent intactes.
-        setTimeout(function(){ loadSharedResourcesAutomatically(); }, 900);
-
-        // Supabase se opsyonèl jiskaske konfigirasyon an fèt; li pa anpeche aplikasyon an demare lokalman.
-        setTimeout(function(){ initCentralSync(); }, 600);
+        bootENSS();
 
         // --- === EKSPOZE FONKSYON === ---
         window.navigateTo = navigateTo;
