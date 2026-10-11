@@ -12306,8 +12306,16 @@
 
         function getAvailableYears() {
             var years = {};
-            STATE.students.forEach(function(s) { if (s._YEAR) years[s._YEAR] = true; });
-            years[STATE.anneeCourante] = true;
+            (STATE.students || []).forEach(function(s) { if (s && s._YEAR) years[String(s._YEAR)] = true; });
+            // Kenbe lis ane lekòl yo kòm yon pati nan eta lekòl pataje a,
+            // pou ane ki poko gen elèv pa disparèt sou lòt aparèy.
+            if (STATE.parametres && Array.isArray(STATE.parametres.schoolYears)) {
+                STATE.parametres.schoolYears.forEach(function(y) {
+                    y = String(y || '').trim();
+                    if (/^\d{4}-\d{4}$/.test(y)) years[y] = true;
+                });
+            }
+            if (STATE.anneeCourante) years[String(STATE.anneeCourante)] = true;
             return Object.keys(years).sort();
         }
 
@@ -12336,6 +12344,9 @@
                 options, getYear());
             if (newYear && newYear.trim().match(/^\d{4}-\d{4}$/)) {
                 STATE.anneeCourante = newYear.trim();
+                if (!STATE.parametres) STATE.parametres = {};
+                if (!Array.isArray(STATE.parametres.schoolYears)) STATE.parametres.schoolYears = [];
+                if (STATE.parametres.schoolYears.indexOf(newYear.trim()) < 0) STATE.parametres.schoolYears.push(newYear.trim());
                 saveState();
                 renderAccueilMenu();
                 renderDashboard();
@@ -13210,6 +13221,9 @@
             }
             if (userObj) {
                 STATE.utilisateur = userObj.profil;
+                // Kenbe sèlman non pwofil la sou aparèy sa a pou rafrechi paj la
+                // pa fòse rekoneksyon. Modpas la pa janm anrejistre nan ENSS_LOGIN.
+                try { localStorage.setItem('ENSS_LOGIN', userObj.profil); } catch (e) {}
                 safeCall(function() { syncUserAccess(userObj); }, 'syncUserAccess');
                 saveState();
                 msgEl.style.color = '#27ae60';
@@ -13669,10 +13683,20 @@
                 } catch (_) { STATE = getDefaultState(); }
             }
             try {
-                STATE.utilisateur = null;
+                // Retabli sesyon pwofil lokal la apre rafrechi sèlman si pwofil la
+                // toujou egziste. Se bouton Dekonekte ki retire ENSS_LOGIN.
+                var savedProfile = '';
+                try { savedProfile = String(localStorage.getItem('ENSS_LOGIN') || '').trim(); } catch (e) {}
+                var savedUser = savedProfile && STATE && STATE.securite && Array.isArray(STATE.securite.users)
+                    ? STATE.securite.users.find(function(u){ return u && String(u.profil || '') === savedProfile; })
+                    : null;
+                STATE.utilisateur = savedUser ? savedUser.profil : null;
                 STATE.currentPage = 'accueil';
-                STATE.parametres.autoLogin = false;
-                localStorage.removeItem('ENSS_LOGIN');
+                if (savedUser) {
+                    try { syncUserAccess(savedUser); } catch (e) {}
+                } else {
+                    try { localStorage.removeItem('ENSS_LOGIN'); } catch (e) {}
+                }
                 saveState();
 
                 var centralLoaded=false;
