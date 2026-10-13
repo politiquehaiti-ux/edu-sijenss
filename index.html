@@ -2456,7 +2456,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V93';
+        var ENSS_APP_VERSION = 'V94';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2820,6 +2820,35 @@
                 return e.returnValue;
             }
         });
+        async function centralDiagnoseRLS(){
+            if(!requireAdmin('verifye otorizasyon RLS la')) return false;
+            try{
+                var client=ensureCentralClient();
+                if(!client) throw new Error('Konfigirasyon Supabase la manke.');
+                var cfg=getCentralConfig();
+                var ur=await client.auth.getUser();
+                if(ur.error) throw ur.error;
+                var user=ur.data&&ur.data.user?ur.data.user:null;
+                if(!user) throw new Error('Pa gen sesyon itilizatè Supabase aktif. Konekte ankò ak kont administratè a.');
+                ENSS_CENTRAL.session=(await client.auth.getSession()).data.session;
+                var member=await client.rpc('is_school_member',{p_school_id:cfg.schoolId});
+                var lines=['ID kont konekte: '+user.id,'Email: '+(user.email||'(pa retounen)'), 'School ID: '+cfg.schoolId];
+                if(member.error){ lines.push('Fonksyon RLS: ERÈ — '+member.error.message); }
+                else { lines.push('is_school_member: '+String(member.data)); }
+                var read=await client.from(ENSS_CENTRAL_TABLE).select('school_id').eq('school_id',cfg.schoolId).maybeSingle();
+                if(read.error) lines.push('Lekti school_state: ERÈ — '+read.error.message);
+                else lines.push('Lekti school_state: OK'+(read.data?' (liy egziste)':' (pa gen liy)'));
+                var msg=lines.join('\n');
+                centralStatus('Dyagnostik RLS fini. Li rezilta yo pou idantifye blokaj la.', member.error||member.data!==true||read.error ? false : true);
+                alert('DYAGNOSTIK RLS — san okenn chanjman nan done yo\n\n'+msg+'\n\nPa peze « Inisyalize baz »; voye rezilta sa a ban nou.');
+                return !member.error && member.data===true && !read.error;
+            }catch(e){
+                centralStatus('Dyagnostik RLS echwe: '+(e.message||e),false);
+                alert('Dyagnostik RLS echwe: '+(e.message||e)+'\nPa gen done ki te modifye.');
+                return false;
+            }
+        }
+
         async function centralTestConnection(){
             if(!requireAdmin('teste baz santral la')) return false;
             try{
@@ -15855,6 +15884,7 @@
        +'</div>'
        +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">'
        +'<button class="btn" onclick="centralTestConnection()" style="padding:.25rem .55rem;font-size:.68rem;">🔎 Teste</button>'
+       +'<button class="btn" onclick="centralDiagnoseRLS()" style="padding:.25rem .55rem;font-size:.68rem;">🛡️ Verifye RLS</button>'
        +'<button class="btn btn-primary" onclick="centralSignIn()" style="padding:.25rem .55rem;font-size:.68rem;">🔐 Konekte</button>'
        +'<button class="btn" onclick="centralCreateAccount()" style="padding:.25rem .55rem;font-size:.68rem;">➕ Kreye kont</button>'
        +'<button class="btn" onclick="centralSignOut()" style="padding:.25rem .55rem;font-size:.68rem;">🚪 Dekonekte</button>'
