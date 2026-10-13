@@ -2456,7 +2456,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V90';
+        var ENSS_APP_VERSION = 'V93';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2565,13 +2565,69 @@
                 return cloned;
             }catch(e){ return JSON.parse(JSON.stringify(STATE)); }
         }
+        function centralIsPersonnelRecord(item) {
+            return !!(item && typeof item === 'object' && item.nom != null && item.prenom != null &&
+                (item.matiereEnseignee !== undefined || item.posteActuel !== undefined || item.nif !== undefined || item.ninu !== undefined));
+        }
+        function centralStableObject(value, omitId) {
+            if (Array.isArray(value)) return value.map(function(v){ return centralStableObject(v, false); });
+            if (value && typeof value === 'object') {
+                var out={};
+                Object.keys(value).sort().forEach(function(k){
+                    if (omitId && k === 'id') return;
+                    out[k]=centralStableObject(value[k], false);
+                });
+                return out;
+            }
+            return value;
+        }
+        function centralNormKey(v){ return String(v==null?'':v).normalize ? String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' ') : String(v==null?'':v).trim().toLowerCase().replace(/\s+/g,' '); }
+        function centralIsStudentRecord(item){
+            return !!(item && typeof item==='object' && (item.nisu!=null || item.NISU!=null || item.nis!=null || item.numeroEleve!=null || (item.nom!=null && item.prenom!=null && item.classe!=null && (item._YEAR!=null || item.annee!=null))));
+        }
         function centralIdentity(item, index) {
             if (item === null || item === undefined || typeof item !== 'object') return 'primitive:' + String(item);
-            var fields=['id','nisu','NISU','nis','matricule','numeroEleve','numero','profil','teacherId','personnelId','school_id','code','key','slug','date','timestamp'];
+            // Elèv: menm NISU nan menm ane a se menm dosye; menm NISU nan lòt ane rete apa.
+            if (centralIsStudentRecord(item)) {
+                var nis=centralNormKey(item.nisu || item.NISU || item.nis || item.numeroEleve || item.numero || '');
+                var year=centralNormKey(item._YEAR || item.annee || item.anneeScolaire || '');
+                if(nis) return 'student:'+nis+'|year:'+year;
+                var nom=centralNormKey(item.nom), prenom=centralNormKey(item.prenom), classe=centralNormKey(item.classe), naissance=centralNormKey(item.dateNaissance || item.date_naissance || '');
+                if(nom && prenom && classe && naissance) return 'student-name:'+nom+'|'+prenom+'|'+classe+'|'+naissance+'|year:'+year;
+                return 'student-record:'+JSON.stringify(centralStableObject(item,true));
+            }
+            // Pèsonèl: ID diferan pa dwe kreye kopi si tout lòt chan yo menm.
+            if (centralIsPersonnelRecord(item)) return 'personnel-record:' + JSON.stringify(centralStableObject(item, true));
+            var fields=['id','matricule','numeroEleve','numero','profil','teacherId','personnelId','school_id','code','key','slug','date','timestamp'];
             for(var i=0;i<fields.length;i++){
                 if(item[fields[i]]!==undefined && item[fields[i]]!==null && String(item[fields[i]])!=='') return fields[i]+':'+String(item[fields[i]]);
             }
-            return 'index:'+String(index);
+            // Dosye objè ki pa gen kle: anprent ki estab olye endèks pozisyon an.
+            return 'object:'+JSON.stringify(centralStableObject(item,true));
+        }
+        function centralDeduplicateStudents(rows){
+            if(!Array.isArray(rows)) return rows;
+            var seen=Object.create(null), out=[];
+            rows.forEach(function(row,i){var k=centralIdentity(row,i); if(seen[k]) return; seen[k]=true; out.push(row);});
+            return out;
+        }
+        // V93: normalizasyon koleksyon yo anvan fizyon/ekriti pou inisyalizasyon pa akimile kopi.
+        function centralNormalizeStateCollections(state){
+            if(!state || typeof state!=='object') return state;
+            if(Array.isArray(state.students)) state.students=centralDeduplicateStudents(state.students);
+            if(Array.isArray(state.personnel)) state.personnel=centralDeduplicatePersonnel(state.personnel);
+            return state;
+        }
+        function centralDeduplicatePersonnel(rows) {
+            if (!Array.isArray(rows)) return rows;
+            var seen=Object.create(null), out=[];
+            rows.forEach(function(row,idx){
+                var key=centralIsPersonnelRecord(row) ? centralIdentity(row,idx) : 'nonpersonnel:'+idx;
+                if (seen[key]) return;
+                seen[key]=true;
+                out.push(row);
+            });
+            return out;
         }
         function centralDeepEqual(a,b){
             try{return JSON.stringify(a)===JSON.stringify(b);}catch(e){return a===b;}
@@ -2620,7 +2676,7 @@
             if(centralDeepEqual(remote,base)) return JSON.parse(JSON.stringify(local));
             if(Array.isArray(base) && Array.isArray(remote) && Array.isArray(local)){
                 var bMap={},rMap={},lMap={},order=[];
-                base.forEach(function(v,i){var k=centralIdentity(v,i);bMap[k]=v;order.push(k);});
+                base.forEach(function(v,i){var k=centralIdentity(v,i);bMap[k]=v;if(order.indexOf(k)<0)order.push(k);});
                 remote.forEach(function(v,i){var k=centralIdentity(v,i);rMap[k]=v;if(order.indexOf(k)<0)order.push(k);});
                 local.forEach(function(v,i){var k=centralIdentity(v,i);lMap[k]=v;if(order.indexOf(k)<0)order.push(k);});
                 var out=[];
@@ -2683,6 +2739,7 @@
                 var merged=(allowMerge&&base)?centralThreeWayMerge(base,remote,localBefore):(allowMerge?centralMergeValues(remote,localBefore):JSON.parse(JSON.stringify(remote)));
                 if(merged && typeof nonDestructiveDefaults==='function') nonDestructiveDefaults(merged,getDefaultState());
                 if(!merged||typeof merged!=='object') merged=getDefaultState();
+                centralNormalizeStateCollections(merged);
                 var _v79RemoteMove = normalize1to6NotesAngToEeaInState(merged);
                 // Si la fusion conserve des ajouts locaux qui ne sont pas encore dans Supabase,
                 // les envoyer après la fin de la lecture centrale (sans écraser les données distantes).
@@ -2728,6 +2785,8 @@
                     if(!force){ centralStatus('Baz santral la pa retounen done. Pa gen okenn done ki te ekri.', false); return false; }
                     mergedState=localState;
                 }
+                // Netwaye kopi elèv/pèsonèl yo anvan ekriti santral la; konsève lòt ane lekòl yo.
+                centralNormalizeStateCollections(mergedState);
                 var payload={school_id:c.schoolId,state:mergedState,schema_version:Math.max(ENSS_DATA_SCHEMA,Number(current.data&&current.data.schema_version||0)),updated_at:new Date().toISOString(),updated_by:ENSS_CENTRAL.session.user.id};
                 var r=await client.from(ENSS_CENTRAL_TABLE).upsert(payload,{onConflict:'school_id'}).select('school_id,updated_at,revision,state').single();
                 if(r.error) throw r.error;
@@ -2780,6 +2839,9 @@
         async function centralSeedCurrentState(){
             if(!requireAdmin('inisyalize baz santral la')) return false;
             if(!ENSS_CENTRAL.session){ alert('Konekte ak kont Supabase administratè a anvan.'); return false; }
+            // Rann inisyalizasyon an idempotan pou kopi elèv/pèsonèl yo pa akimile.
+            centralNormalizeStateCollections(STATE);
+            try{ localStorage.setItem(ENSS_STATE_KEY,JSON.stringify(STATE)); }catch(e){}
             var studentCount=Array.isArray(STATE&&STATE.students)?STATE.students.length:0;
             var personnelCount=Array.isArray(STATE&&STATE.personnel)?STATE.personnel.length:0;
             var year=String(STATE&&STATE.anneeCourante||'');
@@ -17040,6 +17102,8 @@
           list.push(fresh);
         }
       });
+      // Evite kopi egzak yo ak ID diferan apre fizyon CSV; dosye ki gen lòt matyè/klas rete apa.
+      if(typeof centralDeduplicatePersonnel==='function') STATE.personnel=centralDeduplicatePersonnel(list);
       if(typeof saveState==='function')saveState();
       if(typeof renderPersonnel==='function')renderPersonnel();
       /* Rafraîchir les tableaux déjà affichés avec les décisions fiables de l'année courante. */
