@@ -2530,7 +2530,18 @@
                     var r=await Promise.race([client.auth.getSession(),timeoutPromise]);
                     if(r.error) throw r.error;
                     if(ENSS_CENTRAL.signingOut) return null;
-                    ENSS_CENTRAL.session=r.data && r.data.session ? r.data.session : null;
+                    var freshSession=r.data && r.data.session ? r.data.session : null;
+                    // Rekipere sesyon ki te deja konekte a si getSession() retounen null tanporèman.
+                    // Pa pèdi refresh_token an memwa anvan nou eseye retabli sesyon Supabase la.
+                    if(!freshSession && ENSS_CENTRAL.session && ENSS_CENTRAL.session.refresh_token && client.auth.setSession){
+                        try{
+                            var prior=ENSS_CENTRAL.session;
+                            var restored=await client.auth.setSession({access_token:prior.access_token,refresh_token:prior.refresh_token});
+                            if(!restored.error && restored.data && restored.data.session) freshSession=restored.data.session;
+                        }catch(restoreError){}
+                    }
+                    if(freshSession) ENSS_CENTRAL.session=freshSession;
+                    else ENSS_CENTRAL.session=null;
                     return ENSS_CENTRAL.session;
                 } finally {
                     if(timeoutId) clearTimeout(timeoutId);
@@ -2847,8 +2858,10 @@
                 // ENSS_CENTRAL.session=null pandan demann baz done yo ap tann.
                 var syncSession=await centralAwaitWithTimeout(centralRefreshSession(),'Verifikasyon sesyon Supabase',15000);
                 if(!syncSession || !syncSession.user || !syncSession.user.id){
-                    ENSS_CENTRAL.session=null; ENSS_CENTRAL.ready=false; ENSS_CENTRAL_PENDING=true;
-                    centralStatus('Senkronizasyon kanpe: sesyon Supabase la pa aktif. Rekonekte ak kont administratè a; chanjman lokal yo konsève.',false);
+                    // Pa efase sesyon ki te deja konekte a sou yon repons null tanporè;
+                    // centralRefreshSession ap eseye retabli li ak refresh_token nan pwochen tantativ la.
+                    ENSS_CENTRAL.ready=false; ENSS_CENTRAL_PENDING=true;
+                    centralStatus('Senkronizasyon kanpe: sesyon Supabase la poko konfime. Eseye retabli sesyon an; si li pa reyisi, rekonekte ak kont administratè a. Chanjman lokal yo konsève.',false);
                     return false;
                 }
                 var syncUserId=syncSession.user.id;
