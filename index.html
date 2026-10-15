@@ -2456,7 +2456,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V97';
+        var ENSS_APP_VERSION = 'V98-SESSION-TIMEOUT-FIX';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2511,23 +2511,35 @@
             return ENSS_CENTRAL.client;
         }
         async function centralRefreshSession(){
-            // Yon sèl verifikasyon sesyon alafwa: evite getSession() miltip kouri
-            // pandan refresh token Supabase ap fèt. Pa lanse nouvo verifikasyon pandan signOut.
+            // Yon sèl verifikasyon sesyon alafwa. Si getSession() bloke nan rezo a,
+            // pa kite sessionCheckPromise rete kole pou tout lòt tantativ yo.
             if(ENSS_CENTRAL.signingOut) return null;
             if(ENSS_CENTRAL.sessionCheckPromise) return ENSS_CENTRAL.sessionCheckPromise;
             var client=ensureCentralClient(); if(!client) return null;
-            ENSS_CENTRAL.sessionCheckPromise=(async function(){
+            var checkPromise;
+            checkPromise=(async function(){
+                var timeoutId=null;
                 try{
-                    var r=await client.auth.getSession();
+                    var timeoutPromise=new Promise(function(resolve,reject){
+                        timeoutId=setTimeout(function(){
+                            var e=new Error('Verifikasyon sesyon Supabase pa reponn apre 10 segonn. Eseye konekte ankò; done lokal yo rete konsève.');
+                            e.code='ENSS_SESSION_TIMEOUT';
+                            reject(e);
+                        },10000);
+                    });
+                    var r=await Promise.race([client.auth.getSession(),timeoutPromise]);
                     if(r.error) throw r.error;
                     if(ENSS_CENTRAL.signingOut) return null;
                     ENSS_CENTRAL.session=r.data && r.data.session ? r.data.session : null;
                     return ENSS_CENTRAL.session;
                 } finally {
-                    ENSS_CENTRAL.sessionCheckPromise=null;
+                    if(timeoutId) clearTimeout(timeoutId);
+                    // Netwaye sèlman pwomès sa a; pa efase yon nouvo verifikasyon ki ta kòmanse apre timeout la.
+                    if(ENSS_CENTRAL.sessionCheckPromise===checkPromise) ENSS_CENTRAL.sessionCheckPromise=null;
                 }
             })();
-            return ENSS_CENTRAL.sessionCheckPromise;
+            ENSS_CENTRAL.sessionCheckPromise=checkPromise;
+            return checkPromise;
         }
         // V97: pa kite endikatè senkronizasyon an rete sou 'an kou' san limit.
         // Sa bay yon erè vizib si yon demann Supabase pa reponn nan delè a.
@@ -2668,18 +2680,10 @@
             if (!Array.isArray(rows)) return rows;
             var seen=Object.create(null), out=[];
             rows.forEach(function(row,idx){
-                if(!row || typeof row!=='object'){out.push(row);return;}
-                var nif=centralNormKey(row.nif||row.NIF||''), ninu=centralNormKey(row.ninu||row.NINU||'');
-                var nom=centralNormKey(row.nom||row.NOM||''), prenom=centralNormKey(row.prenom||row.prénom||row.PRENOM||'');
-                // Anpeche yon menm moun ak ID diferan antre plizyè fwa apre fizyon/senkronizasyon.
-                var key=nif?'personnel-nif:'+nif:ninu?'personnel-ninu:'+ninu:(nom&&prenom?'personnel-name:'+nom+'|'+prenom:(centralIsPersonnelRecord(row)?centralIdentity(row,idx):'nonpersonnel:'+idx));
-                if(seen[key]!==undefined){
-                    var keep=out[seen[key]];
-                    // Konsève enfòmasyon ki ranpli nan youn oswa lòt kopi a san efase valè ki deja la.
-                    Object.keys(row).forEach(function(k){if((keep[k]===undefined||keep[k]===null||String(keep[k]).trim()==='')&&row[k]!==undefined&&row[k]!==null&&String(row[k]).trim()!=='')keep[k]=row[k];});
-                    return;
-                }
-                seen[key]=out.length;out.push(row);
+                var key=centralIsPersonnelRecord(row) ? centralIdentity(row,idx) : 'nonpersonnel:'+idx;
+                if (seen[key]) return;
+                seen[key]=true;
+                out.push(row);
             });
             return out;
         }
@@ -2839,7 +2843,15 @@
             ENSS_CENTRAL.syncing=true;
             try{
                 var client=ensureCentralClient(); if(!client){ ENSS_CENTRAL_PENDING=true; centralStatus('Senkronizasyon kanpe: konfigirasyon oswa bibliyotèk Supabase la pa pare. Done yo rete lokalman.',false); return false; }
-                await centralAwaitWithTimeout(centralRefreshSession(),'Verifikasyon sesyon Supabase',15000); if(!ENSS_CENTRAL.session){ ENSS_CENTRAL_PENDING=true; centralStatus('Senkronizasyon kanpe: pa gen sesyon Supabase aktif. Konekte ankò; done lokal yo pa efase.',false); return false; }
+                // Kenbe yon snapshot lokal sesyon an: yon lòt evènman auth ka mete
+                // ENSS_CENTRAL.session=null pandan demann baz done yo ap tann.
+                var syncSession=await centralAwaitWithTimeout(centralRefreshSession(),'Verifikasyon sesyon Supabase',15000);
+                if(!syncSession || !syncSession.user || !syncSession.user.id){
+                    ENSS_CENTRAL.session=null; ENSS_CENTRAL.ready=false; ENSS_CENTRAL_PENDING=true;
+                    centralStatus('Senkronizasyon kanpe: sesyon Supabase la pa aktif. Rekonekte ak kont administratè a; chanjman lokal yo konsève.',false);
+                    return false;
+                }
+                var syncUserId=syncSession.user.id;
                 var c=getCentralConfig();
                 if(!force && !ENSS_CENTRAL.ready){ ENSS_CENTRAL_PENDING=true; centralStatus('Senkronizasyon an poko kòmanse: done santral yo poko chaje sou aparèy sa a. Pa fè lòt chanjman jiskaske koneksyon an verifye.',false); return false; }
                 var localState=centralSanitizeStateForRemote();
@@ -2857,7 +2869,21 @@
                 }
                 // Netwaye kopi elèv/pèsonèl yo anvan ekriti santral la; konsève lòt ane lekòl yo.
                 centralNormalizeStateCollections(mergedState);
-                var payload={school_id:c.schoolId,state:mergedState,schema_version:Math.max(ENSS_DATA_SCHEMA,Number(current.data&&current.data.schema_version||0)),updated_at:new Date().toISOString(),updated_by:ENSS_CENTRAL.session.user.id};
+                // V98: pa fè UPDATE/upsert si eta pataje a pa chanje.
+                // Chak UPDATE sou school_state deklanche achiv JSONB konplè a;
+                // konparezon sa a anpeche kopi initil, san li pa efase ni modifye done yo.
+                if(remote && centralDeepEqual(centralSanitizeStateForRemoteObject(mergedState), centralSanitizeStateForRemoteObject(remote))){
+                    ENSS_CENTRAL.ready=true;
+                    ENSS_CENTRAL.lastRemoteAt=current.data.updated_at||null;
+                    centralSetBaseSnapshot(remote);
+                    ENSS_CENTRAL_PENDING=false;
+                    centralStatus('✓ Pa gen nouvo chanjman; done santral yo deja ajou.', true);
+                    return true;
+                }
+                // Pa janm li ENSS_CENTRAL.session.user dirèkteman apre demann async;
+                // itilize ID verifye a epi kanpe pwòp si sesyon an te fèmen antretan.
+                if(!syncUserId) throw new Error('Pa gen ID itilizatè nan sesyon Supabase la. Rekonekte anvan senkronizasyon.');
+                var payload={school_id:c.schoolId,state:mergedState,schema_version:Math.max(ENSS_DATA_SCHEMA,Number(current.data&&current.data.schema_version||0)),updated_at:new Date().toISOString(),updated_by:syncUserId};
                 var r=await centralAwaitWithTimeout(client.from(ENSS_CENTRAL_TABLE).upsert(payload,{onConflict:'school_id'}).select('school_id,updated_at,revision,state').single(),'Ekriti done nan baz santral la',20000);
                 if(r.error) throw r.error;
                 ENSS_CENTRAL.ready=true;
@@ -3143,7 +3169,6 @@
         }
 
         function saveState() {
-            try{if(Array.isArray(STATE.personnel)&&typeof centralDeduplicatePersonnel==='function') STATE.personnel=centralDeduplicatePersonnel(STATE.personnel);}catch(e){}
             try {
                 markStateVersion();
                 var raw = JSON.stringify(STATE);
@@ -8575,7 +8600,6 @@
             return p[key] == null ? '' : p[key];
         }
         function renderPersonnel() {
-            if(Array.isArray(STATE.personnel) && typeof centralDeduplicatePersonnel==='function') STATE.personnel=centralDeduplicatePersonnel(STATE.personnel);
             var body = document.getElementById('personnelTableBody'), head = document.getElementById('personnelTableHead');
             var cols = personnelColumns();
             if (enrichPersonnelFirstNames()) saveState();
@@ -16024,66 +16048,7 @@
     }
     try{ updateCentralPanel(); }catch(e){}
     try{ renderCentralRoleAccessPanel(page); }catch(e){console.error('ENSS role access panel',e);}
-    try{ renderENSSSchoolManager(page); }catch(e){console.error('ENSS school manager',e);}
   }
-  // Jesyon lekòl: kreye lekòl sou sèvè a atravè RPC ki verifye dwa administratè prensipal la.
-  function renderENSSSchoolManager(page){
-    if(!page)return;
-    var box=document.getElementById('enssSchoolManagerPanel');
-    if(!box){box=document.createElement('div');box.id='enssSchoolManagerPanel';box.className='card';box.style.cssText='padding:.8rem;margin-top:.7rem;border-left:4px solid #7c3aed;';}
-    box.innerHTML='<h4 style="margin:0;font-size:.9rem;">🏫 Jesyon lòt lekòl yo</h4>'
-      +'<p style="font-size:.68rem;color:#475569;margin:.35rem 0;">Se administratè prensipal ENSS la ki ajoute lekòl yo. Chak direktè jere sèlman lekòl yo ba li aksè. Sa mande fonksyon SQL sekirize ki nan fichye konfigirasyon apa a.</p>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.35rem;">'
-      +'<input id="enssNewSchoolName" maxlength="180" placeholder="Non lekòl la" style="padding:.35rem;font-size:.72rem;">'
-      +'<input id="enssNewSchoolCode" maxlength="80" placeholder="Kòd inik lekòl la (eg. ECOLE-002)" style="padding:.35rem;font-size:.72rem;">'
-      +'<input id="enssNewSchoolDirector" maxlength="180" placeholder="Non direktè a" style="padding:.35rem;font-size:.72rem;">'
-      +'<input id="enssNewSchoolEmail" type="email" maxlength="254" placeholder="Imèl kont direktè a (li dwe deja kreye)" style="padding:.35rem;font-size:.72rem;">'
-      +'<input id="enssNewSchoolAddress" maxlength="240" placeholder="Adrès lekòl la" style="padding:.35rem;font-size:.72rem;">'
-      +'<input id="enssNewSchoolPhone" maxlength="80" placeholder="Telefòn lekòl la" style="padding:.35rem;font-size:.72rem;">'
-      +'</div><div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem;">'
-      +'<button class="btn btn-primary" type="button" onclick="centralCreateSchool()" style="font-size:.68rem;padding:.3rem .6rem;">➕ Ajoute lekòl la</button>'
-      +'<button class="btn" type="button" onclick="centralListSchools()" style="font-size:.68rem;padding:.3rem .6rem;">🔄 Montre lekòl yo</button>'
-      +'</div><div id="enssSchoolManagerStatus" role="status" style="font-size:.68rem;margin-top:.4rem;color:#475569;">Pa gen aksyon ki fèt.</div>'
-      +'<div id="enssSchoolManagerList" style="font-size:.68rem;margin-top:.4rem;overflow-wrap:anywhere;"></div>';
-    if(!box.parentNode)page.appendChild(box);
-  }
-  function enssSchoolManagerStatus(msg,ok){var el=document.getElementById('enssSchoolManagerStatus');if(el){el.textContent=msg;el.style.color=ok===true?'#166534':ok===false?'#b91c1c':'#475569';}}
-  window.centralCreateSchool=async function(){
-    try{
-      if(typeof isAdminUser==='function'&&!isAdminUser()){enssSchoolManagerStatus('Aksè refize: se administratè prensipal la sèlman ki ka ajoute lekòl.',false);return;}
-      var name=(document.getElementById('enssNewSchoolName')||{}).value||'';
-      var code=(document.getElementById('enssNewSchoolCode')||{}).value||'';
-      var director=(document.getElementById('enssNewSchoolDirector')||{}).value||'';
-      var email=(document.getElementById('enssNewSchoolEmail')||{}).value||'';
-      var address=(document.getElementById('enssNewSchoolAddress')||{}).value||'';
-      var phone=(document.getElementById('enssNewSchoolPhone')||{}).value||'';
-      name=name.trim();code=code.trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'-');director=director.trim();email=email.trim().toLowerCase();address=address.trim();phone=phone.trim();
-      if(!name||!code||!director||!email){enssSchoolManagerStatus('Ranpli non lekòl la, kòd la, non direktè a ak imèl direktè a.',false);return;}
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){enssSchoolManagerStatus('Imèl direktè a pa sanble valab.',false);return;}
-      var client=ensureCentralClient();if(!client){enssSchoolManagerStatus('Konfigire Supabase anvan ou ajoute yon lekòl.',false);return;}
-      var session=await centralRefreshSession();if(!session||!session.user){enssSchoolManagerStatus('Konekte ak kont administratè prensipal ENSS la anvan.',false);return;}
-      if(!confirm('Kreye lekòl « '+name+' » epi bay kont '+email+' wòl direktè? Kont direktè a dwe deja egziste nan Supabase Auth.'))return;
-      enssSchoolManagerStatus('Ap verifye otorizasyon epi kreye lekòl la…',null);
-      var result=await client.rpc('enss_create_school_for_director',{p_school_name:name,p_school_code:code,p_director_name:director,p_director_email:email,p_address:address,p_phone:phone});
-      if(result.error)throw result.error;
-      var row=Array.isArray(result.data)?result.data[0]:result.data;
-      enssSchoolManagerStatus('Lekòl la kreye epi aksè direktè a anrejistre. School ID: '+String(row&&row.school_id||'(verifye lis lekòl yo)'),true);
-      ['enssNewSchoolName','enssNewSchoolCode','enssNewSchoolDirector','enssNewSchoolEmail','enssNewSchoolAddress','enssNewSchoolPhone'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-      await window.centralListSchools();
-    }catch(e){console.error('ENSS centralCreateSchool',e);enssSchoolManagerStatus('Lekòl la pa kreye: '+String(e&&e.message||e)+'. Verifye SQL sekirize a, kont direktè a, epi dwa administratè a.',false);}
-  };
-  window.centralListSchools=async function(){
-    try{
-      var client=ensureCentralClient();if(!client){enssSchoolManagerStatus('Konfigire Supabase anvan.',false);return;}
-      var session=await centralRefreshSession();if(!session||!session.user){enssSchoolManagerStatus('Konekte ak kont administratè prensipal la anvan.',false);return;}
-      var r=await client.rpc('enss_list_schools_for_owner');if(r.error)throw r.error;
-      var rows=Array.isArray(r.data)?r.data:[];var list=document.getElementById('enssSchoolManagerList');if(!list)return;
-      if(!rows.length){list.textContent='Pa gen lòt lekòl ki anrejistre, oswa kont sa a pa gen dwa wè lis la.';return;}
-      list.innerHTML='<strong>Lekòl ki anrejistre:</strong><ul style="margin:.3rem 0;padding-left:1.2rem;">'+rows.map(function(x){return '<li style="margin:.2rem 0;"><strong>'+String(x.school_name||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];})+'</strong> — '+String(x.school_code||'').replace(/[&<>"']/g,'')+' · ID: '+String(x.school_id||'').replace(/[&<>"']/g,'')+' · Direktè: '+String(x.director_email||'').replace(/[&<>"']/g,'')+'</li>';}).join('')+'</ul>';
-      enssSchoolManagerStatus('Lis la chaje. Lekòl sa yo rete separe; pa chanje School ID ENSS la nan paramèt yo pou eseye antre nan yon lòt lekòl.',true);
-    }catch(e){console.error('ENSS centralListSchools',e);enssSchoolManagerStatus('Pa kapab chaje lis la: '+String(e&&e.message||e)+'. Fòk SQL sekirize a enstale anvan.',false);}
-  };
-
   // V98: vizib, separe kontwòl aksè pa gwoup pwofil. Sa se konfigirasyon aplikasyon an;
   // li pa ranplase RLS/API filtre sou sèvè a pou pwoteje done sansib yo.
   function renderCentralRoleAccessPanel(page){
@@ -17870,24 +17835,7 @@
   /* Prezans anseyan an nan klas: se li ki sous verite a. */
   function classTeacherRows(classe){
     try{ensureCustomClasses();ensureClassAssignments();}catch(e){}
-    var rows=((STATE.classAssignments&&STATE.classAssignments[classe])||[]).filter(function(a){return a&&(String(a.teacher||'').trim()||String(a.teacherId||'').trim());});
-    var byTeacher=Object.create(null), unique=[];
-    rows.forEach(function(a){
-      var who=String(a.teacherId||'').trim();
-      if(!who) who=norm(a.teacher||'');
-      if(!who)return;
-      var key='teacher:'+who, current=byTeacher[key];
-      if(!current){
-        current={teacherId:a.teacherId||'',teacher:a.teacher||'',subject:String(a.subject||''),savedAt:a.savedAt||0};
-        byTeacher[key]=current;unique.push(current);return;
-      }
-      var subjects=String(current.subject||'').split('/').map(function(x){return norm(x);});
-      String(a.subject||'').split('/').forEach(function(part){
-        var label=String(part||'').trim();
-        if(label && subjects.indexOf(norm(label))===-1){current.subject=current.subject?current.subject+' / '+label:label;subjects.push(norm(label));}
-      });
-    });
-    return unique;
+    return ((STATE.classAssignments&&STATE.classAssignments[classe])||[]).filter(function(a){return String(a.teacher||'').trim()||String(a.teacherId||'').trim();});
   }
   function teacherPerson(row){
     var p=null; if(row.teacherId)p=(STATE.personnel||[]).find(function(x){return String(x.id)===String(row.teacherId);});
