@@ -3925,6 +3925,14 @@
 
         function hasAccess(page) {
             var role = getRole();
+            // ENSS student accounts are strictly personal: never open class-wide or management pages.
+            if (role === 'eleve') {
+                var ownUser = getCurrentUserObj();
+                var ownNisu = ownUser && (ownUser.studentNisu || ownUser.nisu);
+                var ownStudent = ownNisu && Array.isArray(STATE.students) ? STATE.students.find(function(st) { return String(st.nisu) === String(ownNisu); }) : null;
+                if (!ownStudent && ownUser && ownUser.profil && Array.isArray(STATE.students)) ownStudent = STATE.students.find(function(st) { return String(st.nisu) === String(ownUser.profil); });
+                return !!ownStudent && ['accueil', 'dashboard', 'eleves', 'resultats', 'devoirs', 'quiz', 'evaluation', 'library'].includes(page);
+            }
             if (page === 'parametres') return role === 'admin';
             if (page === 'classe-detail') {
                 if (!role) return false;
@@ -6520,6 +6528,14 @@
                 .value || '');
             var students = getStudents();
             var role = getRole();
+            if (role !== 'eleve') {
+                var normalToolbar = document.getElementById('elevesToolbar');
+                var normalTable = document.getElementById('elevesTableWrap');
+                if (normalToolbar) normalToolbar.style.display = '';
+                if (normalTable) normalTable.style.display = '';
+                var ownBox = document.getElementById('studentOwnDossierOnly');
+                if (ownBox) ownBox.style.display = 'none';
+            }
             if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
                 var user = STATE.securite.users.find(function(u) { return u.profil === STATE.utilisateur; });
                 if (user && user.accessClasses && user.accessClasses.length > 0) {
@@ -6528,9 +6544,32 @@
                     students = [];
                 }
             } else if (role === 'eleve') {
-                var su=getCurrentUserObj();
-                students = su && su.studentNisu ? students.filter(function(s){return s.nisu===su.studentNisu;}) : [];
+                var su = getCurrentUserObj();
+                var ownNisu = su && (su.studentNisu || su.nisu);
+                var ownStudent = ownNisu ? students.find(function(st) { return String(st.nisu) === String(ownNisu); }) : null;
+                if (!ownStudent && su && su.profil) ownStudent = students.find(function(st) { return String(st.nisu) === String(su.profil); });
+                students = ownStudent ? [ownStudent] : [];
+                // A student must never see class-wide lists, filters, exports, or administrative actions.
+                var studentToolbar = document.getElementById('elevesToolbar');
+                var studentTable = document.getElementById('elevesTableWrap');
+                if (studentToolbar) studentToolbar.style.display = 'none';
+                if (studentTable) studentTable.style.display = 'none';
+                var studentPage = document.getElementById('page-eleves');
+                var personalBox = document.getElementById('studentOwnDossierOnly');
+                if (!personalBox && studentPage) {
+                    personalBox = document.createElement('div');
+                    personalBox.id = 'studentOwnDossierOnly';
+                    personalBox.className = 'card';
+                    personalBox.style.cssText = 'padding:1rem;margin:.5rem 0;';
+                    studentPage.insertBefore(personalBox, studentToolbar || studentTable || null);
+                }
+                if (personalBox) {
+                    personalBox.innerHTML = ownStudent
+                      ? '<h3 style="margin-bottom:.5rem;">📁 Dosye pèsonèl mwen</h3><p>Se enfòmasyon pa ou sèlman ki disponib nan pwofil sa a.</p><button type="button" class="btn btn-primary" onclick="openStudentDossier(' + JSON.stringify(String(ownStudent.nisu)) + ')">Louvri dosye pa mwen</button>'
+                      : '<h3>Dosye pèsonèl</h3><p>Nou pa jwenn dosye ki lye ak pwofil sa a. Pou pwoteje done lòt elèv yo, lis klas la rete kache. Kontakte administrasyon an pou verifye NISU pwofil la.</p>';
+                }
             }
+            if (role !== 'eleve' && document.getElementById('studentOwnDossierOnly')) document.getElementById('studentOwnDossierOnly').style.display = 'none';
             if (search) students = students.filter(function(s) {
                 return (s.nom || '').toLowerCase().includes(search) || (s.prenom || '').toLowerCase().includes(
                     search) || (s.nisu || '').toLowerCase().includes(search);
@@ -6904,8 +6943,16 @@
 
         // --- === DOSYE ELEV === ---
         function openStudentDossier(nisu) {
-            var s = STATE.students.find(function(st) { return st.nisu === nisu; });
+            var s = STATE.students.find(function(st) { return String(st.nisu) === String(nisu); });
             if (!s) return;
+            if (getRole() === 'eleve') {
+                var loggedStudent = getCurrentUserObj();
+                var allowedNisu = loggedStudent && (loggedStudent.studentNisu || loggedStudent.nisu || loggedStudent.profil);
+                if (!allowedNisu || String(allowedNisu) !== String(s.nisu)) {
+                    showAccessNotice('🔒 Ou ka wè dosye pa ou sèlman.', 'student-private-dossier');
+                    return;
+                }
+            }
             var matieres = getMatieresForClasse(s.classe);
             var m = getStudentMoyennes(s);
             var hideNotes = STATE.parametres.hideNotes && getRole() !== 'admin';
@@ -14877,7 +14924,9 @@
       var disabledGroup='';
       if(roleKey==='secretaire' && grants.secretaire!==true) disabledGroup='Sekretè';
       else if(['enseignant','enseignante','professeur','teacher','anseyan'].indexOf(roleKey)!==-1 && grants.enseignants!==true) disabledGroup='Anseyan';
-      else if(['eleve','student','etudiant','pupil'].indexOf(roleKey)!==-1 && grants.eleves!==true) disabledGroup='Elèv';
+      // Pwofil elèv dwe kapab konekte pou li dosye pa li; kontwòl done prive yo fèt anba a pa NISU.
+      // Pa bloke tout koneksyon elèv akoz ansyen reglaj global ki te rete false nan baz santral la.
+      else if(['eleve','student','etudiant','pupil'].indexOf(roleKey)!==-1) disabledGroup='';
       if(roleKey!=='admin' && disabledGroup){
         if(msgEl){msgEl.style.color='#b91c1c';msgEl.textContent='Aksè '+disabledGroup+' dezaktive pa administratè a. Kontakte administratè ENSS la.';}
         return;
