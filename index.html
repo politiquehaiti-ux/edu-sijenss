@@ -763,7 +763,7 @@
                     <div class="grid grid-2" style="gap:0.8rem;">
                         <div>
                             <h5 style="font-size:0.78rem;">*Père</h5>
-                            <div class="grid grid-3" style="gap:0.4rem;">
+                            <div class="grid grid-2" style="gap:0.4rem;margin-bottom:.35rem;"><div class="form-group"><label style="font-size:0.68rem;">Nom du père</label><input type="text" id="insPereNom" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div><div class="form-group"><label style="font-size:0.68rem;">Prénom du père</label><input type="text" id="insPerePrenom" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div></div><div class="grid grid-3" style="gap:0.4rem;">
                                 <div class="form-group"><label style="font-size:0.68rem;">Connu ?</label><select id="insPereConnu" style="padding:0.2rem 0.35rem;font-size:0.72rem;"><option value="Connu">Connu</option><option value="Pas connu">Pas connu</option></select></div>
                                 <div class="form-group"><label style="font-size:0.68rem;">Statut</label><select id="insPereStatut" style="padding:0.2rem 0.35rem;font-size:0.72rem;"><option value="Vivant">Vivant</option><option value="Decede">Décédé</option></select></div>
                                 <div class="form-group"><label style="font-size:0.68rem;">Occupation</label><input type="text" id="insPereOccupation" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div>
@@ -771,7 +771,7 @@
                         </div>
                         <div>
                             <h5 style="font-size:0.78rem;">*Mère</h5>
-                            <div class="grid grid-3" style="gap:0.4rem;">
+                            <div class="grid grid-2" style="gap:0.4rem;margin-bottom:.35rem;"><div class="form-group"><label style="font-size:0.68rem;">Nom de la mère</label><input type="text" id="insMereNom" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div><div class="form-group"><label style="font-size:0.68rem;">Prénom de la mère</label><input type="text" id="insMerePrenom" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div></div><div class="grid grid-3" style="gap:0.4rem;">
                                 <div class="form-group"><label style="font-size:0.68rem;">Connu ?</label><select id="insMereConnu" style="padding:0.2rem 0.35rem;font-size:0.72rem;"><option value="Connu">Connu</option><option value="Pas connu">Pas connu</option></select></div>
                                 <div class="form-group"><label style="font-size:0.68rem;">Statut</label><select id="insMereStatut" style="padding:0.2rem 0.35rem;font-size:0.72rem;"><option value="Vivant">Vivant</option><option value="Decede">Décédé</option></select></div>
                                 <div class="form-group"><label style="font-size:0.68rem;">Occupation</label><input type="text" id="insMereOccupation" style="padding:0.2rem 0.35rem;font-size:0.72rem;" /></div>
@@ -6726,9 +6726,13 @@
                 departement: v('insDept'),
                 commune: v('insCommune'),
                 section: v('insSection'),
+                pereNom: v('insPereNom'),
+                perePrenom: v('insPerePrenom'),
                 pereConnu: v('insPereConnu') || 'Connu',
                 pereStatut: v('insPereStatut') || 'Vivant',
                 pereOccupation: v('insPereOccupation'),
+                mereNom: v('insMereNom'),
+                merePrenom: v('insMerePrenom'),
                 mereConnu: v('insMereConnu') || 'Connu',
                 mereStatut: v('insMereStatut') || 'Vivant',
                 mereOccupation: v('insMereOccupation'),
@@ -6751,7 +6755,7 @@
             showInscriptionMsg('Elèv ' + student.nom + ' ' + student.prenom +
                 ' enskri avèk siksè! NISU: ' + nisu + ' — Klas: ' + classe, true);
             required.forEach(function(r) { document.getElementById(r.id).value = ''; });
-            ['insAdresse', 'insRespLien', 'insRespNifNisu', 'insRespTel2', 'insPereOccupation',
+            ['insAdresse', 'insRespLien', 'insRespNifNisu', 'insRespTel2', 'insPereNom', 'insPerePrenom', 'insMereNom', 'insMerePrenom', 'insPereOccupation',
                 'insMereOccupation'
             ].forEach(function(id) { document.getElementById(id).value = ''; });
             document.getElementById('insHandicap').value = 'Non';
@@ -10024,8 +10028,9 @@
                 var quota = rations[prod] !== undefined ? parseFloat(rations[prod]) : (CANTINE_QUOTAS[prod] || 0);
                 var qty = Math.round(quota * totalPresent * 1000) / 1000;
                 if (qty > 0) {
+                    var sexCounts = getCantinePresentCountsBySex(date);
                     mouvements.push({ id: 'ration-' + date + '-' + prod, date: date, produit: prod, type: 'sortie', quantite: qty,
-                        totalPresent: totalPresent, autoRation: true });
+                        totalPresent: totalPresent, totalFilles: sexCounts.filles, totalGarcons: sexCounts.garcons, autoRation: true });
                 }
             });
             STATE.cantine.mouvements = mouvements;
@@ -10154,6 +10159,35 @@
             }).join('');
         }
 
+        function getCantinePresentCountsBySex(date) {
+            var counts = { filles: 0, garcons: 0, total: 0 };
+            (ALL_CLASSES || []).forEach(function(cl) {
+                var pres = (STATE.presences && STATE.presences[cl + '|' + date]) || {};
+                (getStudentsByClasse(cl) || []).forEach(function(st) {
+                    if ((pres[st.nisu] || 'P') === 'P') {
+                        if (String(st.sexe || '').toUpperCase().startsWith('F')) counts.filles++; else counts.garcons++;
+                    }
+                });
+            });
+            counts.total = counts.filles + counts.garcons; return counts;
+        }
+        function openCantineDailySummaryEdit(date) {
+            if (!canModifyData('cantine')) return requireLogin('modifye rezime kantin', 'cantine');
+            var items = (STATE.cantine.mouvements || []).filter(function(m) { return m.date === date; });
+            if (!items.length) { alert('Pa gen mouvman kantin pou dat sa a.'); return; }
+            var counts = getCantinePresentCountsBySex(date);
+            var stored = items.find(function(m) { return m.manualGenderCounts === true; }) || items.find(function(m) { return m.totalFilles !== undefined || m.totalGarcons !== undefined; });
+            var filles = stored && stored.totalFilles !== undefined ? Number(stored.totalFilles) : counts.filles;
+            var garcons = stored && stored.totalGarcons !== undefined ? Number(stored.totalGarcons) : counts.garcons;
+            openModal('✏️ Modifye rezime kantin — ' + date, '<p style="font-size:.75rem;">Modifye kantite ti fi ak ti gason; total la ak sòti pwodwi otomatik yo ap rekalkile.</p><div class="form-row"><div class="form-group"><label>Ti fi prezan</label><input id="cantineEditFilles" type="number" min="0" step="1" value="' + filles + '" /></div><div class="form-group"><label>Ti gason prezan</label><input id="cantineEditGarcons" type="number" min="0" step="1" value="' + garcons + '" /></div></div>', function() {
+                var f = Number(document.getElementById('cantineEditFilles').value), g = Number(document.getElementById('cantineEditGarcons').value);
+                if (!Number.isInteger(f) || !Number.isInteger(g) || f < 0 || g < 0) { alert('Mete kantite antye ki egal oswa pi gran pase zewo.'); return; }
+                var total = f + g, rations = STATE.cantine.rations || {};
+                items.forEach(function(m) { m.totalFilles = f; m.totalGarcons = g; m.totalPresent = total; m.manualGenderCounts = true; if (m.autoRation === true) { var quota = rations[m.produit] !== undefined ? Number(rations[m.produit]) : Number(CANTINE_QUOTAS[m.produit] || 0); m.quantite = Math.round(quota * total * 1000) / 1000; } });
+                saveState(); renderCantine(); closeModal(); openCantineResumeModal(date);
+            });
+        }
+
         function renderCantineResume() {
             var mouvements = STATE.cantine.mouvements || [];
             var dates = {};
@@ -10187,11 +10221,15 @@
                 CANTINE_PRODUITS.forEach(function(p) {
                     cumulative[p] += totals[p].entree - totals[p].sortie;
                 });
+                var countRecord = items.find(function(m) { return m.totalFilles !== undefined || m.totalGarcons !== undefined; });
+                var sexCounts = countRecord ? { filles: Number(countRecord.totalFilles || 0), garcons: Number(countRecord.totalGarcons || 0) } : getCantinePresentCountsBySex(date);
+                if (!countRecord && totalPresent && sexCounts.filles + sexCounts.garcons !== totalPresent) sexCounts.garcons = Math.max(0, totalPresent - sexCounts.filles);
+                var displayTotal = countRecord ? sexCounts.filles + sexCounts.garcons : (totalPresent || sexCounts.filles + sexCounts.garcons);
                 bodyHtml += "<tr onclick=\"openCantineResumeModal('" + date +
                     "')\" style=\"cursor:pointer;\">\n                <td style=\"font-size:0.55rem;\">" +
-                    date + "</td><td style=\"font-size:0.55rem;\">" + Math.round(totalPresent * 0.5) +
-                    "</td><td style=\"font-size:0.55rem;\">" + Math.round(totalPresent * 0.5) +
-                    "</td><td style=\"font-size:0.55rem;\">" + totalPresent + "</td>";
+                    date + "</td><td style=\"font-size:0.55rem;\">" + sexCounts.filles +
+                    "</td><td style=\"font-size:0.55rem;\">" + sexCounts.garcons +
+                    "</td><td style=\"font-size:0.55rem;\">" + displayTotal + "</td>";
                 CANTINE_PRODUITS.forEach(function(p) {
                     bodyHtml += "<td style=\"font-size:0.5rem;\">" + totals[p].entree.toFixed(2) +
                         "</td><td style=\"font-size:0.5rem;\">" + totals[p].sortie.toFixed(2) +
@@ -10201,7 +10239,7 @@
                 bodyHtml +=
                     "<td style=\"font-size:0.55rem;\"><button onclick=\"event.stopPropagation();openCantineResumeModal('" +
                     date +
-                    "')\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDCCB Detay</button></td></tr>";
+                    "')\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDCCB Detay</button> <button onclick=\"event.stopPropagation();openCantineDailySummaryEdit('" + date + "')\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">✏️ Modifye</button></td></tr>";
             });
             body.innerHTML = bodyHtml ||
                 '<tr><td colspan="99" class="text-center text-muted" style="font-size:0.8rem;">Aucun mouvement</td></tr>';
@@ -13434,6 +13472,11 @@
         }
 
         // --- === KONEKSYON (anlinye sou paj Akèy, san ekran separe) === ---
+        function toggleCentralPassword() {
+            var el = document.getElementById('enssCentralPassword');
+            if (el) el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
         function toggleHomeLoginPassword() {
             var el = document.getElementById('accueilLoginPass');
             if (el) el.type = el.type === 'password' ? 'text' : 'password';
@@ -16032,7 +16075,7 @@
        +'</div>'
        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.35rem;margin-top:.35rem;">'
        +'<input id="enssCentralEmail" type="email" placeholder="Email kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;">'
-       +'<input id="enssCentralPassword" type="password" placeholder="Mo de pase kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'<div style="display:flex;align-items:center;gap:.25rem;min-width:180px;"><input id="enssCentralPassword" type="password" placeholder="Mo de pase kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;flex:1;min-width:0;"><button type="button" class="btn" onclick="toggleCentralPassword()" title="Montre/kache mo de pase Supabase" style="padding:.22rem .35rem;font-size:.7rem;">👁️</button></div>'
        +'</div>'
        +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">'
        +'<button class="btn" onclick="centralTestConnection()" style="padding:.25rem .55rem;font-size:.68rem;">🔎 Teste</button>'
