@@ -2469,7 +2469,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V99-STOP-UNNECESSARY-SNAPSHOTS';
+        var ENSS_APP_VERSION = 'V100-FAST-SYNC-SMALL-WRITE-RESPONSE';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2911,11 +2911,11 @@
                 // itilize ID verifye a epi kanpe pwòp si sesyon an te fèmen antretan.
                 if(!syncUserId) throw new Error('Pa gen ID itilizatè nan sesyon Supabase la. Rekonekte anvan senkronizasyon.');
                 var payload={school_id:c.schoolId,state:mergedState,schema_version:Math.max(ENSS_DATA_SCHEMA,Number(current.data&&current.data.schema_version||0)),updated_at:new Date().toISOString(),updated_by:syncUserId};
-                var r=await centralAwaitWithTimeout(client.from(ENSS_CENTRAL_TABLE).upsert(payload,{onConflict:'school_id'}).select('school_id,updated_at,revision,state').single(),'Ekriti done nan baz santral la',20000);
+                var r=await centralAwaitWithTimeout(client.from(ENSS_CENTRAL_TABLE).upsert(payload,{onConflict:'school_id'}).select('school_id,updated_at,revision').single(),'Ekriti done nan baz santral la',20000);
                 if(r.error) throw r.error;
                 ENSS_CENTRAL.ready=true;
                 ENSS_CENTRAL.lastRemoteAt=r.data.updated_at||payload.updated_at;
-                centralSetBaseSnapshot(r.data.state||mergedState);
+                centralSetBaseSnapshot(mergedState);
                 try{ localStorage.setItem(ENSS_CENTRAL_META_KEY,JSON.stringify({schoolId:c.schoolId,lastRemoteAt:ENSS_CENTRAL.lastRemoteAt,schema:ENSS_DATA_SCHEMA,revision:r.data.revision||null})); }catch(e){}
                 ENSS_CENTRAL_PENDING=false;
                 centralStatus('✓ Done sove nan baz santral la.', true);
