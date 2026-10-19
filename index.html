@@ -2434,8 +2434,21 @@
         function markStateVersion() {
             if (!STATE || typeof STATE !== 'object') return;
             var old = Number(STATE._dataSchema || 0);
-            STATE._dataSchema = Math.max(old, ENSS_DATA_SCHEMA);
-            STATE._dataLastMigratedAt = new Date().toISOString();
+            var target = Math.max(old, ENSS_DATA_SCHEMA);
+            // V99: pa modifye timestamp migrasyon an nan chak saveState().
+            // Anvan sa, chak ti sove te chanje _dataLastMigratedAt, sa ki fè
+            // eta JSONB la parèt diferan menm lè done itilizatè yo pa t chanje.
+            // Chak push konsa te deklanche yon nouvo snapshot istorik nan Supabase.
+            if (old < target) {
+                STATE._dataSchema = target;
+                STATE._dataLastMigratedAt = new Date().toISOString();
+            } else {
+                STATE._dataSchema = target;
+                // Mete dat la yon sèl fwa pou ansyen eta ki pa t gen li.
+                if (!STATE._dataLastMigratedAt) {
+                    STATE._dataLastMigratedAt = new Date().toISOString();
+                }
+            }
         }
 
         function saveStateBackup(raw) {
@@ -2456,7 +2469,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V98-SESSION-TIMEOUT-FIX';
+        var ENSS_APP_VERSION = 'V99-STOP-UNNECESSARY-SNAPSHOTS';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2882,9 +2895,10 @@
                 }
                 // Netwaye kopi elèv/pèsonèl yo anvan ekriti santral la; konsève lòt ane lekòl yo.
                 centralNormalizeStateCollections(mergedState);
-                // V98: pa fè UPDATE/upsert si eta pataje a pa chanje.
-                // Chak UPDATE sou school_state deklanche achiv JSONB konplè a;
-                // konparezon sa a anpeche kopi initil, san li pa efase ni modifye done yo.
+                // V99: pa fè UPDATE/upsert si eta pataje a pa chanje.
+                // Chak UPDATE sou school_state ka deklanche achiv JSONB konplè a.
+                // markStateVersion() pa chanje timestamp nan chak sove ankò;
+                // konparezon sa a anpeche snapshots initil san li pa efase done itilizatè yo.
                 if(remote && centralDeepEqual(centralSanitizeStateForRemoteObject(mergedState), centralSanitizeStateForRemoteObject(remote))){
                     ENSS_CENTRAL.ready=true;
                     ENSS_CENTRAL.lastRemoteAt=current.data.updated_at||null;
