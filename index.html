@@ -18733,5 +18733,77 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<script id="enss-v105-teacher-login">
+/* ===== V105 — KONEKSYON ANSEYAN: BLOKE SÈLMAN LÈ ADMINISTRATÈ A DEZAKTIVE L AN KLÈ =====
+   Avan: « Tout anseyan » pa koche (valè pa defo) = tout anseyan bloke.
+   Kounye a: anseyan yo kapab konekte, sof si administratè a dekoche « Tout anseyan » epi klike
+   « Anrejistre » (sa make dezaktivasyon an kòm deliberé). Aksè pa wòl/klas/matyè yo (syncUserAccess)
+   rete egzakteman menm jan. Sekretè ak elèv pa chanje. Ajoute sèlman; pa retire anyen. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V105_TEACHER_LOGIN__) return; window.__ENSS_V105_TEACHER_LOGIN__=true;
+  var TEACHER_ROLES=['enseignant','enseignante','professeur','teacher','anseyan'];
+  function norm(v){ return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+  /* 1) Chak fwa administratè a anrejistre aksè pwofil yo, nou sonje si li te dezaktive anseyan yo an klè. */
+  var prevSet=window.enssSetRoleAccess;
+  if(typeof prevSet==='function' && !prevSet.__v105){
+    var wrappedSet=async function(access){
+      var r=await prevSet.apply(this,arguments);
+      try{
+        var st=window.STATE; if(st){
+          st.parametres=st.parametres||{};
+          var v=(r && r.enseignants!==undefined) ? r.enseignants : (access && access.enseignants);
+          st.parametres.enseignantsAccessDisabledByAdmin=(v===false || v===0 || v==='false');
+        }
+      }catch(e){}
+      return r;
+    };
+    wrappedSet.__v105=true; window.enssSetRoleAccess=wrappedSet;
+  }
+
+  function teacherBlockedByAdmin(){
+    var p=(window.STATE&&STATE.parametres)||{}, g=p.centralRoleAccess||{};
+    return p.enseignantsAccessDisabledByAdmin===true && g.enseignants===false;
+  }
+
+  /* 2) Si lojik la te bloke yon anseyan sèlman paske paramèt la pa t konfigire, nou fini koneksyon an. */
+  var prevLogin=window.inlineLogin;
+  window.inlineLogin=function(){
+    var res=prevLogin ? prevLogin.apply(this,arguments) : undefined;
+    try{
+      var msgEl=document.getElementById('inlineLoginMsg'), userEl=document.getElementById('accueilLoginUser'), passEl=document.getElementById('accueilLoginPass');
+      if(!msgEl||!userEl||!passEl) return res;
+      if(!/dezaktive pa administrat/i.test(msgEl.textContent||'')) return res;
+      var user=userEl.value.trim(), pass=passEl.value.trim();
+      var list=(window.STATE&&STATE.securite&&STATE.securite.users)||[];
+      var u=list.find(function(x){ return x.profil===user && x.mdp===pass; });
+      if(!u || TEACHER_ROLES.indexOf(norm(u.role))===-1) return res;
+      if(teacherBlockedByAdmin()) return res;
+      STATE.utilisateur=u.profil;
+      safeCall(function(){ syncUserAccess(u); },'syncUserAccess');
+      saveState();
+      msgEl.style.color='#27ae60'; msgEl.textContent='✓ Konekte kòm '+u.profil;
+      passEl.value='';
+      safeCall(initApp,'initApp'); safeCall(spawnHearts,'spawnHearts');
+    }catch(e){ try{console.warn('V105 teacher login',e);}catch(_){} }
+    return res;
+  };
+
+  /* 3) Ti eksplikasyon nan panèl Paramèt la pou kaz « Tout anseyan » pa twonpe administratè a. */
+  function addHint(){
+    var box=document.getElementById('enssCentralRoleAccessPanel');
+    if(!box || box.querySelector('.enss-v105-hint')) return;
+    var cb=box.querySelector('#enssRoleTeachers'); if(!cb) return;
+    var p=document.createElement('p'); p.className='enss-v105-hint';
+    p.style.cssText='font-size:.66rem;color:#166534;margin:.4rem 0 0;';
+    p.textContent='ℹ️ Anseyan yo kapab konekte pa defo. Yo bloke sèlman si w dekoche « Tout anseyan » epi w klike « Anrejistre ». Aksè chak anseyan pa klas ak matyè rete jan w defini l la.';
+    var holder=box.querySelector('#enssSaveRoleAccess'); if(holder&&holder.parentNode) holder.parentNode.insertBefore(p,holder.nextSibling);
+  }
+  setInterval(addHint,1500);
+})();
+</script>
+
 </body>
 </html>
