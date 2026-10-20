@@ -14162,7 +14162,7 @@
         window.computeAttendanceSummary = computeAttendanceSummary;
         window.renderFinance = renderFinance;
         window.renderFrais = renderFrais;
-        window.enregistrerPaiement = enregistrerPaiement;
+        if (typeof enregistrerPaiement === 'function') window.enregistrerPaiement = enregistrerPaiement;
         window.openFraisModal = openFraisModal;
         window.saveFrais = saveFrais;
         window.printQuittance = printQuittance;
@@ -14464,7 +14464,7 @@
         window.validateNoteInput = validateNoteInput;
         window.generateTeacherPassword = generateTeacherPassword;
         window.ensurePredefinedTeacherProfiles = ensurePredefinedTeacherProfiles;
-        window.toggleDistributionTLM = toggleDistributionTLM;
+        if (typeof toggleDistributionTLM === 'function') window.toggleDistributionTLM = toggleDistributionTLM;
         window.renderMatieresPrescolaireStandalone = renderMatieresPrescolaireStandalone;
         window.addStandalonePrescolaireMatiere = addStandalonePrescolaireMatiere;
         window.removeStandalonePrescolaireMatiere = removeStandalonePrescolaireMatiere;
@@ -18262,6 +18262,286 @@
     window.Blob.prototype = NativeBlob.prototype;
     try { Object.setPrototypeOf(window.Blob, NativeBlob); } catch(e) {}
   }
+})();
+</script>
+
+
+<style id="enss-v102-polish">
+/* ===== V102 — POLISH VIZYÈL SÈLMAN (okenn chanjman estrikti, gwosè, plasman oswa fonksyon) ===== */
+html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
+::selection{ background:rgba(42,82,152,.22); color:inherit; }
+.card, .stat-card, .classe-section-card, .quick-actions .action-card{
+    box-shadow:0 0 0 1px rgba(30,58,95,.05), 0 1px 2px rgba(15,36,64,.05), 0 10px 28px rgba(15,36,64,.07);
+    transition:box-shadow .22s ease, transform .18s ease, filter .18s ease;
+}
+.card:hover, .classe-section-card:hover, .quick-actions .action-card:hover{
+    box-shadow:0 0 0 1px rgba(42,82,152,.10), 0 2px 4px rgba(15,36,64,.06), 0 16px 36px rgba(15,36,64,.12);
+}
+.stat-card{ background-image:linear-gradient(135deg, rgba(42,82,152,.05), rgba(255,255,255,0) 55%); }
+.btn, button{ transition:transform .15s ease, box-shadow .2s ease, filter .2s ease, background-color .2s ease, border-color .2s ease; }
+.btn:hover:not(:disabled){ box-shadow:0 4px 12px rgba(15,36,64,.16); }
+.btn:active:not(:disabled){ transform:translateY(0); box-shadow:0 1px 3px rgba(15,36,64,.18); }
+.btn:focus-visible, button:focus-visible, a:focus-visible{ outline:2px solid rgba(42,82,152,.55); outline-offset:2px; }
+input, select, textarea{ transition:border-color .2s ease, box-shadow .2s ease, background-color .2s ease; }
+input:focus, select:focus, textarea:focus{ box-shadow:0 0 0 3px rgba(42,82,152,.18); }
+.badge{ letter-spacing:.2px; box-shadow:inset 0 0 0 1px rgba(15,36,64,.04); }
+#topbar{ box-shadow:0 1px 0 rgba(30,58,95,.06), 0 6px 20px rgba(15,36,64,.07); }
+.modal-overlay{ -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); }
+.modal-box{ box-shadow:0 0 0 1px rgba(15,36,64,.06), 0 32px 70px rgba(15,36,64,.28); }
+.table-wrap table th{ background-image:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0)); }
+.table-wrap table tbody tr{ transition:background-color .15s ease; }
+.table-wrap table tbody tr:hover td{ background-image:linear-gradient(rgba(42,82,152,.055), rgba(42,82,152,.055)); }
+.accueil-menu .menu-item{ box-shadow:0 1px 3px rgba(0,0,0,.10), 0 4px 10px rgba(15,36,64,.08); }
+#loginScreen .login-box{ box-shadow:0 0 0 1px rgba(255,255,255,.35), 0 28px 70px rgba(0,0,0,.28); }
+@media (prefers-reduced-motion: reduce){ .card, .btn, button, input, select, textarea, .table-wrap table tbody tr{ transition:none !important; } }
+</style>
+
+<script id="enss-v102-assignments-dedupe">
+/* ===== V102 — ANSEYAN PA DOUBLE NAN KLAS YO (blòk ajoute; pa chanje okenn lòt fonksyon) =====
+   Kòz: menm anseyan ka rete de fwa nan yon klas lè afektasyon yo gen de kalite ID (per-* ak assign-*),
+   oswa lè fizyon Supabase/localStorage kenbe de kopi ki gen ID diferan. Blòk sa a:
+   - netwaye STATE.classAssignments ak STATE.classTeacherAssignments sou plas (san pèdi matyè),
+   - fè sa chak fwa done yo sove, chaje oswa rale nan Supabase,
+   - kenbe yon kopi sekirite lokal anvan premye netwayaj la. */
+(function(){
+  'use strict';
+  if (window.__ENSS_V102_ASSIGN_DEDUPE__) return;
+  window.__ENSS_V102_ASSIGN_DEDUPE__ = true;
+  var BACKUP_KEY = 'enss_v102_assignments_backup';
+
+  function N(v){ return String(v==null?'':v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' '); }
+  function cleanName(v){ return String(v==null?'':v).replace(/\s*[·•-]?\s*\[?(?:per|assign)-[a-z0-9-]+\]?\s*$/i,'').replace(/\s+/g,' ').trim(); }
+  function nameKey(v){ var t=N(cleanName(v)).replace(/[^a-z0-9\s'-]/g,' ').split(/\s+/).filter(Boolean); t.sort(); return t.join(' '); }
+  function is79(c){ return /(?:^|\s)(?:7|8|9)(?:e|è|eme|ème)?(?:\s|$)/i.test(String(c||'')); }
+  function personnelList(){ return (window.STATE && Array.isArray(STATE.personnel)) ? STATE.personnel : []; }
+  function personById(id){
+    if(id==null || id==='') return null;
+    var ps=personnelList();
+    for(var i=0;i<ps.length;i++){ if(ps[i] && String(ps[i].id||'')===String(id)) return ps[i]; }
+    return null;
+  }
+  function personName(p){
+    var a=[p&&p.prenom,p&&p.nom].map(function(x){return String(x==null?'':x).trim();}).filter(Boolean).join(' ').trim();
+    return a || String((p&&(p.name||p.nomComplet))||'').trim();
+  }
+  function rowKey(r){
+    var k=nameKey(r&&r.teacher);
+    if(k) return k;
+    var p=personById(r&&r.teacherId);
+    if(p){ k=nameKey(personName(p)); if(k) return k; }
+    return (r&&r.teacherId) ? ('id:'+String(r.teacherId)) : '';
+  }
+  function subjectsOf(r){
+    var raw = Array.isArray(r&&r.subjects) ? r.subjects : (r&&r.subject ? String(r.subject).split('/') : []);
+    var out=[], seen={};
+    raw.forEach(function(s){ s=String(s==null?'':s).trim(); var k=N(s); if(s && !seen[k]){ seen[k]=1; out.push(s); } });
+    return out;
+  }
+  function subjectSig(r){ return subjectsOf(r).map(N).sort().join('|'); }
+
+  /* Regroupe les lignes d'une classe par enseignant (nom normalisé, ordre des mots ignoré).
+     Deux enseignants différents qui ont chacun un vrai dossier Personnel ne sont jamais fusionnés. */
+  function normalizeRows(classe, rows){
+    var byKey={}, info=[];
+    rows.forEach(function(r,idx){
+      if(!r || typeof r!=='object'){ info.push(null); return; }
+      var k=rowKey(r);
+      if(!k){ info.push(null); return; }
+      var pid = personById(r.teacherId) ? String(r.teacherId) : '';
+      var list = byKey[k] = byKey[k] || [];
+      var b=null, i;
+      for(i=0;i<list.length;i++){ if(list[i].pid===pid){ b=list[i]; break; } }
+      if(!b && pid){ for(i=0;i<list.length;i++){ if(list[i].pid===''){ b=list[i]; b.pid=pid; break; } } }
+      if(!b && !pid && list.length){ b=list[0]; }
+      if(!b){ b={pid:pid, idx:[]}; list.push(b); }
+      b.idx.push(idx);
+      info.push(b);
+    });
+    var out=[], done=[];
+    rows.forEach(function(r,idx){
+      var b=info[idx];
+      if(!b){ out.push(r); return; }
+      if(done.indexOf(b)>=0 && b.merge) return;
+      var first=rows[b.idx[0]];
+      var ids={}, names={};
+      b.idx.forEach(function(j){ ids[String(rows[j].teacherId||'')]=1; names[cleanName(rows[j].teacher)]=1; });
+      var multi = Object.keys(ids).length>1 || Object.keys(names).length>1;
+      var repId = b.pid || (function(){ for(var q=0;q<b.idx.length;q++){ var v=rows[b.idx[q]].teacherId; if(v) return String(v); } return ''; })();
+      var repName = cleanName(first.teacher) || (personById(repId) ? personName(personById(repId)) : '');
+      var grouped = is79(classe) || b.idx.some(function(j){ return Array.isArray(rows[j].subjects); });
+      if(grouped){
+        if(b.idx.length<2){ out.push(r); done.push(b); b.merge=true; return; }
+        var subs=[], seen={}, latest=0;
+        b.idx.forEach(function(j){ subjectsOf(rows[j]).forEach(function(s){ var k=N(s); if(!seen[k]){ seen[k]=1; subs.push(s); } }); latest=Math.max(latest,Number(rows[j].savedAt)||0); });
+        var m={}; Object.keys(first).forEach(function(p){ m[p]=first[p]; });
+        m.teacherId=repId; m.teacher=repName; m.subjects=subs; m.subject=subs.join(' / ');
+        if(latest) m.savedAt=latest;
+        out.push(m); done.push(b); b.merge=true; return;
+      }
+      /* Format « une matière par ligne » : on ne retire que les doublons exacts. */
+      b.seen = b.seen || {};
+      var sig = subjectSig(r) || N(r.subject||'');
+      if(b.seen[sig]) return;
+      b.seen[sig]=1;
+      if(multi && (String(r.teacherId||'')!==repId || cleanName(r.teacher)!==repName)){
+        var c={}; Object.keys(r).forEach(function(p){ c[p]=r[p]; });
+        c.teacherId=repId; c.teacher=repName; out.push(c);
+      } else out.push(r);
+    });
+    return out;
+  }
+
+  function normalizeMap(map){
+    if(!map || typeof map!=='object') return false;
+    var changed=false;
+    Object.keys(map).forEach(function(c){
+      var rows=map[c];
+      if(!Array.isArray(rows) || rows.length<2) return;
+      var next=normalizeRows(c,rows);
+      if(JSON.stringify(next)!==JSON.stringify(rows)){ map[c]=next; changed=true; }
+    });
+    return changed;
+  }
+
+  function backupOnce(){
+    try{
+      if(localStorage.getItem(BACKUP_KEY)) return;
+      localStorage.setItem(BACKUP_KEY, JSON.stringify({at:Date.now(), classAssignments:STATE.classAssignments||{}, classTeacherAssignments:STATE.classTeacherAssignments||{}}));
+    }catch(e){}
+  }
+
+  function normalizeState(){
+    try{
+      if(!window.STATE || typeof STATE!=='object') return false;
+      var a=STATE.classAssignments, b=STATE.classTeacherAssignments;
+      var needs=false;
+      [a,b].forEach(function(map){ if(map && typeof map==='object') Object.keys(map).forEach(function(c){ if(Array.isArray(map[c]) && map[c].length>1) needs=true; }); });
+      if(!needs) return false;
+      var snapshot=JSON.stringify({a:a||{},b:b||{}});
+      var probeA=a?JSON.parse(JSON.stringify(a)):null, probeB=b?JSON.parse(JSON.stringify(b)):null;
+      var chA=normalizeMap(probeA), chB=normalizeMap(probeB);
+      if(!chA && !chB) return false;
+      backupOnce();
+      if(chA) STATE.classAssignments=probeA;
+      if(chB) STATE.classTeacherAssignments=probeB;
+      return JSON.stringify({a:STATE.classAssignments||{},b:STATE.classTeacherAssignments||{}})!==snapshot;
+    }catch(e){ try{console.warn('V102 dedupe',e);}catch(_){} return false; }
+  }
+
+  function refreshUI(){
+    try{
+      var c=window.currentClasseNotes; if(!c) return;
+      if(typeof window.renderClasseTeacherBanner==='function') window.renderClasseTeacherBanner(c);
+      if(typeof window.renderClasseTeachers==='function') window.renderClasseTeachers(c);
+    }catch(e){}
+  }
+  function run(){
+    if(normalizeState()){
+      try{ if(typeof window.saveState==='function') window.saveState(); }catch(e){}
+      refreshUI();
+    }
+  }
+
+  /* 1) Chak sove: done yo netwaye anvan yo ekri (localStorage + Supabase). */
+  var origSave=window.saveState;
+  if(typeof origSave==='function' && !origSave.__v102){
+    var wrappedSave=function(){ try{ normalizeState(); }catch(e){} return origSave.apply(this,arguments); };
+    wrappedSave.__v102=true; window.saveState=wrappedSave;
+  }
+  /* 2) Apre chak lekti Supabase. */
+  var origPull=window.centralPullState;
+  if(typeof origPull==='function' && !origPull.__v102){
+    var wrappedPull=function(){
+      var r=origPull.apply(this,arguments);
+      return Promise.resolve(r).then(function(v){ try{ run(); }catch(e){} return v; });
+    };
+    wrappedPull.__v102=true; window.centralPullState=wrappedPull;
+  }
+  /* 3) Sòti: yon sèl liy pa (anseyan, matyè) menm si done yo pa t netwaye ankò. */
+  var origGet=window.getClasseTeacherAssignments;
+  if(typeof origGet==='function' && !origGet.__v102){
+    var wrappedGet=function(){
+      var res=origGet.apply(this,arguments);
+      if(!Array.isArray(res) || res.length<2) return res;
+      var seen={}, out=[];
+      res.forEach(function(r){
+        if(!r){ out.push(r); return; }
+        var k=rowKey(r); if(!k){ out.push(r); return; }
+        var sig=k+'#'+(subjectSig(r)||N(r.subject||''));
+        if(seen[sig]) return; seen[sig]=1; out.push(r);
+      });
+      return out.length===res.length ? res : out;
+    };
+    wrappedGet.__v102=true; window.getClasseTeacherAssignments=wrappedGet;
+  }
+  /* 4) Chaje paj la + fi sekirite (léger, idempotent). */
+  setTimeout(run,800);
+  window.addEventListener('load',function(){ setTimeout(run,1500); });
+  setInterval(run,5000);
+  window.__ENSS_V102_NORMALIZE_ASSIGNMENTS__=normalizeState;
+})();
+</script>
+
+
+<style id="enss-v103-ux">
+/* ===== V103 — PREZANTASYON PI SENP E PWOFESYONÈL (rearajman vizyèl; okenn fonksyon pa retire) ===== */
+:root{ --radius:14px; --radius-sm:10px; --shadow:0 1px 2px rgba(15,36,64,.05), 0 8px 24px rgba(15,36,64,.07); }
+body{ line-height:1.55; }
+/* Tit seksyon yo pi klè */
+.card > h3:first-child, .card > h4:first-child{ color:var(--primary); padding-bottom:.45rem; margin-bottom:.7rem; border-bottom:2px solid var(--border); }
+#topbar .page-title{ font-weight:800; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* Estatistik: chif gwo, etikèt ti, aliyman pwòp */
+.stat-card .stat-number, .accueil-stat .number{ font-size:1.75rem; font-weight:800; font-variant-numeric:tabular-nums; }
+.stat-card .stat-label, .accueil-stat .label{ font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text-light); }
+.accueil-stats{ gap:.8rem; }
+.accueil-stat{ border-top:3px solid var(--accent); }
+.stat-card{ border-left-width:5px; }
+/* Ban yo: menm fòm, pi fasil pou klike (ti ekran = zòn manyen pi gwo) */
+.accueil-menu{ gap:.4rem; }
+.accueil-menu .menu-item{ display:inline-flex; align-items:center; gap:.3rem; min-height:34px; }
+.module-action-band{ border-radius:12px; padding:.6rem .9rem; letter-spacing:.2px; }
+.direction-mini-band{ border-style:solid; border-color:var(--border); border-radius:10px; }
+.accueil-menu .menu-item:hover, .direction-mini-band:hover, .quick-actions .action-card:hover, .classe-section-card:hover{ transform:translateY(-2px); }
+/* Ba zouti: gwoup yo separe klèman */
+.toolbar{ box-shadow:0 1px 3px rgba(15,36,64,.06); }
+.toolbar .toolbar-group{ padding-right:.6rem; border-right:1px solid var(--border); }
+.toolbar .toolbar-group:last-child{ padding-right:0; border-right:0; }
+/* Tablo: antèt klè, liy altène, chif aliyen (kòlè selil yo pa chanje) */
+.table-wrap{ scrollbar-width:thin; }
+.table-wrap table th{ background-color:#eef3fb; color:var(--primary); border-bottom:2px solid #c9d6ea; }
+.table-wrap table td{ border-bottom:1px solid #edf1f7; font-variant-numeric:tabular-nums; }
+.table-wrap table tbody tr:nth-child(even) td{ background-image:linear-gradient(rgba(30,58,95,.03), rgba(30,58,95,.03)); }
+/* Fòm: etikèt klè, chan pi konfòtab */
+.form-group label, .modal-box .form-group label{ font-weight:700; color:var(--text); }
+.modal-box input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=color]), .modal-box select, .card .form-group input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=color]), .card .form-group select{ min-height:38px; }
+/* Fenèt: tit ak bouton Anrejistre toujou vizib menm si fòm lan long */
+.modal-box .modal-header{ position:sticky; top:-1.2rem; z-index:3; background:#fff; padding-bottom:.5rem; margin-bottom:.6rem; border-bottom:1px solid var(--border); }
+.modal-box .form-actions{ position:sticky; bottom:-1.2rem; z-index:3; background:#fff; padding-top:.6rem; border-top:1px solid var(--border); }
+@media (max-width:560px){
+  .modal-box .modal-header{ top:-.8rem; } .modal-box .form-actions{ bottom:-.8rem; }
+  .modal-box .form-row{ grid-template-columns:1fr; }
+  .accueil-menu .menu-item{ min-height:38px; }
+  .stat-card .stat-number, .accueil-stat .number{ font-size:1.5rem; }
+}
+/* Bouton « Retounen anlè » */
+#enssToTop{ position:fixed; right:14px; bottom:14px; z-index:850; width:42px; height:42px; border-radius:50%; background:var(--primary); color:#fff; font-size:1.1rem; font-weight:800; box-shadow:0 6px 18px rgba(15,36,64,.28); opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .2s, transform .2s; }
+#enssToTop.show{ opacity:.92; pointer-events:auto; transform:none; }
+@media print{ #enssToTop{ display:none !important; } }
+</style>
+
+<script id="enss-v103-ux-js">
+/* V103 — bouton « Retounen anlè » (ajoute sèlman; pa chanje okenn fonksyon egzistan) */
+(function(){
+  'use strict';
+  if(window.__ENSS_V103_TOTOP__) return; window.__ENSS_V103_TOTOP__=true;
+  function init(){
+    if(document.getElementById('enssToTop')) return;
+    var b=document.createElement('button'); b.id='enssToTop'; b.type='button'; b.title='Retounen anlè'; b.setAttribute('aria-label','Retounen anlè'); b.textContent='↑';
+    b.addEventListener('click',function(){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); } });
+    document.body.appendChild(b);
+    window.addEventListener('scroll',function(){ b.classList.toggle('show',(window.pageYOffset||document.documentElement.scrollTop||0)>500); },{passive:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
 
