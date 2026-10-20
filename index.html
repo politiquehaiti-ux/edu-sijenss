@@ -18545,5 +18545,193 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<script id="enss-v104-voice">
+/* ===== V104 — LEKTI VWA PI BON (quiz, evalyasyon, bibliyotèk) : FR / HT / EN / ES =====
+   Ajoute sèlman. Ranplase fonksyon lekti yo ak vèsyon ki:
+   - detekte lang chak pati (kesyon, repons, mo ant gimè) pa mo ki pi fò + matyè a,
+   - li chak pati ak pwòp vwa lang li (egz. Espagnol: kesyon an espanyòl, repons lan an franse),
+   - chwazi pi bon vwa disponib (Natural/Neural/Google an premye) epi tann vwa yo chaje,
+   - ekri kreyòl la nan yon òtograf ki pi klè pou vwa franse a lè pa gen vwa kreyòl natif natal,
+   - koupe tèks long yo an mòso (navigatè yo kanpe lekti a sinon), li pi dousman pou plis klète. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V104_VOICE__) return; window.__ENSS_V104_VOICE__=true;
+  if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance==='undefined') return;
+  var synth=window.speechSynthesis;
+  var BCP={ht:'ht-HT',fr:'fr-FR',en:'en-US',es:'es-ES'};
+  function strip(s){return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+  function base(l){return String(l||'').toLowerCase().split(/[-_]/)[0];}
+  function W(str,w,o){o=o||{};strip(str).toLowerCase().split(/\s+/).forEach(function(x){if(x&&!(x in o&&o[x]>=w))o[x]=w;});return o;}
+  var LEX={
+    fr:W('le la un de que et en au ou ce son sa ses il elle on ne pas par plus se si',1,W('les des du une est sont pour qui quel quelle quels quelles comment pourquoi combien quand dans avec sans sur entre nous vous ils elles cette ces aux mais donc car comme tres aussi leur leurs sous apres avant chaque quoi dit appelle-t-on est-ce definition exemple je suis sommes etes ai avons ont ils elles nous vous signifie signifient signifier traduis traduire traduction bonjour merci bonsoir salut maison livre ecole',2.5)),
+    ht:W('yo nan ak pou pa li te ap gen ki sa se ka pi plis men le fe we vle bay lot gwo moun bagay dlo san sou ye',1,W('mwen kisa kijan poukisa kile konbyen eske paske pral kapab genyen yon nou lan kote anpil toujou pwofese elev lekol kreyol ayisyen jodi anko bezwen kounye demen selman tankou epi oswa tout kesyon repons matye fanmi lanmou',2.5)),
+    en:W('to in for by at as it be an or you do choose complete correct name',1,W('the of and is are what which who how why does did that this these those with from your they was were has have not name means called word sentence answer translate meaning week month year color good morning hello thanks thank please goodbye house book school teacher student table chair red blue green yellow black white dog cat friend family brother sister mother father night afternoon evening',2.5)),
+    es:W('el la de en y es se su sus lo al mas que un',1,W('los las del una unos unas muy pero porque cuando donde cuantos cuantas cual cuales quien como traduce yo soy eres somos son ella nosotros ellos ellas tengo tienes estoy estas estamos esta estan tiene tienen hay tambien hacer para por casa bonita bonito hola gracias buenos dias buenas amigo escuela libro nino nina espanol ano senor',2.5))
+  };
+  function subjLang(q){
+    var m=strip(String(q&&q.matiere||'')).toLowerCase();
+    if(/anglais|english/.test(m))return 'en'; if(/espagnol|espanol/.test(m))return 'es';
+    if(/creole|kreyol|kominikasyon|istwa|jewografi|jeyografi|fizik|chimi/.test(m))return 'ht';
+    if(/francais/.test(m))return 'fr'; return '';
+  }
+  /* Detekte lang: {lang, score}. prior = lang matyè a (fèb), fallback = si pa gen prèv. */
+  function detect(text,prior,fallback){
+    var raw=String(text||''), low=strip(raw).toLowerCase().replace(/[^a-z0-9\s'\-]/g,' ');
+    var toks=low.replace(/'/g,' ').split(/[\s\-]+/).filter(Boolean), sc={fr:0,ht:0,en:0,es:0};
+    toks.forEach(function(t){ for(var k in sc){ if(LEX[k][t]) sc[k]+=LEX[k][t]; } });
+    var ap=(low.match(/\b(l|d|qu|j|c|n|s|m|t)'\w/g)||[]).length; sc.fr+=Math.min(ap,3)*1.5;
+    if(/[ñ¿¡]/i.test(raw)) sc.es+=6;
+    if(/[çœ]/i.test(raw)) sc.fr+=2;
+    if(/[òÒ]/.test(raw)) sc.ht+=3;
+    var w=toks.filter(function(t){return t.indexOf('w')>=0 && !/^(www|web|show|new|how|who|two|what|when|where|which|why|with|was|were|will|would|know|knows|answer|we|own|low|slow|blow|grow|flow|yellow|brown)$/.test(t);}).length; sc.ht+=Math.min(w,3);
+    var best='',bs=0; ['fr','ht','en','es'].forEach(function(k){ if(sc[k]>bs){bs=sc[k];best=k;} });
+    if(prior && sc[prior]!==undefined){ sc[prior]+=1.2; if(sc[prior]>bs){bs=sc[prior];best=prior;} }
+    if(bs<1) return {lang:fallback||prior||'fr',score:0};
+    return {lang:best,score:bs};
+  }
+  function splitQuoted(t){
+    var out=[],re=/«\s*([^»]+?)\s*»|“([^”]+)”|"([^"]+)"/g,last=0,m;
+    t=String(t||'');
+    while((m=re.exec(t))){ if(m.index>last) out.push({t:t.slice(last,m.index),q:false}); out.push({t:m[1]||m[2]||m[3],q:true}); last=re.lastIndex; }
+    if(last<t.length) out.push({t:t.slice(last),q:false});
+    return out;
+  }
+  var SAY={ /* mo ki pale tèks la */
+    q:{fr:'Question.',ht:'Kesyon.',en:'Question.',es:'Pregunta.'},
+    a:{fr:'Réponse.',ht:'Repons.',en:'Answer.',es:'Respuesta.'},
+    ok:{fr:'Bonne réponse ! Bravo ! Vous avez obtenu un point.',ht:'Bon repons ! Bravo ! Ou jwenn yon pwen.',en:'Correct answer! Well done! You earned a point.',es:'¡Respuesta correcta! ¡Bravo! Has ganado un punto.'},
+    bad:{fr:'Mauvaise réponse. La bonne réponse est',ht:'Move repons. Bon repons lan se',en:'Wrong answer. The correct answer is',es:'Respuesta incorrecta. La respuesta correcta es'}
+  };
+  var OPS={ pct:{fr:' pour cent',ht:' pou san',en:' percent',es:' por ciento'}, over:{fr:' sur ',ht:' sou ',en:' over ',es:' sobre '}, times:{fr:' fois ',ht:' fwa ',en:' times ',es:' por '}, div:{fr:' divisé par ',ht:' divize pa ',en:' divided by ',es:' dividido entre '}, plus:{fr:' plus ',ht:' plis ',en:' plus ',es:' más '}, minus:{fr:' moins ',ht:' mwens ',en:' minus ',es:' menos '}, eq:{fr:' égale ',ht:' egal ',en:' equals ',es:' igual a '} };
+  function speakable(t,lang){
+    t=String(t==null?'':t).replace(/^\s*[A-Za-z]{1,2}\s*:\s+/,'').replace(/[*_#`~]+/g,' ').replace(/[\r\n]+/g,'. ');
+    t=t.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\/\d)/g,'$1'+OPS.over[lang]+'$2').replace(/%/g,OPS.pct[lang])
+       .replace(/(\d)\s*[x×]\s*(?=\d)/g,'$1'+OPS.times[lang]).replace(/÷/g,OPS.div[lang]).replace(/(\d)\s*\+\s*(?=\d)/g,'$1'+OPS.plus[lang])
+       .replace(/(\d)\s*[−–]\s*(?=\d)/g,'$1'+OPS.minus[lang]).replace(/\s=\s|(\d)=(?=\d)/g,function(m,a){return (a||'')+OPS.eq[lang];});
+    return t.replace(/\s+/g,' ').trim();
+  }
+  /* Kreyòl -> òtograf ki pi pwòch pou vwa franse a (sèlman si pa gen vwa kreyòl natif natal) */
+  function respellHT(t){
+    return String(t).replace(/[A-Za-zÀ-ÿ]+/g,function(w){
+      if(w===w.toUpperCase()) return w;
+      var s=w.toLowerCase().replace(/ò/g,'o');
+      s=s.replace(/en(?![aeiouyèéùoun])/g,'in').replace(/([aeiouèéy])s(?=[aeiouèéy])/g,'$1ss').replace(/g(?=[eiè])/g,'gu')
+         .replace(/w(?=[aeiouèéy])/g,'ou').replace(/w/g,'ou').replace(/e(?![nm])/g,'é');
+      return s;
+    });
+  }
+  function chunks(t,max){
+    var out=[],parts=String(t).split(/(?<=[.!?;:…])\s+/);
+    parts.forEach(function(p){
+      while(p.length>max){ var i=p.lastIndexOf(',',max); if(i<40)i=p.lastIndexOf(' ',max); if(i<20)i=max; out.push(p.slice(0,i+1).trim()); p=p.slice(i+1); }
+      if(p.trim()) out.push(p.trim());
+    });
+    return out;
+  }
+  /* Chwa vwa: pi bon kalite an premye */
+  var vcache={};
+  function scoreVoice(v,want){
+    var l=String(v.lang||'').toLowerCase().replace('_','-'), b=base(l), n=String(v.name||'');
+    if(b!==want) return -1;
+    var s=3;
+    if(/natural|neural|online/i.test(n)) s+=5; if(/google/i.test(n)) s+=3; if(/premium|enhanced|siri/i.test(n)) s+=3; if(/compact|novelty|eloquence/i.test(n)) s-=3;
+    if(want==='fr'&&l==='fr-fr') s+=1; if(want==='en'&&(l==='en-us'||l==='en-gb')) s+=1; if(want==='es'&&/es-(es|mx|us)/.test(l)) s+=1;
+    return s;
+  }
+  function pickVoice(lang){
+    var key=lang+'|'+(synth.getVoices()||[]).length; if(vcache[key]!==undefined) return vcache[key];
+    var vs=synth.getVoices()||[], res={voice:null,native:true};
+    function best(want){ var b=null,bs=-1; vs.forEach(function(v){var s=scoreVoice(v,want); if(s>bs){bs=s;b=v;}}); return b; }
+    res.voice=best(lang);
+    if(!res.voice && lang==='ht'){ res.voice=best('fr'); res.native=false; }
+    return (vcache[key]=res);
+  }
+  function ensureVoices(cb){
+    var v=synth.getVoices(); if(v&&v.length){cb();return;}
+    var done=false; function f(){ if(done)return; done=true; try{synth.removeEventListener('voiceschanged',f);}catch(e){} cb(); }
+    try{synth.addEventListener('voiceschanged',f);}catch(e){} setTimeout(f,1200);
+  }
+  var token=0;
+  /* segs = [{text, lang}] — li youn apre lòt, chak ak bon vwa */
+  function speakSegments(segs,after){
+    var my=++token;
+    function fin(){ if(my===token && typeof after==='function'){ try{after();}catch(e){} } }
+    try{ synth.cancel(); }catch(e){}
+    ensureVoices(function(){ setTimeout(function(){
+      var queue=[];
+      segs.forEach(function(s){
+        var lang=s.lang||'fr', pv=pickVoice(lang), txt=speakable(s.text,lang);
+        if(lang==='ht' && !pv.native) txt=respellHT(txt);
+        if(!txt||!/[A-Za-zÀ-ÿ0-9]/.test(txt)) return;
+        chunks(txt,170).forEach(function(c){ queue.push({text:c,lang:lang,pv:pv}); });
+      });
+      (function next(i){
+        if(my!==token) return;
+        if(i>=queue.length){ fin(); return; }
+        var it=queue[i], u=new SpeechSynthesisUtterance(it.text), v=it.pv.voice;
+        u.lang=v?v.lang:BCP[it.lang]; if(v) u.voice=v;
+        u.rate=(it.lang==='ht')?(it.pv.native?0.85:0.8):0.88; u.pitch=1; u.volume=1;
+        var moved=false; function go(){ if(moved)return; moved=true; setTimeout(function(){next(i+1);},120); }
+        u.onend=go; u.onerror=go;
+        try{ synth.speak(u); }catch(e){ go(); }
+      })(0);
+    },70); });
+  }
+  /* Kesyon / repons -> segman ak lang pa yo */
+  function qSegs(text,prior,foreign,target){
+    var parts=splitQuoted(text), outer=parts.filter(function(p){return !p.q;}).map(function(p){return p.t;}).join(' ');
+    var L0=detect(outer||text,prior).lang, segs=[];
+    parts.forEach(function(p){
+      var l=L0; if(p.q){ var r=detect(p.t,''); var qd=(target&&foreign)?(target===foreign?L0:foreign):(foreign||L0); l=r.score>=2?r.lang:qd; }
+      var last=segs[segs.length-1]; if(last&&last.lang===l) last.text+=' '+p.t; else segs.push({text:p.t,lang:l});
+    });
+    return {segs:segs,L0:L0};
+  }
+  /* Endis « an franse / in English / en español / an kreyòl » = lang repons lan */
+  function targetLang(t){
+    var m=strip(String(t||'')).toLowerCase().match(/\b(?:en|in|an|em)\s+(francais|franse|french|frances|anglais|english|angle|ingles|espagnol|spanish|espanyol|espanol|kreyol|creole)\b/);
+    if(!m){ var all=strip(String(t||'')).toLowerCase().match(/\b(francais|franse|french|frances|anglais|english|angle|ingles|espagnol|spanish|espanyol|espanol|kreyol|creole)\b/g)||[];
+      var u={}; all.forEach(function(x){u[/^fran|^french|^frances/.test(x)?'fr':/angl|^english|^ingles/.test(x)?'en':/^esp|^spanish/.test(x)?'es':'ht']=1;});
+      var ks=Object.keys(u); return ks.length===1?ks[0]:''; }
+    var w=m[1]; if(/^fran|^french|^frances/.test(w))return 'fr'; if(/angl|^english|^ingles/.test(w))return 'en'; if(/^esp|^spanish/.test(w))return 'es'; return 'ht';
+  }
+  function qaSegs(q,withAnswer){
+    var prior=subjLang(q), foreign=(prior==='en'||prior==='es')?prior:'';
+    var qt=String(q&&q.question||'').replace(/^\s*(?:dans une activit[eé] scolaire\s*,\s*)/i,'').replace(/^\s*[A-Za-z]{1,2}\s*:\s+/,''), instr='', mm=qt.match(/^\s*(explique|donne une r[eé]ponse courte)\s*:\s*/i);
+    if(mm){ instr=mm[1]; qt=qt.slice(mm[0].length); }
+    var tgt=targetLang(qt), Q=qSegs(qt,prior,foreign,tgt), out=[{text:SAY.q[Q.L0],lang:Q.L0}].concat(instr?[{text:instr,lang:'fr'}]:[],Q.segs);
+    var dA=detect(q&&q.reponse,'',Q.L0), La=dA.lang, tg=tgt;
+    if(tg && dA.score<2.5) La=tg;
+    else if(!tg && foreign && dA.score<2.5 && /traduce|translate|traduc/.test(strip(qt).toLowerCase())) La=(Q.L0===foreign?'fr':foreign);
+    else if(!tg && foreign && dA.score<2.5 && /dit-on|how do you say|como se dice/.test(strip(qt).toLowerCase())) La=foreign;
+    return {L0:Q.L0,La:La,question:out,answer:[{text:q&&q.reponse,lang:La}],out:out.concat(withAnswer?[{text:SAY.a[La],lang:La},{text:q&&q.reponse,lang:La}]:[])};
+  }
+  function feedback(q,ok){
+    var s=qaSegs(q,false);
+    return ok?[{text:SAY.ok[s.L0],lang:s.L0}]:[{text:SAY.bad[s.L0],lang:s.L0},{text:q&&q.reponse,lang:s.La}];
+  }
+  /* ---- API piblik ki egziste deja: ranplase ---- */
+  window.detectQuestionAnswerLanguage=function(question,answer){ return BCP[detect(String(question||'')+' '+String(answer||''),'').lang]; };
+  window.getSpeechLangForQuestion=function(q){ var s=qaSegs(q,false); return BCP[s.L0]; };
+  window.getSpeechVoice=function(lang){ return pickVoice(base(lang)).voice; };
+  window.speechPrefixForLang=function(lang){ return SAY.q[base(lang)]||SAY.q.fr; };
+  window.speechCorrectForLang=function(lang){ return SAY.ok[base(lang)]||SAY.ok.fr; };
+  window.speechIncorrectForLang=function(lang,answer){ var b=base(lang); return (SAY.bad[b]||SAY.bad.fr)+' '+answer; };
+  window.speakQuizText=function(text,after,langOverride){
+    if(!text){ if(typeof after==='function')after(); return; }
+    var l=langOverride?base(langOverride):'', segs;
+    if(l&&BCP[l]) segs=[{text:text,lang:l}]; else segs=qSegs(text,'').segs;
+    speakSegments(segs,after);
+  };
+  window.readCurrentQuizQuestion=function(){ if(typeof quizSession==='undefined'||!quizSession)return; var q=quizSession.questions[quizSession.index]; if(q) speakSegments(qaSegs(q,false).question); };
+  window.readCurrentQuizFeedback=function(){ if(typeof quizSession==='undefined'||!quizSession||!quizSession.currentAnswered)return; var q=quizSession.questions[quizSession.index],r=quizSession.results[quizSession.index]; if(q) speakSegments(feedback(q,!!(r&&r.ok))); };
+  window.readCurrentEvaluationQuestion=function(){ if(typeof evalSession==='undefined'||!evalSession)return; var q=evalSession.questions[evalSession.index]; if(q) speakSegments(qaSegs(q,false).question); };
+  window.readCurrentEvaluationFeedback=function(){ if(typeof evalSession==='undefined'||!evalSession||!evalSession.currentAnswered)return; var q=evalSession.questions[evalSession.index],last=evalSession.results[evalSession.results.length-1]; if(q) speakSegments(feedback(q,!!(last&&last.ok))); };
+  window.readLibraryQuestionAnswer=function(id){ var q=(window.ENSS_QUIZ_BANK||[]).find(function(x){return x&&String(x.id)===String(id);}); if(q) speakSegments(qaSegs(q,true).out); };
+  window.__ENSS_V104_TEST__={detect:detect,qaSegs:qaSegs,respellHT:respellHT,speakable:speakable,pickVoice:pickVoice,speakSegments:speakSegments,chunks:chunks,subjLang:subjLang};
+})();
+</script>
+
 </body>
 </html>
