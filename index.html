@@ -18805,5 +18805,188 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<script id="enss-v106-seed">
+/* ===== V106 — « INISYALIZE BAZ SANTRAL » : KANTITE REYÈL, ANTI-DOUBLON, ANVAN OU KONFIME =====
+   Pwoblèm: mesaj la te konte tout ane yo ansanm epi konte menm pèsonèl la de fwa lè dosye li gen de fòm.
+   Kounye a: mesaj la montre elèv pa ane, elèv/pèsonèl inik, ak kantite doublon ki pral fizyone.
+   Anyen pa chanje si ou kanpe (Anile). Yon kopi sekirite fèt anvan; pa gen RESET. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V106_SEED__) return; window.__ENSS_V106_SEED__=true;
+  function nk(v){ return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean).sort().join(' '); }
+  function filled(v){ if(v===undefined||v===null) return false; if(typeof v==='string') return v.trim()!==''; if(Array.isArray(v)) return v.length>0; if(typeof v==='object') return Object.keys(v).length>0; return true; }
+  function richness(o){ var n=0; Object.keys(o||{}).forEach(function(k){ if(filled(o[k])) n++; }); return n; }
+  function mergeGroup(rows){
+    var base=rows.slice().sort(function(a,b){return richness(b)-richness(a);})[0];
+    var out=JSON.parse(JSON.stringify(base));
+    rows.forEach(function(r){ Object.keys(r).forEach(function(k){ if(!filled(out[k]) && filled(r[k])) out[k]=JSON.parse(JSON.stringify(r[k])); }); });
+    return out;
+  }
+  function dedupe(rows,keyFn){
+    var order=[],groups={};
+    rows.forEach(function(r,i){ var k=keyFn(r,i); if(!(k in groups)){ groups[k]=[]; order.push(k); } groups[k].push(r); });
+    var out=[],dup=0,alias={};
+    order.forEach(function(k){
+      var g=groups[k]; if(g.length===1){ out.push(g[0]); return; }
+      var m=mergeGroup(g); out.push(m); dup+=g.length-1;
+      g.forEach(function(r){ if(r.id!=null && m.id!=null && r.id!==m.id) alias[r.id]=m.id; });
+    });
+    return {rows:out,dup:dup,alias:alias};
+  }
+  function studentKey(s,i){
+    var yr=String(s._YEAR||s.annee||s.anneeScolaire||''), n=nk((s.nom||'')+' '+(s.prenom||'')), d=nk(s.dateNaissance||s.date_naissance||'');
+    return (n&&d)? ('n|'+yr+'|'+n+'|'+d) : ('u|'+i);
+  }
+  function personnelKey(p,i){ var n=nk((p.nom||'')+' '+(p.prenom||'')); return n? ('p|'+n) : ('u|'+i); }
+  function remap(node,alias,skip){
+    if(!node||typeof node!=='object') return 0; var c=0;
+    if(Array.isArray(node)){ node.forEach(function(x){ c+=remap(x,alias,skip); }); return c; }
+    Object.keys(node).forEach(function(k){
+      var v=node[k];
+      if((k==='teacherId'||k==='personnelId') && typeof v==='string' && alias[v]!==undefined){ node[k]=alias[v]; c++; }
+      else if(v && typeof v==='object' && !(skip&&skip.indexOf(k)>=0)) c+=remap(v,alias,skip);
+    });
+    return c;
+  }
+  function plan(){
+    var st=Array.isArray(STATE.students)?STATE.students:[], pe=Array.isArray(STATE.personnel)?STATE.personnel:[];
+    var by={}; st.forEach(function(s){ var y=String(s._YEAR||s.annee||s.anneeScolaire||'?'); by[y]=(by[y]||0)+1; });
+    var S=dedupe(st,studentKey), P=dedupe(pe,personnelKey);
+    var year=String(STATE.anneeCourante||'');
+    var act=S.rows.filter(function(x){return String(x._YEAR||x.annee||x.anneeScolaire||'?')===year;}).length;
+    return {st:st,pe:pe,S:S,P:P,by:by,year:year,active:act,activeRaw:by[year]||0};
+  }
+  window.centralSeedCurrentState=async function(){
+    if(!requireAdmin('inisyalize baz santral la')) return false;
+    if(!ENSS_CENTRAL.session){ alert('Konekte ak kont Supabase administratè a anvan.'); return false; }
+    try{ if(typeof centralNormalizeStateCollections==='function') centralNormalizeStateCollections(STATE); }catch(e){}
+    var p=plan();
+    var years=Object.keys(p.by).sort().map(function(y){ return y+': '+p.by[y]; }).join(' · ');
+    var msg='Premye migration ENSS → baz santral la\n\n'+
+      '• Elèv ane aktif '+(p.year||'?')+': '+p.active+' inik'+(p.activeRaw!==p.active?' ('+p.activeRaw+' dosye anvan fizyon)':'')+'\n'+
+      '• Tout ane yo konbine ('+years+'): '+p.st.length+' dosye\n'+
+      '• Doublon elèv ki pral fizyone: '+p.S.dup+'\n'+
+      '• Pèsonèl: '+p.P.rows.length+' moun inik ('+p.pe.length+' liy nan lis la, '+p.P.dup+' doublon pral fizyone)\n\n'+
+      'Tout lòt done STATE yo kopye tou. Done ki deja nan baz la ap konsève; pa gen RESET. Yon kopi sekirite fèt anvan.\n\nKontinye?';
+    if(!confirm(msg)) return false;
+    try{
+      var backupRaw=JSON.stringify(STATE); saveStateBackup(backupRaw);
+      if(p.S.dup>0) STATE.students=p.S.rows;
+      if(p.P.dup>0){ STATE.personnel=p.P.rows; remap(STATE,p.P.alias,['personnel','students']); }
+      try{ localStorage.setItem(ENSS_STATE_KEY,JSON.stringify(STATE)); }catch(e){}
+      var ok=await centralPushState(true);
+      if(ok) alert('✅ Migration fini. Elèv ane aktif '+(p.year||'?')+': '+p.active+' (total '+STATE.students.length+' dosye tout ane) · Pèsonèl: '+STATE.personnel.length+'.');
+      return ok;
+    }catch(e){ alert('Migration echwe: '+(e.message||e)); return false; }
+  };
+  window.__ENSS_V106_PLAN__=function(){ return plan(); };
+})();
+</script>
+
+
+<script id="enss-v107-nonreturn">
+/* ===== V107 — « ELÈV KI PA RETOUNEN » : efase net elèv nou te espere ki pa vini nan ane aktif la =====
+   Ajoute yon bouton nan paj Elèv la. Montre elèv ane aktif la ki te nan ane anvan an (kopi pasaj la),
+   ou chwazi sa ki pa retounen, epi ou efase yo. Yon kopi sekirite fèt anvan. Ane anvan an rete entak
+   sof si ou koche « Efase tout (istorik + frè + kont) ». Anyen pa efase san konfimasyon. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V107_NONRETURN__) return; window.__ENSS_V107_NONRETURN__=true;
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function norm(v){ return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+  function yr(){ return String((window.STATE&&STATE.anneeCourante)||''); }
+  function prevYear(y){ var p=String(y).split('-'); return (parseInt(p[0],10)-1)+'-'+(parseInt(p[1],10)-1); }
+  function hasWork(s){
+    var c=s&&s.controles; if(!c||typeof c!=='object') return false;
+    return Object.keys(c).some(function(k){ var o=c[k]; return o&&typeof o==='object'&&Object.keys(o).some(function(m){ return o[m]!==''&&o[m]!==null&&o[m]!==undefined; }); });
+  }
+  function rows(all){
+    var y=yr(), py=prevYear(y), prev={};
+    (STATE.students||[]).forEach(function(s){ if(s&&String(s._YEAR)===py) prev[s.nisu]=1; });
+    return (STATE.students||[]).filter(function(s){ return s&&String(s._YEAR)===y; })
+      .map(function(s){ return {s:s,old:!!prev[s.nisu],work:hasWork(s)}; })
+      .filter(function(x){ return all||x.old; })
+      .sort(function(a,b){ return String(a.s.classe).localeCompare(String(b.s.classe))||String(a.s.nom).localeCompare(String(b.s.nom)); });
+  }
+  function close(){ var o=document.getElementById('enssV107Overlay'); if(o) o.remove(); }
+  function open(){
+    if(typeof canModifyData==='function' && !canModifyData('eleves')) return requireLogin('modifye done sa yo','eleves');
+    if(typeof canEditStudentRecord==='function' && !canEditStudentRecord()) return;
+    close();
+    var o=document.createElement('div'); o.id='enssV107Overlay';
+    o.style.cssText='position:fixed;inset:0;z-index:5000;background:rgba(15,36,64,.55);display:flex;align-items:center;justify-content:center;padding:.6rem;';
+    o.innerHTML='<div style="background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 70px rgba(0,0,0,.35);">'+
+      '<div style="padding:.9rem 1.1rem;border-bottom:1px solid #e2e8f0;"><div style="font-weight:800;color:#1e3a5f;font-size:1rem;">🧹 Elèv ki pa retounen — ane '+esc(yr())+'</div>'+
+      '<div style="font-size:.72rem;color:#64748b;margin-top:.2rem;">Koche elèv nou te espere ki pa vini epi klike Efase. Dosye ane '+esc(prevYear(yr()))+' rete entak sof si ou koche opsyon anba a.</div></div>'+
+      '<div style="padding:.6rem 1.1rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid #eef2f7;">'+
+      '<select id="enssV107Mode" style="padding:.35rem;border:1px solid #cbd5e1;border-radius:8px;"><option value="old">Sèlman sa nou te espere (te nan ane anvan an)</option><option value="all">Tout elèv ane aktif la</option></select>'+
+      '<input id="enssV107Q" placeholder="🔎 Chèche non / NISU / klas" style="flex:1;min-width:160px;padding:.35rem .5rem;border:1px solid #cbd5e1;border-radius:8px;">'+
+      '<button type="button" id="enssV107All" class="btn" style="padding:.3rem .6rem;">Chwazi tout ki parèt</button><button type="button" id="enssV107None" class="btn" style="padding:.3rem .6rem;">Dechwazi</button></div>'+
+      '<div id="enssV107List" style="overflow:auto;padding:.4rem 1.1rem;flex:1;min-height:120px;"></div>'+
+      '<div style="padding:.7rem 1.1rem;border-top:1px solid #e2e8f0;display:flex;flex-direction:column;gap:.45rem;">'+
+      '<label style="font-size:.74rem;color:#7f1d1d;"><input type="checkbox" id="enssV107Full"> Efase tout (istorik ane anvan yo + frè + kont elèv yo)</label>'+
+      '<div style="display:flex;gap:.5rem;align-items:center;justify-content:space-between;flex-wrap:wrap;"><span id="enssV107Count" style="font-size:.8rem;font-weight:700;color:#1e3a5f;"></span>'+
+      '<span><button type="button" id="enssV107Cancel" class="btn" style="padding:.4rem .8rem;">Anile</button> <button type="button" id="enssV107Del" class="btn btn-primary" style="padding:.4rem .8rem;background:#b91c1c;">🗑️ Efase sa yo chwazi yo</button></span></div></div></div>';
+    document.body.appendChild(o);
+    var listEl=o.querySelector('#enssV107List'), chosen={};
+    function render(){
+      var all=o.querySelector('#enssV107Mode').value==='all', q=norm(o.querySelector('#enssV107Q').value).trim();
+      var rs=rows(all).filter(function(x){ return !q||norm([x.s.nom,x.s.prenom,x.s.nisu,x.s.classe].join(' ')).indexOf(q)>=0; });
+      listEl.innerHTML=rs.length? rs.map(function(x){
+        return '<label style="display:flex;gap:.5rem;align-items:center;padding:.3rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem;"><input type="checkbox" data-n="'+esc(x.s.nisu)+'"'+(chosen[x.s.nisu]?' checked':'')+'>'+
+          '<span style="flex:1;"><b>'+esc(x.s.nom)+'</b> '+esc(x.s.prenom)+' <span style="color:#64748b;">· '+esc(x.s.nisu)+'</span></span>'+
+          '<span style="color:#475569;">'+esc(String(x.s.classe).replace('CLASSE ',''))+'</span>'+
+          (x.old?'':'<span style="background:#dcfce7;color:#166534;border-radius:6px;padding:0 .35rem;font-size:.66rem;">nouvo</span>')+
+          (x.work?'<span style="background:#fef3c7;color:#92400e;border-radius:6px;padding:0 .35rem;font-size:.66rem;">⚠ gen nòt</span>':'')+'</label>';
+      }).join('') : '<div style="padding:1rem;color:#64748b;font-size:.8rem;">Pa gen elèv pou montre.</div>';
+      listEl.querySelectorAll('input[data-n]').forEach(function(cb){ cb.onchange=function(){ if(cb.checked) chosen[cb.getAttribute('data-n')]=1; else delete chosen[cb.getAttribute('data-n')]; count(); }; });
+      count();
+    }
+    function count(){ o.querySelector('#enssV107Count').textContent=Object.keys(chosen).length+' elèv chwazi'; }
+    o.querySelector('#enssV107Mode').onchange=render; o.querySelector('#enssV107Q').oninput=render;
+    o.querySelector('#enssV107All').onclick=function(){ listEl.querySelectorAll('input[data-n]').forEach(function(cb){ cb.checked=true; chosen[cb.getAttribute('data-n')]=1; }); count(); };
+    o.querySelector('#enssV107None').onclick=function(){ chosen={}; render(); };
+    o.querySelector('#enssV107Cancel').onclick=close;
+    o.addEventListener('click',function(e){ if(e.target===o) close(); });
+    o.querySelector('#enssV107Del').onclick=function(){ doDelete(Object.keys(chosen),o.querySelector('#enssV107Full').checked); };
+    render();
+  }
+  function doDelete(nisus,full){
+    if(!nisus.length){ alert('Chwazi omwen yon elèv.'); return; }
+    var y=yr(), set={}; nisus.forEach(function(n){ set[n]=1; });
+    var inYear=(STATE.students||[]).filter(function(s){ return s&&set[s.nisu]&&String(s._YEAR)===y; });
+    var withWork=inYear.filter(hasWork).length;
+    var msg='Efase '+nisus.length+' elèv '+(full?'(TOUT dosye yo, tout ane yo, frè ak kont yo)':'nan ane '+y+' sèlman')+' ?'+
+      (withWork?'\n\n⚠ '+withWork+' ladan yo gen nòt ki antre deja.':'')+'\n\nYon kopi sekirite fèt anvan. Aksyon sa a pa ka defèt fasil. Kontinye?';
+    if(!confirm(msg)) return;
+    try{ if(typeof saveStateBackup==='function') saveStateBackup(JSON.stringify(STATE)); }catch(e){}
+    var before=STATE.students.length;
+    STATE.students=STATE.students.filter(function(s){ return !(s&&set[s.nisu]&&(full||String(s._YEAR)===y)); });
+    var removed=before-STATE.students.length;
+    var remaining={}; STATE.students.forEach(function(s){ if(s&&s.nisu!=null) remaining[s.nisu]=1; });
+    var curr={}; STATE.students.forEach(function(s){ if(s&&String(s._YEAR)===y) curr[s.nisu]=1; });
+    if(STATE.securite&&Array.isArray(STATE.securite.users)){
+      STATE.securite.users=STATE.securite.users.filter(function(u){ return !(u&&u.role==='eleve'&&set[u.studentNisu]&&(full?!remaining[u.studentNisu]:!curr[u.studentNisu])); });
+    }
+    if(full && STATE.finance && STATE.finance.frais){ nisus.forEach(function(n){ if(!remaining[n]) delete STATE.finance.frais[n]; }); }
+    try{ if(typeof selectedStudents!=='undefined' && selectedStudents && selectedStudents.delete) nisus.forEach(function(n){ selectedStudents.delete(n); }); }catch(e){}
+    try{ saveState(); }catch(e){}
+    ['renderStudents','renderDashboard','renderClasses','renderAccueil'].forEach(function(f){ try{ if(typeof window[f]==='function') window[f](); }catch(e){} });
+    close();
+    alert('✅ '+removed+' dosye efase. Elèv ane '+y+' kounye a: '+STATE.students.filter(function(s){ return s&&String(s._YEAR)===y; }).length+'.');
+    try{ spawnHearts(); }catch(e){}
+  }
+  function inject(){
+    if(document.getElementById('enssV107Btn')) return;
+    var add=document.querySelector('button[onclick="openAddStudent()"]'); if(!add||!add.parentNode) return;
+    var b=document.createElement('button'); b.type='button'; b.id='enssV107Btn'; b.className='btn'; b.textContent='🧹 Elèv ki pa retounen'; b.title='Efase elèv nou te espere ki pa retounen';
+    b.addEventListener('click',open); add.parentNode.insertBefore(b,add.nextSibling);
+  }
+  setInterval(inject,1200); setTimeout(inject,300);
+  window.__ENSS_V107_TEST__={rows:rows,doDelete:doDelete,open:open};
+})();
+</script>
+
 </body>
 </html>
