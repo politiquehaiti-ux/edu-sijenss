@@ -19113,5 +19113,135 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<style id="enss-v109-ux">
+/* ===== V109 — Kolòn pi kout + lèt pi li (ekran) ===== */
+.table-wrap table{ min-width:0; }
+.table-wrap table td{ white-space:normal; overflow-wrap:break-word; word-break:normal; }
+.table-wrap table td:has(button), .table-wrap table td:has(input), .table-wrap table td:has(select){ white-space:nowrap; }
+.table-wrap table th{ white-space:normal; font-size:.72rem; line-height:1.15; padding-top:.35rem; padding-bottom:.35rem; }
+.table-wrap table th, .table-wrap table td{ padding-left:.4rem; padding-right:.4rem; }
+.table-wrap [style*="font-size:0.5"], .table-wrap [style*="font-size: 0.5"], .table-wrap [style*="font-size:.5"], .table-wrap [style*="font-size:0.6"], .table-wrap [style*="font-size: 0.6"], .table-wrap [style*="font-size:.6"]{ font-size:.74rem !important; }
+#cantineResumeHead th, #cantineResumeBody td{ font-size:.74rem !important; text-align:center; }
+#cantineResumeBody td button{ font-size:.7rem !important; padding:.15rem .35rem !important; }
+</style>
+
+<script id="enss-v109-docs">
+/* ===== V109 — DOKIMAN OFISYÈL STANDA (PDF / enprime / Word) + RÉSUMÉ CANTINE PROP =====
+   Tout dokiman lekòl la (31 fenèt enprime + 19 ekspòtasyon Word) pase pa menm filtè a:
+   - antèt ofisyèl (Repiblik, MENFP, lekòl la) si li pa genyen,
+   - siyati direktè + sceau lekòl la si yo pa genyen,
+   - lèt pa janm pi piti pase 11 pt, tablo ki gen anpil kolòn pase an papye lajè (A4 paysage),
+   - Résumé par jour cantine: boutòn PDF/Word kòt tit la, san kolòn « Actions ».
+   Ajoute sèlman; dokiman ki deja gen antèt/siyati/sceau pa gen doublon. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V109_DOCS__) return; window.__ENSS_V109_DOCS__=true;
+  function P(){ return (window.STATE&&STATE.parametres)||{}; }
+  function g(n){ try{ return (typeof window[n]!=='undefined'&&window[n])||''; }catch(e){ return ''; } }
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  var MIN_PT=11;
+  function bumpFonts(html){
+    return html.replace(/font-size\s*:\s*([0-9]*\.?[0-9]+)\s*(px|pt|rem|em|%)?/gi,function(m,n,u){
+      var v=parseFloat(n); u=(u||'px').toLowerCase(); if(!(v>0)) return m;
+      if(u==='em') return v<0.9?'font-size:0.95em':m;
+      if(u==='%') return v<90?'font-size:95%':m;
+      var pt=u==='px'?v*0.75:(u==='rem'?v*12:v);
+      return pt<MIN_PT?'font-size:'+MIN_PT+'pt':m;
+    });
+  }
+  function headerHtml(){ try{ return (typeof buildOfficialHeaderHtml==='function')?buildOfficialHeaderHtml():''; }catch(e){ return ''; } }
+  function footerHtml(needSig,needSeal){
+    var p=P(), sig=p.directorSignature||g('IMG_SIG'), seal=p.schoolSeal||g('IMG_SEAL'), dir=p.directorNom||'CHARLES Joseph Mary';
+    var sh=(typeof getImgSize==='function')?getImgSize('signature',50):50, eh=(typeof getImgSize==='function')?getImgSize('seal',75):75;
+    var d=new Date(), dt=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
+    var cell=function(inner){ return '<div style="text-align:center;min-width:30%;">'+inner+'</div>'; };
+    var parts=[];
+    parts.push(cell('<div style="font-size:12pt;">Sainte-Suzanne, le '+dt+'</div>'));
+    if(needSeal) parts.push(cell((seal?'<img src="'+seal+'" style="height:'+eh+'px;" />':'')+'<div style="font-size:12pt;">Sceau de l\'école</div>'));
+    if(needSig) parts.push(cell((sig?'<img src="'+sig+'" style="height:'+sh+'px;display:block;margin:0 auto;" />':'<div style="height:'+sh+'px;"></div>')+'<div style="border-top:1px solid #000;width:200px;margin:0 auto;"></div><div style="font-size:12pt;"><strong>'+esc(dir)+'</strong><br/>Directeur</div>'));
+    return '<div class="enss-doc-footer" style="display:flex;justify-content:space-around;align-items:flex-end;margin-top:22px;page-break-inside:avoid;">'+parts.join('')+'</div>';
+  }
+  function firstRowCells(html){
+    var m=html.match(/<tr[^>]*>([\s\S]*?)<\/tr>/i); if(!m) return 0;
+    var n=(m[1].match(/<t[hd][\s>]/gi)||[]).length; return n;
+  }
+  function stdHtml(html,opt){
+    if(typeof html!=='string' || !/<body|<html/i.test(html)) return html;
+    if(html.indexOf('data-enss-std')>=0) return html;
+    opt=opt||{};
+    var p=P(), seal=p.schoolSeal||'', sealMark=seal?seal.slice(0,80):'__none__';
+    var hasHeader=/R(?:É|E|&Eacute;|&#201;)PUBLIQUE\s+D/i.test(html);
+    var hasSeal=/sceau|cachet|class=["']?seal/i.test(html) || html.indexOf(sealMark)>=0 || (g('IMG_SEAL')&&html.indexOf(String(g('IMG_SEAL')).slice(0,80))>=0);
+    var hasSig=/signature|siyati/i.test(html);
+    var out=html;
+    if(!hasHeader){ var h=headerHtml(); if(h){ out=/<body[^>]*>/i.test(out)? out.replace(/<body([^>]*)>/i,function(m){ return m+h; }) : h+out; } }
+    if(!hasSig||!hasSeal){
+      var f=footerHtml(!hasSig,!hasSeal);
+      out=/<\/body>/i.test(out)? out.replace(/<\/body>(?![\s\S]*<\/body>)/i,function(m){ return f+m; }) : out+f;
+    }
+    out=bumpFonts(out);
+    var wide=firstRowCells(out)>=10 && !/@page[^{]*\{[^}]*size\s*:/i.test(out);
+    var css='<style id="enss-doc-std">'+(opt.word?'':'@page{margin:12mm;'+(wide?'size:A4 landscape;':'')+'}')+
+      'table{border-collapse:collapse;}th,td{overflow-wrap:break-word;}tr{page-break-inside:avoid;}thead{display:table-header-group;}img{max-width:100%;}.signature,.enss-doc-footer{page-break-inside:avoid;}'+
+      (opt.word?'':'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}')+'</style><meta data-enss-std="1">';
+    out=/<\/head>/i.test(out)? out.replace(/<\/head>/i,css+'</head>') : out.replace(/<body/i,css+'<body');
+    return out;
+  }
+  /* 1) Fenèt enprime (window.open vid) : tout sa ki ekri pase pa filtè a */
+  var nativeOpen=window.open;
+  window.open=function(url){
+    var w=nativeOpen.apply(window,arguments);
+    if(!w || (url!==''&&url!==undefined&&url!=='about:blank')) return w;
+    try{
+      var d=w.document, nw=d.write.bind(d), nc=d.close.bind(d), buf=[], done=false, t=null;
+      var flush=function(){ if(done) return; done=true; clearTimeout(t); var html=buf.join(''); try{ html=stdHtml(html); }catch(e){} nw(html); nc(); };
+      d.write=function(){ if(done) return nw.apply(null,arguments); buf.push(Array.prototype.join.call(arguments,'')); if(!t) t=setTimeout(flush,1200); };
+      d.writeln=function(){ d.write(Array.prototype.join.call(arguments,'')+'\n'); };
+      d.close=function(){ flush(); };
+    }catch(e){}
+    return w;
+  };
+  /* 2) Ekspòtasyon Word (.doc) */
+  var NB=window.Blob;
+  function WB(parts,opts){
+    try{ if(opts && /msword|ms-word/i.test(opts.type||'') && Array.isArray(parts) && parts.length===1 && typeof parts[0]==='string') parts=[stdHtml(parts[0],{word:true})]; }catch(e){}
+    return new NB(parts,opts);
+  }
+  WB.prototype=NB.prototype; window.Blob=WB;
+
+  /* 3) Résumé par jour (cantine): dokiman pwòp, san « Actions » */
+  function resumeDoc(word){
+    var prods=(typeof CANTINE_PRODUITS!=='undefined')?CANTINE_PRODUITS:[];
+    var rows=[].slice.call(document.querySelectorAll('#cantineResumeBody tr')).filter(function(tr){ return tr.cells.length>3; });
+    var th='border:1px solid #000;padding:4px;text-align:center;background:#e8eef7;font-size:11pt;', td='border:1px solid #000;padding:4px;text-align:center;font-size:11pt;';
+    var h1='<tr><th style="'+th+'" rowspan="2">Date</th><th style="'+th+'" rowspan="2">Filles</th><th style="'+th+'" rowspan="2">Garçons</th><th style="'+th+'" rowspan="2">Total</th>'+prods.map(function(p){ return '<th style="'+th+'" colspan="3">'+esc(p)+'</th>'; }).join('')+'</tr>';
+    var h2='<tr>'+prods.map(function(){ return '<th style="'+th+'">Entrée</th><th style="'+th+'">Sortie</th><th style="'+th+'">Solde</th>'; }).join('')+'</tr>';
+    var body=rows.map(function(tr){ var c=[].slice.call(tr.cells,0,4+prods.length*3); return '<tr>'+c.map(function(x){ return '<td style="'+td+'">'+esc(x.textContent.trim())+'</td>'; }).join('')+'</tr>'; }).join('')||'<tr><td colspan="'+(4+prods.length*3)+'" style="'+td+'">Aucun mouvement</td></tr>';
+    var year=(typeof getYear==='function')?getYear():'';
+    return '<html><head><meta charset="UTF-8"><title>Résumé Cantine</title></head><body style="font-family:Arial,sans-serif;font-size:12pt;">'+
+      '<h2 style="text-align:center;font-size:16pt;margin:8px 0;">RÉSUMÉ PAR JOUR — CANTINE SCOLAIRE</h2><p style="text-align:center;font-size:12pt;margin:0 0 8px;">Année scolaire '+esc(year)+'</p>'+
+      '<table style="width:100%;border-collapse:collapse;"><thead>'+h1+h2+'</thead><tbody>'+body+'</tbody></table>'+
+      (word?'':'<script>window.onload=function(){window.print();}<\/script>')+'</body></html>';
+  }
+  function guard(){ return (typeof canPrintOrExport==='function' && !canPrintOrExport('cantine')) ? (requireLogin('enprime/telechaje dokiman sa a','cantine'),false) : true; }
+  window.printCantineResume=window.exportCantineResumePDF=function(){
+    if(!guard()) return; var w=window.open('','_blank'); if(!w) return; w.document.write(resumeDoc(false)); w.document.close();
+  };
+  window.exportCantineResumeWord=function(date){
+    if(!guard()) return; var blob=new Blob([resumeDoc(true)],{type:'application/msword'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='Cantine_Resume_'+(date||new Date().toISOString().slice(0,10))+'.doc'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+  };
+  function injectButtons(){
+    var h=document.querySelector('h4[data-t="dailySummary"]'); if(!h||document.getElementById('enssV109ResBtns')) return;
+    var s=document.createElement('span'); s.id='enssV109ResBtns'; s.style.cssText='margin-left:.6rem;display:inline-flex;gap:.35rem;vertical-align:middle;';
+    s.innerHTML='<button type="button" class="btn btn-success" style="padding:.2rem .55rem;font-size:.75rem;" onclick="printCantineResume()">🖨️ PDF</button><button type="button" class="btn btn-primary" style="padding:.2rem .55rem;font-size:.75rem;" onclick="exportCantineResumeWord()">📄 Word</button>';
+    h.appendChild(s);
+  }
+  setInterval(injectButtons,1500); setTimeout(injectButtons,400);
+  window.__ENSS_V109_TEST__={stdHtml:stdHtml,resumeDoc:resumeDoc};
+})();
+</script>
+
 </body>
 </html>
