@@ -19349,5 +19349,68 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<script id="enss-v110-eleves-pdf">
+/* ===== V110 — ÉLÈVES: bouton Enprime + PDF apre « Tous » (filt sèks la) =====
+   Dokiman an respekte filt yo (klas, sèks, rechèch), pa gen kolòn seleksyon/aksyon, ni bouton.
+   Li pase nan filtè dokiman V109 la: antèt ofisyèl, sceau, siyati, lèt ≥ 11 pt, paysage si anpil kolòn. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V110_ELEVES_PDF__) return; window.__ENSS_V110_ELEVES_PDF__=true;
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function opt(id){ var s=document.getElementById(id); return (s&&s.value)?(s.options?s.options[s.selectedIndex].text:s.value):''; }
+  function data(){
+    try{ renderStudents(); }catch(e){}
+    var heads=[].slice.call(document.querySelectorAll('#elevesTableHead th'));
+    var rows=[].slice.call(document.querySelectorAll('#elevesTableBody tr')).filter(function(tr){ return tr.cells.length>2; });
+    var keep=[];
+    heads.forEach(function(th,i){
+      var t=th.textContent.trim();
+      var junk=!t||/^(actions?|aksyon)$/i.test(t)||/s[ée]lection|☑/i.test(t)||(rows.length>0&&rows.every(function(tr){ return tr.cells[i]&&/^\d+$/.test(tr.cells[i].textContent.trim()); }));
+      var ctl=rows.length>0&&rows.every(function(tr){ return tr.cells[i]&&tr.cells[i].querySelector('input,button'); });
+      if(!junk&&!ctl) keep.push(i);
+    });
+    var sexIdx=-1; keep.forEach(function(i){ if(/^sexe$/i.test(heads[i].textContent.trim())) sexIdx=i; });
+    var fi=0,gi=0;
+    var body=rows.map(function(tr,n){
+      var cells=keep.map(function(i){ return (tr.cells[i]?tr.cells[i].textContent:'').replace(/\s+/g,' ').trim(); });
+      if(sexIdx>=0){ var sx=(tr.cells[sexIdx].textContent||'').trim().toUpperCase(); if(sx.indexOf('F')===0) fi++; else if(sx) gi++; }
+      return {n:n+1,cells:cells};
+    });
+    return {head:keep.map(function(i){ return heads[i].textContent.replace(/\s+/g,' ').trim(); }),rows:body,f:fi,g:gi,hasSex:sexIdx>=0};
+  }
+  function doc(){
+    var d=data(), year=(typeof getYear==='function')?getYear():'';
+    var classe=opt('elevesClasseFilter'), sexe=opt('elevesSexeFilter'), q=(document.getElementById('elevesSearch')||{}).value||'';
+    var info=[classe||'Toutes les classes', sexe&&sexe!=='Tous'?sexe:'Garçons et filles'].concat(q?['Recherche : '+q]:[]).join(' · ');
+    var th='border:1px solid #000;padding:4px;background:#e8eef7;text-align:center;font-size:11pt;', td='border:1px solid #000;padding:3px 5px;font-size:11pt;';
+    var thead='<tr><th style="'+th+'">N°</th>'+d.head.map(function(h){ return '<th style="'+th+'">'+esc(h)+'</th>'; }).join('')+'</tr>';
+    var tbody=d.rows.map(function(r){ return '<tr><td style="'+td+'text-align:center;">'+r.n+'</td>'+r.cells.map(function(c){ return '<td style="'+td+'">'+esc(c)+'</td>'; }).join('')+'</tr>'; }).join('');
+    var total='Total : '+d.rows.length+' élève'+(d.rows.length>1?'s':'')+(d.hasSex?' ('+d.f+' fille'+(d.f>1?'s':'')+', '+d.g+' garçon'+(d.g>1?'s':'')+')':'');
+    var fname='Liste_Eleves'+(classe?'_'+classe.replace(/[^A-Za-z0-9À-ÿ]+/g,'_'):'')+(year?'_'+year:'');
+    return {empty:!d.rows.length,html:'<html><head><meta charset="UTF-8"><title>'+esc(fname)+'</title></head><body style="font-family:Arial,sans-serif;font-size:12pt;">'+
+      '<h2 style="text-align:center;font-size:16pt;margin:8px 0;">LISTE DES ÉLÈVES</h2><p style="text-align:center;font-size:12pt;margin:0 0 8px;">Année scolaire '+esc(year)+' · '+esc(info)+'</p>'+
+      '<table style="width:100%;border-collapse:collapse;"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'+
+      '<p style="font-size:12pt;font-weight:700;margin-top:8px;">'+esc(total)+'</p><script>window.onload=function(){window.print();}<\/script></body></html>'};
+  }
+  function run(){
+    if(typeof canPrintOrExport==='function' && !canPrintOrExport('eleves')) return requireLogin('enprime/telechaje dokiman sa a','eleves');
+    var d=doc(); if(d.empty){ alert('Pa gen elèv pou enprime ak filt sa yo.'); return; }
+    var w=window.open('','_blank'); if(!w){ alert('Otorize fenèt popup yo pou enprime.'); return; }
+    w.document.write(d.html); w.document.close();
+  }
+  function inject(){
+    if(document.getElementById('enssV110Btns')) return;
+    var sel=document.getElementById('elevesSexeFilter'); if(!sel||!sel.parentNode) return;
+    var s=document.createElement('span'); s.id='enssV110Btns'; s.style.cssText='display:inline-flex;gap:.25rem;flex-wrap:wrap;';
+    s.innerHTML='<button type="button" class="btn" id="enssV110Print" onclick="enssV110Run()" style="padding:.2rem .5rem;font-size:.75rem;" title="Enprime lis la ak filt yo">🖨 Imprimer</button><button type="button" class="btn btn-success" id="enssV110Pdf" onclick="enssV110Run()" style="padding:.2rem .5rem;font-size:.75rem;" title="Telechaje PDF (chwazi « Sove kòm PDF »)">📄 PDF</button>';
+    sel.parentNode.insertBefore(s,sel.nextSibling);
+  }
+  window.enssV110Run=run;
+  setInterval(inject,1200); setTimeout(inject,300);
+  window.__ENSS_V110_TEST__={doc:doc,data:data,run:run};
+})();
+</script>
+
 </body>
 </html>
