@@ -19009,7 +19009,10 @@ body{ line-height:1.55; }
   function store(){ STATE.cantine=STATE.cantine||{}; STATE.cantine.quickPresences=STATE.cantine.quickPresences||{}; return STATE.cantine.quickPresences; }
   function getQ(date){ var q=store()[date]; return (q&&typeof q==='object')?q:null; }
   function num(v){ var n=parseInt(v,10); return (isFinite(n)&&n>0)?n:0; }
-  function sums(q){ var f=0,g=0; if(q) Object.keys(q).forEach(function(c){ f+=num(q[c]&&q[c].f); g+=num(q[c]&&q[c].g); }); return {f:f,g:g,t:f+g}; }
+  function sums(q){
+    if(q&&q.__manual){ var mf=num(q.__manual.f), mg=num(q.__manual.g); return {f:mf,g:mg,t:mf+mg,manual:true}; }
+    var f=0,g=0; if(q) Object.keys(q).forEach(function(c){ if(c.indexOf('__')===0) return; f+=num(q[c]&&q[c].f); g+=num(q[c]&&q[c].g); }); return {f:f,g:g,t:f+g};
+  }
   function canEdit(){ try{ return typeof canModifyData!=='function' || !!canModifyData('cantine'); }catch(e){ return true; } }
 
   /* Mete Résumé par jour + sòti pwodwi ajou ak chif fòm lan */
@@ -19034,6 +19037,7 @@ body{ line-height:1.55; }
     saveState();
     try{ updateCantineStocks(); }catch(e){}
     try{ renderCantine(); }catch(e){}
+    try{ renderHistory(); }catch(e){}
   }
 
   function render(date){
@@ -19053,9 +19057,10 @@ body{ line-height:1.55; }
       '<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">'+
       '<button type="button" class="btn btn-primary" id="enssQSave"'+(edit?'':' disabled')+'>💾 Anrejistre</button>'+
       '<button type="button" class="btn" id="enssQFromAppel"'+(edit?'':' disabled')+' title="Ranpli ak apèl anseyan yo pou klas ki gen apèl deja">↻ Pran apèl anseyan yo</button>'+
+      '<button type="button" class="btn" id="enssQMove"'+(edit?'':' disabled')+'>📅 Chanje dat jou sa a</button>'+
       '<button type="button" class="btn" id="enssQClear"'+(edit?'':' disabled')+'>🧹 Vide jou sa a</button>'+
       '<button type="button" class="btn" id="enssQResume">📈 Louvri Résumé par jour</button>'+
-      '<span id="enssQStatus" style="font-size:.72rem;color:#166534;"></span></div>'+(edit?'':'<p style="font-size:.74rem;color:#92400e;margin-top:.5rem;">🔒 Ou pa gen dwa pou modifye kantin. Konekte ak yon kont ki gen dwa.</p>');
+      '<span id="enssQStatus" style="font-size:.72rem;color:#166534;"></span></div>'+(edit?'':'<p style="font-size:.74rem;color:#92400e;margin-top:.5rem;">🔒 Ou pa gen dwa pou modifye kantin. Konekte ak yon kont ki gen dwa.</p>')+(sums(getQ(date)).manual?'<p style="font-size:.74rem;color:#92400e;margin-top:.5rem;">⚠ Total jou sa a te ajiste dirèkteman nan Résumé a. Si ou anrejistre fòm sa a, chif pa klas yo ap ranplase l.</p>':'')+'<div id="enssQHist" style="margin-top:1.2rem;"></div>';
     var inputs=box.querySelectorAll('input[data-k]'), timer=null;
     function collect(){ var d={}; inputs.forEach(function(inp){ var c=classes[+inp.getAttribute('data-i')], k=inp.getAttribute('data-k'); (d[c]=d[c]||{f:0,g:0})[k]=num(inp.value); }); return d; }
     function recalc(){
@@ -19092,8 +19097,109 @@ body{ line-height:1.55; }
       });
       recalc(); if(n) save(); else alert('Pa gen apèl anseyan pou dat sa a.');
     };
-    recalc();
+    box.querySelector('#enssQMove').onclick=function(){ changeDate(date,function(nd){ var inp=document.getElementById('cantinePresDate'); if(inp) inp.value=nd; }); };
+    recalc(); renderHistory();
   }
+
+  /* ---------- Dosye pa jou (swiv dat) + chanje dat ---------- */
+  var histFrom='', histTo='';
+  function validDate(v){ return /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(Date.parse(v)); }
+  function moveDate(old,neu){
+    if(!validDate(neu)){ alert('Dat la pa valid. Itilize fòma AAAA-MM-JJ.'); return false; }
+    if(neu===old) return true;
+    var st=store(); STATE.cantine=STATE.cantine||{}; var mv=STATE.cantine.mouvements||[];
+    var exists=!!st[neu]||mv.some(function(m){ return m.date===neu; });
+    if(exists){
+      if(!confirm('Gen done deja pou '+neu+'. Ranplase yo ak done '+old+' ?')) return false;
+      mv=STATE.cantine.mouvements=mv.filter(function(m){ return m.date!==neu; }); delete st[neu];
+    }
+    var pre='ration-'+old+'-';
+    mv.forEach(function(m){ if(m.date===old){ m.date=neu; if(typeof m.id==='string'&&m.id.indexOf(pre)===0) m.id='ration-'+neu+'-'+m.id.slice(pre.length); } });
+    if(st[old]){ st[neu]=st[old]; delete st[old]; }
+    return true;
+  }
+  function afterChange(){
+    saveState(); try{ updateCantineStocks(); }catch(e){} try{ renderCantine(); }catch(e){}
+    if(document.getElementById('cantinePresContent')) window.loadCantinePresences();
+  }
+  function changeDate(old,cb){
+    if(!canEdit()){ requireLogin('modifye kantin','cantine'); return; }
+    var nd=prompt('Nouvèl dat pou '+old+' (AAAA-MM-JJ) :',old); if(nd===null) return; nd=nd.trim();
+    if(moveDate(old,nd)){ if(cb) cb(nd); afterChange(); }
+  }
+  function histRows(){
+    var st=store();
+    return Object.keys(st).filter(function(d){ return validDate(d)&&(!histFrom||d>=histFrom)&&(!histTo||d<=histTo); }).sort().map(function(d){ return {d:d,q:st[d],s:sums(st[d])}; }).filter(function(r){ return r.s.t>0; });
+  }
+  function histTable(rows,classes,print){
+    var bd=print?'border:1px solid #000;padding:3px;text-align:center;font-size:11pt;':'', th=print?bd+'background:#e8eef7;font-weight:700;':'';
+    var attr=function(st){ return print?' style="'+st+'"':''; };
+    var head='<tr><th'+attr(th)+'>Dat</th>'+classes.map(function(c){ return '<th'+attr(th)+'>'+esc(label(c))+'<br/><span style="font-weight:400;">F / G</span></th>'; }).join('')+'<th'+attr(th)+'>Total F</th><th'+attr(th)+'>Total G</th><th'+attr(th)+'>Total</th>'+(print?'':'<th>Aksyon</th>')+'</tr>';
+    var tf={},tg={},TF=0,TG=0; classes.forEach(function(c){ tf[c]=0; tg[c]=0; });
+    var body=rows.map(function(r){
+      var cells=classes.map(function(c){ var x=r.q[c]; var f=num(x&&x.f), g=num(x&&x.g); tf[c]+=f; tg[c]+=g; return '<td'+attr(bd)+'>'+((f||g)?(f+' / '+g):'—')+'</td>'; }).join('');
+      TF+=r.s.f; TG+=r.s.g;
+      var act=print?'':'<td style="white-space:nowrap;"><button type="button" class="btn" data-a="edit" data-d="'+r.d+'" style="padding:.15rem .4rem;font-size:.72rem;">✏️</button> <button type="button" class="btn" data-a="move" data-d="'+r.d+'" style="padding:.15rem .4rem;font-size:.72rem;">📅</button> <button type="button" class="btn" data-a="del" data-d="'+r.d+'" style="padding:.15rem .4rem;font-size:.72rem;">🗑️</button></td>';
+      return '<tr><td'+attr(bd+'font-weight:700;')+'>'+r.d+'</td>'+cells+'<td'+attr(bd)+'>'+r.s.f+(r.s.manual?'*':'')+'</td><td'+attr(bd)+'>'+r.s.g+(r.s.manual?'*':'')+'</td><td'+attr(bd+'font-weight:700;')+'>'+r.s.t+'</td>'+act+'</tr>';
+    }).join('');
+    var foot='<tr style="background:#dbeafe;"><td'+attr(bd+'font-weight:800;')+'>TOTAL ('+rows.length+' jou)</td>'+classes.map(function(c){ return '<td'+attr(bd+'font-weight:800;')+'>'+tf[c]+' / '+tg[c]+'</td>'; }).join('')+'<td'+attr(bd+'font-weight:800;')+'>'+TF+'</td><td'+attr(bd+'font-weight:800;')+'>'+TG+'</td><td'+attr(bd+'font-weight:800;')+'>'+(TF+TG)+'</td>'+(print?'':'<td></td>')+'</tr>';
+    return '<table'+(print?' style="width:100%;border-collapse:collapse;"':'')+'><thead>'+head+'</thead><tbody>'+(body||'<tr><td colspan="'+(classes.length+5)+'"'+attr(bd)+'>Pa gen dosye pou peryòd sa a.</td></tr>')+foot+'</tbody></table>';
+  }
+  function histDoc(word){
+    var classes=(typeof ALL_CLASSES!=='undefined'?ALL_CLASSES:[]), rows=histRows(), year=(typeof getYear==='function')?getYear():'';
+    var per=(histFrom||histTo)?('Peryòd: '+(histFrom||'…')+' → '+(histTo||'…')):'Tout dat yo';
+    return '<html><head><meta charset="UTF-8"><title>Présences cantine</title></head><body style="font-family:Arial,sans-serif;font-size:12pt;">'+
+      '<h2 style="text-align:center;font-size:16pt;margin:8px 0;">DOSYE PRÉSENCES CANTINE — PA JOU</h2><p style="text-align:center;font-size:12pt;margin:0 0 8px;">Ane eskolè '+esc(year)+' · '+esc(per)+' · F = Fiy, G = Gason</p>'+
+      histTable(rows,classes,true)+(word?'':'<script>window.onload=function(){window.print();}<\/script>')+'</body></html>';
+  }
+  function renderHistory(){
+    var el=document.getElementById('enssQHist'); if(!el) return;
+    var classes=(typeof ALL_CLASSES!=='undefined'?ALL_CLASSES:[]), edit=canEdit();
+    el.innerHTML='<h4 style="font-size:.95rem;margin-bottom:.4rem;">📚 Dosye prezans pa jou <span style="font-weight:400;font-size:.72rem;color:#64748b;">(klase otomatikman pa dat)</span></h4>'+
+      '<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.5rem;font-size:.8rem;">De <input type="date" id="enssQFrom" value="'+esc(histFrom)+'" style="padding:.3rem;border:1px solid #cbd5e1;border-radius:8px;"> A <input type="date" id="enssQTo" value="'+esc(histTo)+'" style="padding:.3rem;border:1px solid #cbd5e1;border-radius:8px;">'+
+      '<button type="button" class="btn" id="enssQAllDates" style="padding:.3rem .6rem;">Tout</button>'+
+      '<button type="button" class="btn btn-success" id="enssQHistPdf" style="padding:.3rem .7rem;">🖨️ PDF</button><button type="button" class="btn btn-primary" id="enssQHistWord" style="padding:.3rem .7rem;">📄 Word</button></div>'+
+      '<div class="table-wrap" style="overflow-x:auto;">'+histTable(histRows(),classes,false)+'</div><p style="font-size:.7rem;color:#64748b;">* total ajiste dirèkteman nan Résumé a.</p>';
+    el.querySelector('#enssQFrom').onchange=function(){ histFrom=this.value; renderHistory(); };
+    el.querySelector('#enssQTo').onchange=function(){ histTo=this.value; renderHistory(); };
+    el.querySelector('#enssQAllDates').onclick=function(){ histFrom=''; histTo=''; renderHistory(); };
+    el.querySelector('#enssQHistPdf').onclick=function(){ if(typeof canPrintOrExport==='function'&&!canPrintOrExport('cantine')) return requireLogin('enprime/telechaje dokiman sa a','cantine'); var w=window.open('','_blank'); if(!w) return; w.document.write(histDoc(false)); w.document.close(); };
+    el.querySelector('#enssQHistWord').onclick=function(){ if(typeof canPrintOrExport==='function'&&!canPrintOrExport('cantine')) return requireLogin('enprime/telechaje dokiman sa a','cantine'); var b=new Blob([histDoc(true)],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a'); a.href=u; a.download='Cantine_Presences_Dosye.doc'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },1500); };
+    el.querySelectorAll('button[data-a]').forEach(function(b){
+      b.onclick=function(){
+        var d=b.getAttribute('data-d'), a=b.getAttribute('data-a');
+        if(a==='edit'){ var inp=document.getElementById('cantinePresDate'); if(inp) inp.value=d; window.loadCantinePresences(); window.scrollTo(0,0); }
+        else if(a==='move'){ changeDate(d); }
+        else if(a==='del'){
+          if(!canEdit()){ requireLogin('modifye kantin','cantine'); return; }
+          if(!confirm('Efase dosye prezans '+d+' (ak sòti pwodwi otomatik jou a)?')) return;
+          delete store()[d]; applyQuick(d); window.loadCantinePresences();
+        }
+      };
+    });
+  }
+  /* Résumé par jour: modifye dat la tou (Fiy, Gason, Dat) */
+  window.openCantineDailySummaryEdit=function(date){
+    if(!canEdit()) return requireLogin('modifye rezime kantin','cantine');
+    var items=(STATE.cantine.mouvements||[]).filter(function(m){ return m.date===date; });
+    if(!items.length){ alert('Pa gen mouvman kantin pou dat sa a.'); return; }
+    var counts=getCantinePresentCountsBySex(date);
+    var stored=items.find(function(m){ return m.manualGenderCounts===true; })||items.find(function(m){ return m.totalFilles!==undefined||m.totalGarcons!==undefined; });
+    var f0=stored&&stored.totalFilles!==undefined?Number(stored.totalFilles):counts.filles, g0=stored&&stored.totalGarcons!==undefined?Number(stored.totalGarcons):counts.garcons;
+    openModal('✏️ Modifye rezime kantin — '+date,'<p style="font-size:.78rem;">Modifye dat la, kantite ti fi ak ti gason. Total la ak sòti pwodwi otomatik yo ap rekalkile, epi lis la ap klase ankò pa dat.</p>'+
+      '<div class="form-row"><div class="form-group"><label>📅 Dat</label><input id="enssCRDate" type="date" value="'+esc(date)+'" /></div><div class="form-group"><label>Ti fi prezan</label><input id="enssCRF" type="number" min="0" step="1" value="'+f0+'" /></div><div class="form-group"><label>Ti gason prezan</label><input id="enssCRG" type="number" min="0" step="1" value="'+g0+'" /></div></div>',function(){
+      var f=Number(document.getElementById('enssCRF').value), g=Number(document.getElementById('enssCRG').value), nd=(document.getElementById('enssCRDate').value||'').trim();
+      if(!Number.isInteger(f)||!Number.isInteger(g)||f<0||g<0){ alert('Mete kantite antye ki egal oswa pi gran pase zewo.'); return; }
+      var total=f+g, rations=STATE.cantine.rations||{};
+      items.forEach(function(m){ m.totalFilles=f; m.totalGarcons=g; m.totalPresent=total; m.manualGenderCounts=true;
+        if(m.autoRation===true){ var quota=rations[m.produit]!==undefined?Number(rations[m.produit]):((typeof CANTINE_QUOTAS!=='undefined'&&CANTINE_QUOTAS[m.produit])||0); m.quantite=Math.round(quota*total*1000)/1000; } });
+      var q=getQ(date); if(q){ var sm=sums({}); var base=sums(Object.assign({},q,{__manual:undefined})); if(base.f!==f||base.g!==g) q.__manual={f:f,g:g}; else delete q.__manual; }
+      if(nd!==date && !moveDate(date,nd)) return;
+      saveState(); try{ updateCantineStocks(); }catch(e){} try{ renderCantine(); }catch(e){} try{ renderHistory(); }catch(e){}
+      closeModal(); try{ openCantineResumeModal(nd||date); }catch(e){}
+    });
+  };
+
   window.loadCantinePresences=function(){
     var inp=document.getElementById('cantinePresDate'); if(!inp) return;
     var date=inp.value||today(); inp.value=date; render(date);
@@ -19109,7 +19215,7 @@ body{ line-height:1.55; }
     var s=sums(getQ(date)); if(s.t>0) return {filles:s.f,garcons:s.g,total:s.t};
     return prevCnt?prevCnt.apply(this,arguments):{filles:0,garcons:0,total:0};
   };
-  window.__ENSS_V108_TEST__={sums:sums,applyQuick:applyQuick,getQ:getQ};
+  window.__ENSS_V108_TEST__={sums:sums,applyQuick:applyQuick,getQ:getQ,moveDate:moveDate,histDoc:histDoc,histRows:histRows};
 })();
 </script>
 
