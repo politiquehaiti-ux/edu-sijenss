@@ -18988,5 +18988,130 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<script id="enss-v108-cantine">
+/* ===== V108 — PRÉSENCES CANTINE: FÒM RAPID (Fiy / Gason / Total pa klas) =====
+   Ranplase paj « Présences Cantine » ak yon tablo senp: klas yo an kolòn (Préscolaire 1 → 9èm),
+   yon liy Fiy, yon liy Gason, yon liy Total klas. Total pa sèks ak total jeneral kalkile otomatikman.
+   Chif yo antre dirèkteman nan « 📈 Résumé par jour » (Fiy, Gason, Total) ak sòti pwodwi yo.
+   Pa depann de apèl anseyan yo. Ajoute sèlman. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V108_CANTINE__) return; window.__ENSS_V108_CANTINE__=true;
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function today(){ return new Date().toISOString().split('T')[0]; }
+  function label(c){
+    c=String(c||''); var m;
+    if((m=c.match(/^PRESCOLAIRE\s*(\d)(.*)$/i))) return 'Préscol. '+m[1]+(m[2]?m[2]:'');
+    if((m=c.match(/^CLASSE\s*(\d)(?:ere|eme)(?:\s*AF)?(.*)$/i))) return m[1]+(m[1]==='1'?'ère':'ème')+(/AF/i.test(c)?' AF':'')+(m[2]?m[2]:'');
+    return c;
+  }
+  function store(){ STATE.cantine=STATE.cantine||{}; STATE.cantine.quickPresences=STATE.cantine.quickPresences||{}; return STATE.cantine.quickPresences; }
+  function getQ(date){ var q=store()[date]; return (q&&typeof q==='object')?q:null; }
+  function num(v){ var n=parseInt(v,10); return (isFinite(n)&&n>0)?n:0; }
+  function sums(q){ var f=0,g=0; if(q) Object.keys(q).forEach(function(c){ f+=num(q[c]&&q[c].f); g+=num(q[c]&&q[c].g); }); return {f:f,g:g,t:f+g}; }
+  function canEdit(){ try{ return typeof canModifyData!=='function' || !!canModifyData('cantine'); }catch(e){ return true; } }
+
+  /* Mete Résumé par jour + sòti pwodwi ajou ak chif fòm lan */
+  function applyQuick(date){
+    var s=sums(getQ(date)); STATE.cantine=STATE.cantine||{};
+    var mv=(STATE.cantine.mouvements||[]).filter(function(m){ return !(m.date===date && m.autoRation===true); });
+    if(s.t>0){
+      var produits=STATE.cantine.produitsJour||(typeof CANTINE_PRODUITS!=='undefined'?CANTINE_PRODUITS.slice():['Riz','Blé','Haricot','Lentille','Huile','Sel']);
+      var rations=STATE.cantine.rations||{};
+      produits.forEach(function(prod){
+        var quota=rations[prod]!==undefined?parseFloat(rations[prod]):((typeof CANTINE_QUOTAS!=='undefined'&&CANTINE_QUOTAS[prod])||0);
+        var qty=Math.round(quota*s.t*1000)/1000;
+        if(qty>0) mv.push({id:'ration-'+date+'-'+prod,date:date,produit:prod,type:'sortie',quantite:qty,totalPresent:s.t,totalFilles:s.f,totalGarcons:s.g,manualGenderCounts:true,autoRation:true});
+      });
+    }
+    if(s.t>0 && !mv.some(function(m){ return m.date===date && m.autoRation===true; })){
+      /* Pa gen pwodwi/rasyon defini: kenbe yon liy 0 pou Résumé par jour la montre Fiy/Gason/Total. */
+      var pj=STATE.cantine.produitsJour; var pr=(Array.isArray(pj)&&pj[0])||(typeof CANTINE_PRODUITS!=='undefined'&&CANTINE_PRODUITS[0])||'Riz';
+      mv.push({id:'ration-'+date+'-compte',date:date,produit:pr,type:'sortie',quantite:0,totalPresent:s.t,totalFilles:s.f,totalGarcons:s.g,manualGenderCounts:true,autoRation:true});
+    }
+    STATE.cantine.mouvements=mv;
+    saveState();
+    try{ updateCantineStocks(); }catch(e){}
+    try{ renderCantine(); }catch(e){}
+  }
+
+  function render(date){
+    var box=document.getElementById('cantinePresContent'); if(!box) return;
+    var classes=(typeof ALL_CLASSES!=='undefined'?ALL_CLASSES:[]).slice(), q=getQ(date)||{}, edit=canEdit();
+    var th='<th style="position:sticky;left:0;background:#eef3fb;z-index:2;min-width:4.6rem;"></th>'+classes.map(function(c){ return '<th style="font-size:.62rem;text-align:center;min-width:3.6rem;">'+esc(label(c))+'</th>'; }).join('')+'<th style="font-size:.66rem;text-align:center;background:#dbeafe;min-width:4.2rem;">TOTAL</th>';
+    function row(key,name,color){
+      return '<tr><td style="position:sticky;left:0;background:'+color+';font-weight:800;font-size:.72rem;z-index:1;">'+name+'</td>'+classes.map(function(c,i){
+        var v=q[c]&&q[c][key]!==undefined&&q[c][key]!==''?q[c][key]:'';
+        return '<td style="padding:.2rem;text-align:center;"><input type="number" min="0" step="1" inputmode="numeric" data-k="'+key+'" data-i="'+i+'" value="'+esc(v)+'"'+(edit?'':' disabled')+' style="width:3.3rem;padding:.35rem .2rem;text-align:center;font-size:.9rem;font-weight:700;border:1px solid #cbd5e1;border-radius:8px;"></td>';
+      }).join('')+'<td id="enssQ_tot_'+key+'" style="text-align:center;font-weight:800;font-size:.95rem;background:'+color+';">0</td></tr>';
+    }
+    var totRow='<tr style="background:#f1f5f9;"><td style="position:sticky;left:0;background:#f1f5f9;font-weight:800;font-size:.72rem;z-index:1;">➕ Total klas</td>'+classes.map(function(c,i){ return '<td id="enssQ_ct_'+i+'" style="text-align:center;font-weight:800;font-size:.9rem;">0</td>'; }).join('')+'<td id="enssQ_tot_all" style="text-align:center;font-weight:900;font-size:1.05rem;background:#bfdbfe;color:#1e3a5f;">0</td></tr>';
+    box.innerHTML='<div style="margin:.4rem 0 .6rem;font-size:.78rem;color:#475569;">Antre kantite elèv ki manje chak klas: <b>fiy</b> sou premye liy lan, <b>gason</b> sou dezyèm liy lan. Total yo kalkile poukont yo epi y ap parèt nan <b>📈 Résumé par jour</b> lan (paj Kantin).</div>'+
+      '<div class="table-wrap" style="overflow-x:auto;"><table style="border-collapse:collapse;"><thead><tr>'+th+'</tr></thead><tbody>'+row('f','👧 Fiy','#fdf2f8')+row('g','👦 Gason','#eff6ff')+totRow+'</tbody></table></div>'+
+      '<div id="enssQSummary" style="margin:.7rem 0;padding:.6rem .8rem;border-radius:10px;background:#f0f9ff;border:1px solid #bae6fd;font-size:.85rem;font-weight:700;color:#1e3a5f;"></div>'+
+      '<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">'+
+      '<button type="button" class="btn btn-primary" id="enssQSave"'+(edit?'':' disabled')+'>💾 Anrejistre</button>'+
+      '<button type="button" class="btn" id="enssQFromAppel"'+(edit?'':' disabled')+' title="Ranpli ak apèl anseyan yo pou klas ki gen apèl deja">↻ Pran apèl anseyan yo</button>'+
+      '<button type="button" class="btn" id="enssQClear"'+(edit?'':' disabled')+'>🧹 Vide jou sa a</button>'+
+      '<button type="button" class="btn" id="enssQResume">📈 Louvri Résumé par jour</button>'+
+      '<span id="enssQStatus" style="font-size:.72rem;color:#166534;"></span></div>'+(edit?'':'<p style="font-size:.74rem;color:#92400e;margin-top:.5rem;">🔒 Ou pa gen dwa pou modifye kantin. Konekte ak yon kont ki gen dwa.</p>');
+    var inputs=box.querySelectorAll('input[data-k]'), timer=null;
+    function collect(){ var d={}; inputs.forEach(function(inp){ var c=classes[+inp.getAttribute('data-i')], k=inp.getAttribute('data-k'); (d[c]=d[c]||{f:0,g:0})[k]=num(inp.value); }); return d; }
+    function recalc(){
+      var d=collect(), f=0,g=0;
+      classes.forEach(function(c,i){ var x=d[c]||{f:0,g:0}; f+=x.f; g+=x.g; var el=document.getElementById('enssQ_ct_'+i); if(el) el.textContent=x.f+x.g; });
+      document.getElementById('enssQ_tot_f').textContent=f; document.getElementById('enssQ_tot_g').textContent=g; document.getElementById('enssQ_tot_all').textContent=f+g;
+      document.getElementById('enssQSummary').textContent='Total fiy: '+f+'  ·  Total gason: '+g+'  ·  Total jeneral: '+(f+g);
+    }
+    function save(){
+      if(!canEdit()){ requireLogin('modifye kantin','cantine'); return; }
+      var d=collect(), clean={}; Object.keys(d).forEach(function(c){ if(d[c].f||d[c].g) clean[c]=d[c]; });
+      var st=store(); if(Object.keys(clean).length) st[date]=clean; else delete st[date];
+      applyQuick(date);
+      var el=document.getElementById('enssQStatus'); if(el) el.textContent='✓ Anrejistre '+new Date().toLocaleTimeString();
+    }
+    inputs.forEach(function(inp){
+      inp.addEventListener('input',recalc);
+      inp.addEventListener('change',function(){ clearTimeout(timer); timer=setTimeout(save,350); });
+      inp.addEventListener('focus',function(){ try{ inp.select(); }catch(e){} });
+    });
+    box.querySelector('#enssQSave').onclick=function(){ clearTimeout(timer); save(); };
+    box.querySelector('#enssQResume').onclick=function(){ try{ navigateTo('cantine'); }catch(e){} };
+    box.querySelector('#enssQClear').onclick=function(){ if(!confirm('Vide tout chif jou '+date+' yo?')) return; inputs.forEach(function(i){ i.value=''; }); recalc(); save(); };
+    box.querySelector('#enssQFromAppel').onclick=function(){
+      var n=0;
+      classes.forEach(function(c,i){
+        var pres=(STATE.presences&&STATE.presences[c+'|'+date])||null; if(!pres||!Object.keys(pres).length) return;
+        var f=0,g=0;
+        (getStudentsByClasse(c)||[]).forEach(function(st){
+          var rec=(typeof enssNormalizePresenceRecord==='function')?enssNormalizePresenceRecord(pres[st.nisu],pres[st.nisu+'_sove']):{present:(pres[st.nisu]||'P')==='P'};
+          if(rec&&rec.present){ if(String(st.sexe||'').toUpperCase().indexOf('F')===0) f++; else g++; }
+        });
+        var a=box.querySelector('input[data-k="f"][data-i="'+i+'"]'), b=box.querySelector('input[data-k="g"][data-i="'+i+'"]'); if(a)a.value=f; if(b)b.value=g; n++;
+      });
+      recalc(); if(n) save(); else alert('Pa gen apèl anseyan pou dat sa a.');
+    };
+    recalc();
+  }
+  window.loadCantinePresences=function(){
+    var inp=document.getElementById('cantinePresDate'); if(!inp) return;
+    var date=inp.value||today(); inp.value=date; render(date);
+  };
+  /* Si fòm rapid la gen chif pou jou a, li gen priyorite sou apèl anseyan yo (pa ekrase l). */
+  var prevUpd=window.updateCantineFromPresences;
+  window.updateCantineFromPresences=function(date){
+    var s=sums(getQ(date)); if(s.t>0){ applyQuick(date); return; }
+    return prevUpd?prevUpd.apply(this,arguments):undefined;
+  };
+  var prevCnt=window.getCantinePresentCountsBySex;
+  window.getCantinePresentCountsBySex=function(date){
+    var s=sums(getQ(date)); if(s.t>0) return {filles:s.f,garcons:s.g,total:s.t};
+    return prevCnt?prevCnt.apply(this,arguments):{filles:0,garcons:0,total:0};
+  };
+  window.__ENSS_V108_TEST__={sums:sums,applyQuick:applyQuick,getQ:getQ};
+})();
+</script>
+
 </body>
 </html>
