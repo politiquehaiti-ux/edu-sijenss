@@ -517,22 +517,15 @@
                     <button class="btn btn-primary" onclick="inlineLogin()" style="padding:0.25rem 0.6rem;font-size:0.75rem;">🔐 Konekte</button>
                     <span id="inlineLoginMsg" style="font-size:0.7rem;color:#e74c3c;"></span>
                 </div>
-                <!-- Otantifikasyon Supabase pou tout pwofil: pa bezwen antre nan Paramèt administratè a -->
+                <!-- V106: verifikasyon imèl sèlman; koneksyon ENSS la rete ak pwofil/modpas ki deja egziste -->
                 <div class="card" id="enssHomeEmailAccess" style="padding:.65rem .75rem;margin-bottom:.6rem;border-left:3px solid #2563eb;">
-                    <strong style="display:block;font-size:.78rem;margin-bottom:.25rem;">☁️ Aksè ak imèl verifye (yon sèl fwa pou asosye pwofil la)</strong>
-                    <p style="font-size:.66rem;color:#475569;margin:.2rem 0 .45rem;">Kreye kont ak imèl ou, verifye imèl la, epi konekte. Pou premye asosiyasyon an, antre kòd pwofil ENSS ou ak modpas pwofil ou deja genyen an. Si w chanje modpas pwofil la, asosiyasyon imèl la rete.</p>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.35rem;">
-                        <input id="enssHomeEmail" type="email" autocomplete="email" placeholder="Imèl pèsonèl ou" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
-                        <input id="enssHomePassword" type="password" autocomplete="current-password" placeholder="Modpas kont imèl la (6+ karaktè)" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
-                        <input id="enssHomeLinkCode" autocomplete="off" placeholder="Kòd pwofil ENSS (eg. CL2-TLM2017)" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
-                        <input id="enssHomeLinkPassword" type="password" autocomplete="current-password" placeholder="Modpas pwofil ENSS ou" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
+                    <strong style="display:block;font-size:.78rem;margin-bottom:.25rem;">☁️ Verifye adrès imèl ou (yon sèl fwa)</strong>
+                    <p style="font-size:.66rem;color:#475569;margin:.2rem 0 .45rem;">Antre adrès imèl ou sèlman. N ap voye yon lyen verifikasyon. Ou pa bezwen bay modpas imel ou ni kreye yon lòt modpas ENSS. Apre verifikasyon, konekte ak kòd pwofil ENSS ou ak modpas ou te deja genyen an.</p>
+                    <div style="display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:.35rem;align-items:center;">
+                        <input id="enssHomeEmail" type="email" autocomplete="email" placeholder="Adrès imèl pèsonèl ou" style="padding:.4rem .5rem;font-size:.75rem;min-width:0;" />
+                        <button type="button" class="btn btn-primary" onclick="centralSendEmailVerification()" style="padding:.35rem .6rem;font-size:.72rem;">✉️ Voye lyen verifikasyon</button>
                     </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">
-                        <button type="button" class="btn" onclick="centralCreateAccount()" style="padding:.28rem .55rem;font-size:.68rem;">➕ Kreye kont imèl</button>
-                        <button type="button" class="btn btn-primary" onclick="centralSignIn()" style="padding:.28rem .55rem;font-size:.68rem;">🔐 Konekte ak imèl</button>
-                        <button type="button" class="btn btn-success" onclick="centralLinkVerifiedProfile()" style="padding:.28rem .55rem;font-size:.68rem;">🔗 Verifye epi asosye pwofil</button>
-                    </div>
-                    <p style="font-size:.62rem;color:#64748b;margin:.35rem 0 0;">Apre verifikasyon, konekte ak imèl/modpas la. Si kont oswa asosiyasyon an efase, ou ka refè etap la ak kòd ak modpas pwofil aktyèl la. Pwofil ki gen dwa administratè/Direksyon mande verifikasyon administratè.</p>
+                    <p id="enssHomeEmailMsg" style="font-size:.65rem;color:#475569;margin:.35rem 0 0;">Apre ou fin klike sou lyen ki rive nan imel ou, retounen isit la epi konekte nan bwat Idantite a anlè a ak ansyen pwofil/modpas ENSS ou.</p>
                 </div>
 
                 <!-- VERIFIKASYON ELÈV -->
@@ -2672,6 +2665,25 @@
                 return true;
             }catch(e){ centralStatus('Erè koneksyon: '+(e.message||e), false); alert('Koneksyon santral la echwe. Verifye email, mo de pase ak pwojè Supabase la.'); return false; }
         }
+        async function centralSendEmailVerification(){
+            var email=((document.getElementById('enssHomeEmail')||{}).value||'').trim();
+            var msg=document.getElementById('enssHomeEmailMsg');
+            if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Antre yon adrès imèl ki valab.');return false;}
+            try{
+                var client=ensureCentralClient();
+                var r=await client.auth.signInWithOtp({email:email,options:{emailRedirectTo:window.location.href,shouldCreateUser:true}});
+                if(r.error) throw r.error;
+                if(msg) msg.textContent='✓ Nou voye yon lyen verifikasyon nan '+email+'. Louvri imel la, klike sou lyen an, epi retounen isit la pou konekte ak ansyen pwofil/modpas ENSS ou.';
+                alert('Nou voye lyen verifikasyon an nan '+email+'. Pa antre modpas imel ou nan ENSS.');
+                return true;
+            }catch(e){
+                var message=(e&&e.message)||String(e||'Erè enkoni');
+                if(msg) msg.textContent='Voye lyen an echwe: '+message;
+                alert('Nou pa t kapab voye lyen verifikasyon an: '+message);
+                return false;
+            }
+        }
+
         async function centralCreateAccount(){
             var email=((document.getElementById('enssCentralEmail')||document.getElementById('enssHomeEmail')||{}).value)||'';
             var password=((document.getElementById('enssCentralPassword')||document.getElementById('enssHomePassword')||{}).value)||'';
@@ -13742,6 +13754,23 @@
             if (el) el.type = el.type === 'password' ? 'text' : 'password';
         }
 
+        async function enssAssociateVerifiedEmailAfterProfileLogin(userObj, profilePassword){
+            try{
+                var emailInput=document.getElementById('enssHomeEmail');
+                var email=(emailInput&&emailInput.value||'').trim();
+                var client=ensureCentralClient();
+                var session=await centralRefreshSession();
+                if(!session||!session.access_token){return;}
+                var result=await client.functions.invoke('enss-link-verified-profile',{body:{profile_code:userObj.profil,profile_password:profilePassword}});
+                if(result.error) throw result.error;
+                if(result.data&&result.data.error) throw new Error(result.data.error);
+                centralStatus('✓ Imèl verifye a asosye ak pwofil ENSS '+userObj.profil+'.',true);
+            }catch(e){
+                console.warn('ENSS email/profile association:',e);
+                // Pa bloke koneksyon nòmal ENSS la si asosiyasyon imèl la poko fèt.
+            }
+        }
+
         function inlineLogin() {
             var user = document.getElementById('accueilLoginUser').value.trim();
             var pass = document.getElementById('accueilLoginPass').value.trim();
@@ -13759,6 +13788,9 @@
                 try { localStorage.setItem('ENSS_LOGIN', userObj.profil); } catch (e) {}
                 safeCall(function() { syncUserAccess(userObj); }, 'syncUserAccess');
                 saveState();
+                // Si moun nan te verifye imèl li epi sesyon verifikasyon an toujou aktif,
+                // asosye sesyon sa a ak pwofil/modpas ENSS li deja genyen an.
+                try { enssAssociateVerifiedEmailAfterProfileLogin(userObj, pass); } catch (emailLinkError) {}
                 msgEl.style.color = '#27ae60';
                 msgEl.textContent = '✓ Konekte kòm ' + userObj.profil;
                 document.getElementById('accueilLoginPass').value = '';
@@ -14334,6 +14366,7 @@
         window.centralSignIn = centralSignIn;
         window.centralCreateAccount = centralCreateAccount;
          window.centralProvisionProfile = centralProvisionProfile;
+        window.centralSendEmailVerification = centralSendEmailVerification;
         window.centralSignOut = centralSignOut;
         window.centralSeedCurrentState = centralSeedCurrentState;
         window.centralPullForAll = centralPullForAll;
