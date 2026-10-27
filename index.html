@@ -709,8 +709,12 @@
                                             </div>
                 </div>
 
-                <!-- MODIL SIPÈVIZYON PEDAGOJIK ENSS -->
-                <section class="enss-supervision card" id="enssSupervisionModule" aria-labelledby="enssSupervisionTitle">
+                <!-- BANNIÈRE SIPÈVIZYON PEDAGOJIK: FÈMEN PA DEFO -->
+                <div class="direction-mini-band" id="enssSupervisionToggle" role="button" tabindex="0" aria-controls="enssSupervisionModule" aria-expanded="false" onclick="toggleEnssSupervision()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleEnssSupervision();}" style="margin:.55rem 0;cursor:pointer;display:flex;align-items:center;gap:.55rem;border:1px solid #b8d8ef;border-radius:10px;background:linear-gradient(135deg,#edf7ff,#f7fbff);color:#174b73;padding:.75rem .9rem;">
+                    <span class="icon">🎓</span><strong>DIREKSYON • SUIVI PÉDAGOGIQUE — Sipèvizyon pedagojik</strong><span id="enssSupervisionToggleIcon" style="margin-left:auto;font-weight:800;">＋</span>
+                </div>
+                <!-- MODIL SIPÈVIZYON PEDAGOJIK ENSS; li parèt sèlman lè yo klike sou bann lan -->
+                <section class="enss-supervision card" id="enssSupervisionModule" aria-labelledby="enssSupervisionTitle" style="display:none;">
                     <div class="enss-supervision-head">
                         <div>
                             <div class="enss-supervision-kicker">DIREKSYON • SUIVI PÉDAGOGIQUE</div>
@@ -15534,7 +15538,7 @@
 
   function injectClassCommitteeButtons(){var card=document.getElementById('classeDetailComiteBtn');if(!card)return;card.innerHTML='<div style="display:flex;gap:.35rem;flex-wrap:wrap;"><button class="btn btn-primary" onclick="viewComite(\'eleves\',currentClasseNotes)" style="padding:.2rem .55rem;font-size:.68rem;">🤝 Comité des Élèves — '+esc(window.currentClasseNotes||'Classe')+'</button><button class="btn btn-success" onclick="viewComite(\'parents\',currentClasseNotes)" style="padding:.2rem .55rem;font-size:.68rem;">👨‍👩‍👧 Comité des Parents — '+esc(window.currentClasseNotes||'Classe')+'</button></div>';}
   var oldShow=window.showClasseDetail;window.showClasseDetail=function(classe){window.currentClasseNotes=classe;var r=oldShow?oldShow.apply(this,arguments):null;setTimeout(function(){injectClassCommitteeButtons();refreshClass46(classe);},90);return r;};
-  function replaceDirectionBands(){var box=document.querySelector('#page-direction .direction-mini-bands');if(!box)return;box.querySelectorAll('.enss-v46-direction-comite').forEach(function(e){e.remove();});var add=function(icon,label,type){var d=document.createElement('div');d.className='direction-mini-band enss-v46-direction-comite';d.innerHTML='<span class=\"icon\">'+icon+'</span><strong>'+label+'</strong>';d.onclick=function(){navigateTo('comites');setTimeout(function(){viewComite(type)},50);};box.appendChild(d);};add('🏫','Conseil d’École','conseil');add('🏛','Comité Central','central');add('👨‍👩‍👧','Comité des Parents de l’École','parentEcole');add('👩‍🏫','Comité des Enseignants — 5 membres','enseignants');}
+  function replaceDirectionBands(){var box=document.querySelector('#page-direction .direction-mini-bands');if(!box)return;box.querySelectorAll('.enss-v46-direction-comite').forEach(function(e){e.remove();});var add=function(icon,label,type){var d=document.createElement('div');d.className='direction-mini-band enss-v46-direction-comite';d.innerHTML='<span class=\"icon\">'+icon+'</span><strong>'+label+'</strong>';d.onclick=function(){navigateTo('comites');setTimeout(function(){viewComite(type)},50);};box.appendChild(d);};add('🏫','Conseil d’École','conseil');add('🏛','Comité Central','central');add('👨‍👩‍👧','Comité des Parents de l’École','parentEcole');add('👩‍🏫','Comité des Enseignants — 5 membres','enseignants');var supToggle=document.getElementById('enssSupervisionToggle'),supPanel=document.getElementById('enssSupervisionModule');if(box&&supToggle&&supPanel){box.appendChild(supToggle);box.appendChild(supPanel);}}
   function replaceContactsParent(){var b=document.getElementById('contactsComiteParentBtn');if(b)b.innerHTML='<button class="btn" onclick="navigateTo(\'direction\');setTimeout(function(){navigateTo(\'comites\');setTimeout(function(){viewComite(\'parentEcole\')},50)},50)" style="padding:.2rem .6rem;font-size:.72rem;">👨‍👩‍👧 Comité des Parents de l’École</button>';}
   function replaceComitesPage(){var p=document.getElementById('page-comites');if(!p)return;p.querySelector('h2').innerHTML='🤝 Comités';var cards=p.querySelector('#comitesCards');if(cards)cards.innerHTML='<div class="card text-center" style="padding:.6rem;font-size:.78rem;">🏫 Comités de chaque classe : ouvri yo depi paj klas la.</div><div class="card text-center" style="padding:.6rem;font-size:.78rem;">🏛️ 4 comités Direction : Conseil d’École · Comité Central · Comité des Parents de l’École · Comité des Enseignants.</div>';}
   // Nettoyage final : aucune affectation globale ni doublon de comité dans Direction.
@@ -19650,6 +19654,7 @@ body{ line-height:1.55; }
       return (!y||r.annee===y)&&(!c||r.classe===c)&&(!t||r.enseignant===t)&&(!q||[r.matiere,r.objectif,r.pointsForts,r.difficultes,r.recommandations,r.visiteur].join(' ').toLowerCase().indexOf(q)>=0);
     }).sort(function(a,b){return String(b.dateVisite||'').localeCompare(String(a.dateVisite||''));});
   }
+  function toggleEnssSupervision(){var panel=document.getElementById('enssSupervisionModule');var band=document.getElementById('enssSupervisionToggle');var icon=document.getElementById('enssSupervisionToggleIcon');if(!panel||!band)return;var opening=panel.style.display==='none'||!panel.style.display;panel.style.display=opening?'block':'none';band.setAttribute('aria-expanded',opening?'true':'false');if(icon)icon.textContent=opening?'−':'＋';if(opening){try{if(typeof window.enssSupervisionRender==='function')window.enssSupervisionRender();}catch(e){}setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},60);}}
   window.enssSupervisionRender=function(){
     if(!window.STATE)return;
     var module=document.getElementById('enssSupervisionModule');
