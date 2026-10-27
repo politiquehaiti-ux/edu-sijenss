@@ -517,6 +517,23 @@
                     <button class="btn btn-primary" onclick="inlineLogin()" style="padding:0.25rem 0.6rem;font-size:0.75rem;">🔐 Konekte</button>
                     <span id="inlineLoginMsg" style="font-size:0.7rem;color:#e74c3c;"></span>
                 </div>
+                <!-- Otantifikasyon Supabase pou tout pwofil: pa bezwen antre nan Paramèt administratè a -->
+                <div class="card" id="enssHomeEmailAccess" style="padding:.65rem .75rem;margin-bottom:.6rem;border-left:3px solid #2563eb;">
+                    <strong style="display:block;font-size:.78rem;margin-bottom:.25rem;">☁️ Aksè ak imèl verifye (yon sèl fwa pou asosye pwofil la)</strong>
+                    <p style="font-size:.66rem;color:#475569;margin:.2rem 0 .45rem;">Kreye kont ak imèl ou, verifye imèl la, epi konekte. Pou premye asosiyasyon an, antre kòd pwofil ENSS ou ak modpas pwofil ou deja genyen an. Si w chanje modpas pwofil la, asosiyasyon imèl la rete.</p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.35rem;">
+                        <input id="enssHomeEmail" type="email" autocomplete="email" placeholder="Imèl pèsonèl ou" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
+                        <input id="enssHomePassword" type="password" autocomplete="current-password" placeholder="Modpas kont imèl la (6+ karaktè)" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
+                        <input id="enssHomeLinkCode" autocomplete="off" placeholder="Kòd pwofil ENSS (eg. CL2-TLM2017)" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
+                        <input id="enssHomeLinkPassword" type="password" autocomplete="current-password" placeholder="Modpas pwofil ENSS ou" style="padding:.35rem .45rem;font-size:.72rem;min-width:0;" />
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">
+                        <button type="button" class="btn" onclick="centralCreateAccount()" style="padding:.28rem .55rem;font-size:.68rem;">➕ Kreye kont imèl</button>
+                        <button type="button" class="btn btn-primary" onclick="centralSignIn()" style="padding:.28rem .55rem;font-size:.68rem;">🔐 Konekte ak imèl</button>
+                        <button type="button" class="btn btn-success" onclick="centralLinkVerifiedProfile()" style="padding:.28rem .55rem;font-size:.68rem;">🔗 Verifye epi asosye pwofil</button>
+                    </div>
+                    <p style="font-size:.62rem;color:#64748b;margin:.35rem 0 0;">Apre verifikasyon, konekte ak imèl/modpas la. Si kont oswa asosiyasyon an efase, ou ka refè etap la ak kòd ak modpas pwofil aktyèl la. Pwofil ki gen dwa administratè/Direksyon mande verifikasyon administratè.</p>
+                </div>
 
                 <!-- VERIFIKASYON ELÈV -->
                 <div class="card" id="verificationCard" style="padding:0.5rem 0.7rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
@@ -691,6 +708,32 @@
                         <div class="direction-mini-band" onclick="navigateTo('cantine')"><span class="icon">🍲</span><strong>Dossiers Cantine</strong></div>
                                             </div>
                 </div>
+
+                <!-- MODIL SIPÈVIZYON PEDAGOJIK ENSS -->
+                <section class="enss-supervision card" id="enssSupervisionModule" aria-labelledby="enssSupervisionTitle">
+                    <div class="enss-supervision-head">
+                        <div>
+                            <div class="enss-supervision-kicker">DIREKSYON • SUIVI PÉDAGOGIQUE</div>
+                            <h3 id="enssSupervisionTitle">🎓 Sipèvizyon pedagojik</h3>
+                            <p>Planifye vizit, evalye pratik ansèyman, dokimante obsèvasyon, epi swiv rekòmandasyon pou tout klas ak matyè.</p>
+                        </div>
+                        <div class="enss-supervision-actions">
+                            <button class="btn btn-primary" type="button" onclick="enssSupervisionNew()">＋ Nouvo obsèvasyon</button>
+                            <button class="btn btn-success" type="button" onclick="enssSupervisionExportWord()">⇩ Ekspòte Word</button>
+                            <button class="btn btn-info" type="button" onclick="enssSupervisionPrint()">▤ PDF / Enprime</button>
+                        </div>
+                    </div>
+                    <div class="enss-supervision-stats" id="enssSupervisionStats"></div>
+                    <div class="enss-supervision-filters">
+                        <div><label for="enssSupFilterYear">Ane lekòl</label><select id="enssSupFilterYear" onchange="enssSupervisionRender()"></select></div>
+                        <div><label for="enssSupFilterClass">Klas</label><select id="enssSupFilterClass" onchange="enssSupervisionRender()"><option value="">Tout klas</option></select></div>
+                        <div><label for="enssSupFilterTeacher">Anseyan</label><select id="enssSupFilterTeacher" onchange="enssSupervisionRender()"><option value="">Tout anseyan</option></select></div>
+                        <div><label for="enssSupSearch">Rechèch</label><input id="enssSupSearch" type="search" placeholder="Matyè, objektif, rekòmandasyon…" oninput="enssSupervisionRender()"></div>
+                    </div>
+                    <div id="enssSupervisionFormWrap" hidden></div>
+                    <div class="enss-supervision-table-wrap" id="enssSupervisionList"><div class="enss-sup-empty">Obsèvasyon pedagojik yo ap parèt la lè ou anrejistre yo.</div></div>
+                    <p class="enss-supervision-note">Dosye yo anrejistre nan eta done ENSS la atravè <code>saveState()</code>, pou yo swiv mekanis sovgad ak senkronizasyon platfòm nan. Ekspòtasyon pa efase dosye yo.</p>
+                </section>
 
                 <!-- Zòn Excellence -->
                 <div class="excellence-card" id="excellenceContainer2">
@@ -2469,7 +2512,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V100-FAST-SYNC-SMALL-WRITE-RESPONSE';
+        var ENSS_APP_VERSION = 'V102-AUTH-PROTECTED-ROUTES-SESSION-HARDENING';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2579,8 +2622,8 @@
             return Promise.race([Promise.resolve(promise),timeoutPromise]).finally(function(){clearTimeout(timeoutId);});
         }
         async function centralSignIn(){
-            var email=(document.getElementById('enssCentralEmail')||{}).value||'';
-            var password=(document.getElementById('enssCentralPassword')||{}).value||'';
+            var email=((document.getElementById('enssCentralEmail')||document.getElementById('enssHomeEmail')||{}).value)||'';
+            var password=((document.getElementById('enssCentralPassword')||document.getElementById('enssHomePassword')||{}).value)||'';
             email=email.trim();
             if(!email||!password){ alert('Antre email ak mo de pase kont Supabase la.'); return false; }
             try{
@@ -2591,14 +2634,34 @@
                 var pulled=await centralPullState(true);
                 if(!pulled){
                     // Pa fè signOut otomatik lè lekti santral la echwe.
-                    // SignOut sa a te ka anile rafrechisman sesyon ki t ap fèt an menm tan,
-                    // epi lakòz erè "session state changed mid-flight" la.
-                    // Kenbe sesyon an pou administratè a kapab dyagnostike RLS/liy school_state.
+                    // Kenbe sesyon an pou dyagnostik; done lokal yo rete konsève.
                     ENSS_CENTRAL.ready=false;
                     centralSubscribeRealtime();
                     centralStatus('✓ Sesyon Supabase aktif, men done santral yo poko verifye. Pa gen nouvo ekriti ki konfime; verifye RLS ak liy school_state la.', false);
+                    alert('Kont imèl la konekte, men pwofil ENSS la poko asosye oswa aksè santral la poko aktive. Ranpli kòd pwofil ak ansyen modpas ENSS ou nan seksyon Aksè ak imèl verifye a, epi peze “Verifye epi asosye pwofil”.');
                     return false;
                 }
+                // Si kont imèl sa a deja asosye ak yon pwofil, retabli pwofil la apre done santral yo fin chaje.
+                // Fonksyon sèvè a verifye auth.uid() ak asosiyasyon an; kliyan an pa chwazi wòl la.
+                try{
+                    var linkResult=await client.functions.invoke('enss-link-verified-profile',{body:{action:'resolve'}});
+                    if(!linkResult.error && linkResult.data && linkResult.data.linked===true){
+                        var linkedCode=String(linkResult.data.profile_code||'');
+                        var localProfile=(STATE.securite&&Array.isArray(STATE.securite.users))?STATE.securite.users.find(function(u){return String(u.profil||'').trim()===linkedCode;}):null;
+                        if(localProfile && localProfile.role!=='admin' && localProfile.role!=='direction'){
+                            STATE.utilisateur=localProfile.profil;
+                            try{localStorage.setItem('ENSS_LOGIN',localProfile.profil);}catch(storageError){}
+                            safeCall(function(){syncUserAccess(localProfile);},'syncUserAccess linked email');
+                            safeCall(function(){saveState();},'saveState linked email');
+                            safeCall(function(){initApp();},'initApp linked email');
+                        }
+                    }else if(!linkResult.error && linkResult.data && linkResult.data.needs_relink===true){
+                        STATE.utilisateur='';
+                        try{localStorage.removeItem('ENSS_LOGIN');}catch(storageError){}
+                        safeCall(function(){initApp();},'initApp relink required');
+                        alert('Sekirite: modpas oswa idantite pwofil ENSS la chanje. Aksè pwofil la sispann tanporèman. Antre kòd pwofil la ak nouvo modpas ENSS la nan seksyon Aksè ak imèl verifye a, epi peze “Verifye epi asosye pwofil”.');
+                    }
+                }catch(linkResolveError){console.warn('ENSS profile link lookup:',linkResolveError);}
                 centralSubscribeRealtime();
                 centralStatus('✓ Kont Supabase otorize; done santral yo verifye sou aparèy sa a.', true);
                 spawnHearts();
@@ -2606,8 +2669,8 @@
             }catch(e){ centralStatus('Erè koneksyon: '+(e.message||e), false); alert('Koneksyon santral la echwe. Verifye email, mo de pase ak pwojè Supabase la.'); return false; }
         }
         async function centralCreateAccount(){
-            var email=(document.getElementById('enssCentralEmail')||{}).value||'';
-            var password=(document.getElementById('enssCentralPassword')||{}).value||'';
+            var email=((document.getElementById('enssCentralEmail')||document.getElementById('enssHomeEmail')||{}).value)||'';
+            var password=((document.getElementById('enssCentralPassword')||document.getElementById('enssHomePassword')||{}).value)||'';
             email=email.trim();
             if(!email||!password){ alert('Antre email ak yon mo de pase pou kreye kont santral la.'); return false; }
             if(password.length<6){ alert('Supabase mande yon mo de pase ki gen omwen 6 karaktè.'); return false; }
@@ -2616,9 +2679,74 @@
                 var r=await client.auth.signUp({email:email,password:password});
                 if(r.error) throw r.error;
                 if(r.data && r.data.session){ ENSS_CENTRAL.session=r.data.session; await centralPullState(true); centralSubscribeRealtime(); centralStatus('✓ Kont santral la kreye epi konekte.', true); }
-                else centralStatus('✓ Kont lan kreye. Verifye email la si pwojè a mande konfimasyon.', true);
+                else {
+                    centralStatus('✓ Kont lan kreye. Verifye email la si pwojè a mande konfimasyon.', true);
+                    alert('✓ Kont imèl la kreye. Ale nan bwat resepsyon ou, klike sou lyen verifikasyon Supabase la, retounen sou ENSS, konekte ak imèl/modpas sa a, epi asosye kòd pwofil ENSS ou ak modpas pwofil ou deja genyen an.');
+                }
                 return true;
             }catch(e){ centralStatus('Kreyasyon kont echwe: '+(e.message||e), false); alert('Kreyasyon kont santral la echwe: '+(e.message||e)); return false; }
+        }
+
+        async function centralProvisionProfile(){
+            var email=(document.getElementById('enssProvisionEmail')||{}).value||'';
+            var profileCode=(document.getElementById('enssProvisionCode')||{}).value||'';
+            var role=(document.getElementById('enssProvisionRole')||{}).value||'teacher';
+            email=email.trim(); profileCode=profileCode.trim();
+            if(!email||!profileCode){alert('Antre imèl moun nan ak kòd pwofil li.');return false;}
+            if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Imèl la pa sanble yon imèl valab.');return false;}
+            if(!confirm('Voye envitasyon Supabase bay '+email+' epi asosye li ak pwofil '+profileCode+' ('+role+')?')) return false;
+            try{
+                var client=ensureCentralClient();
+                var session=await centralRefreshSession();
+                if(!session||!session.access_token){alert('Konekte ak kont Supabase administratè ENSS la anvan.');return false;}
+                var result=await client.functions.invoke('enss-provision-member',{body:{email:email,profile_code:profileCode,role:role}});
+                if(result.error) throw result.error;
+                if(result.data&&result.data.error) throw new Error(result.data.error);
+                alert('Envitasyon an voye. Kont Auth la ak manm ENSS la asosye. Moun nan dwe ouvri imèl envitasyon an pou li fikse modpas li.');
+                var e=document.getElementById('enssProvisionEmail'); if(e)e.value='';
+                var c=document.getElementById('enssProvisionCode'); if(c)c.value='';
+                return true;
+            }catch(e){
+                var msg=(e&&e.message)||String(e||'Erè enkoni');
+                alert('Kreyasyon/asosyasyon pwofil la echwe: '+msg);
+                centralStatus('Kreyasyon kont pwofil echwe: '+msg,false);
+                return false;
+            }
+        }
+
+        async function centralLinkVerifiedProfile(){
+            var code=((document.getElementById('enssLinkProfileCode')||document.getElementById('enssHomeLinkCode')||{}).value)||'';
+            var profilePassword=((document.getElementById('enssLinkProfilePassword')||document.getElementById('enssHomeLinkPassword')||{}).value)||'';
+            code=code.trim();
+            if(!code||!profilePassword){alert('Antre kòd pwofil ENSS ou ak modpas pwofil ou deja genyen an.');return false;}
+            try{
+                var client=ensureCentralClient();
+                var session=await centralRefreshSession();
+                if(!session||!session.access_token){alert('Konekte ak kont imèl ou a anvan. Si se premye fwa, kreye kont lan, verifye imèl la, epi konekte.');return false;}
+                var result=await client.functions.invoke('enss-link-verified-profile',{body:{profile_code:code,profile_password:profilePassword}});
+                if(result.error) throw result.error;
+                if(result.data&&result.data.error) throw new Error(result.data.error);
+                var passEl=document.getElementById('enssLinkProfilePassword')||document.getElementById('enssHomeLinkPassword');if(passEl)passEl.value='';
+                // Apre asosiyasyon an, manm lan aktif; rale done santral yo epi louvri pwofil li.
+                var refreshed=await centralPullState(true);
+                if(refreshed){
+                    var linkedProfile=(STATE.securite&&Array.isArray(STATE.securite.users))?STATE.securite.users.find(function(u){return String(u.profil||'').trim()===code;}):null;
+                    if(linkedProfile && linkedProfile.role!=='admin' && linkedProfile.role!=='direction'){
+                        STATE.utilisateur=linkedProfile.profil;
+                        try{localStorage.setItem('ENSS_LOGIN',linkedProfile.profil);}catch(storageError){}
+                        safeCall(function(){syncUserAccess(linkedProfile);},'syncUserAccess after profile link');
+                        safeCall(function(){initApp();},'initApp after profile link');
+                    }
+                }
+                alert('✓ '+((result.data&&result.data.message)||'Pwofil ENSS la asosye ak imèl verifye a.'));
+                centralStatus('✓ Pwofil '+code+' asosye ak kont imèl verifye a.',true);
+                return true;
+            }catch(e){
+                var msg=(e&&e.message)||String(e||'Erè enkoni');
+                alert('Asosyasyon an pa reyisi: '+msg);
+                centralStatus('Asosyasyon pwofil la echwe: '+msg,false);
+                return false;
+            }
         }
 
         async function centralSignOut(){
@@ -4788,6 +4916,7 @@
                     break;
                 case 'direction':
                     renderDirectionPage();
+                    if (typeof enssSupervisionRender === 'function') enssSupervisionRender();
                     break;
                 case 'classes':
                     renderClasses();
@@ -14083,20 +14212,14 @@
                 } catch (_) { STATE = getDefaultState(); }
             }
             try {
-                // Retabli sesyon pwofil lokal la apre rafrechi sèlman si pwofil la
-                // toujou egziste. Se bouton Dekonekte ki retire ENSS_LOGIN.
-                var savedProfile = '';
-                try { savedProfile = String(localStorage.getItem('ENSS_LOGIN') || '').trim(); } catch (e) {}
-                var savedUser = savedProfile && STATE && STATE.securite && Array.isArray(STATE.securite.users)
-                    ? STATE.securite.users.find(function(u){ return u && String(u.profil || '') === savedProfile; })
-                    : null;
-                STATE.utilisateur = savedUser ? savedUser.profil : null;
+                // Pwoteksyon sesyon: pa retabli yon pwofil lekòl sèlman paske non li
+                // te rete nan localStorage. Apre rafrechi oswa reouvèti, mande moun nan
+                // antre modpas pwofil li ankò. Sesyon Supabase rete jere pa Supabase Auth.
+                // Sa pa efase ni modifye kont, nòt, prezans, oswa lòt done lekòl la.
+                try { localStorage.removeItem('ENSS_LOGIN'); } catch (e) {}
+                STATE.utilisateur = null;
                 STATE.currentPage = 'accueil';
-                if (savedUser) {
-                    try { syncUserAccess(savedUser); } catch (e) {}
-                } else {
-                    try { localStorage.removeItem('ENSS_LOGIN'); } catch (e) {}
-                }
+                directionAuthSession = false;
                 saveState();
 
                 var centralLoaded=false;
@@ -14206,6 +14329,7 @@
         window.centralTestConnection = centralTestConnection;
         window.centralSignIn = centralSignIn;
         window.centralCreateAccount = centralCreateAccount;
+         window.centralProvisionProfile = centralProvisionProfile;
         window.centralSignOut = centralSignOut;
         window.centralSeedCurrentState = centralSeedCurrentState;
         window.centralPullForAll = centralPullForAll;
@@ -16196,6 +16320,22 @@
        +'<input id="enssCentralEmail" type="email" placeholder="Email kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;">'
        +'<div style="display:flex;align-items:center;gap:.25rem;min-width:180px;"><input id="enssCentralPassword" type="password" placeholder="Mo de pase kont Supabase" style="padding:.28rem .4rem;font-size:.7rem;flex:1;min-width:0;"><button type="button" class="btn" onclick="toggleCentralPassword()" title="Montre/kache mo de pase Supabase" style="padding:.22rem .35rem;font-size:.7rem;">👁️</button></div>'
        +'</div>'
+       +'<div style="margin-top:.55rem;padding:.55rem;border:1px solid #cbd5e1;border-radius:.5rem;background:#f8fafc;">'
+       +'<strong style="display:block;font-size:.74rem;margin-bottom:.35rem;">👤 Kreye kont epi asosye yon pwofil ENSS</strong>'
+       +'<p style="font-size:.64rem;color:#475569;margin:.2rem 0 .4rem;">Itilize yon imèl reyèl moun nan kapab louvri. Sistèm nan voye envitasyon pou li kreye pwòp modpas li; li pa montre ni estoke modpas klè.</p>'
+       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.35rem;">'
+       +'<input id="enssProvisionCode" placeholder="Kòd pwofil eg. CL2-TLM2017" style="padding:.35rem;font-size:.72rem;">'
+       +'<input id="enssProvisionEmail" type="email" placeholder="Imèl pèsonèl pwofil la" style="padding:.35rem;font-size:.72rem;">'
+       +'<select id="enssProvisionRole" style="padding:.35rem;font-size:.72rem;"><option value="teacher">Anseyan</option><option value="secretary">Sekretè</option><option value="direction">Direksyon</option><option value="student">Elèv</option><option value="parent">Paran</option></select>'
+       +'</div><button type="button" class="btn btn-primary" onclick="centralProvisionProfile()" style="margin-top:.4rem;padding:.3rem .6rem;font-size:.7rem;">✉️ Envite epi asosye pwofil la</button></div>'
+       +'<div style="margin-top:.55rem;padding:.55rem;border:1px solid #93c5fd;border-radius:.5rem;background:#eff6ff;">'
+       +'<strong style="display:block;font-size:.74rem;margin-bottom:.3rem;">🔗 Premye asosiyasyon imèl mwen / reprann aksè</strong>'
+       +'<p style="font-size:.64rem;color:#334155;margin:.2rem 0 .4rem;">Kreye kont ak imèl ou nan bouton “Kreye kont”, verifye imèl la nan bwat resepsyon ou, epi konekte ak imèl sa a. Apre sa antre kòd pwofil ENSS ou ak ansyen modpas pwofil la pou asosye yo. Modpas pwofil la verifye sou sèvè a; li pa sove kòm modpas kont imèl la.</p>'
+       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.35rem;">'
+       +'<input id="enssLinkProfileCode" autocomplete="off" placeholder="Kòd pwofil ENSS ou" style="padding:.35rem;font-size:.72rem;">'
+       +'<input id="enssLinkProfilePassword" type="password" autocomplete="current-password" placeholder="Modpas pwofil ENSS ou" style="padding:.35rem;font-size:.72rem;">'
+       +'</div><button type="button" class="btn btn-primary" onclick="centralLinkVerifiedProfile()" style="margin-top:.4rem;padding:.3rem .6rem;font-size:.7rem;">🔐 Verifye epi asosye pwofil mwen</button>'
+       +'<p style="font-size:.62rem;color:#64748b;margin:.35rem 0 0;">Si pwofil la deja mare ak yon lòt kont ki toujou egziste, sistèm nan pa pral deplase li otomatikman: administratè a dwe verifye demann lan.</p></div>'
        +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">'
        +'<button class="btn" onclick="centralTestConnection()" style="padding:.25rem .55rem;font-size:.68rem;">🔎 Teste</button>'
        +'<button class="btn" onclick="centralDiagnoseRLS()" style="padding:.25rem .55rem;font-size:.68rem;">🛡️ Verifye RLS</button>'
@@ -19290,7 +19430,44 @@ body{ line-height:1.55; }
     var wide=firstRowCells(out)>=10 && !/@page[^{]*\{[^}]*size\s*:/i.test(out);
     var css='<style id="enss-doc-std">'+(opt.word?'':'@page{margin:12mm;'+(wide?'size:A4 landscape;':'')+'}')+
       'table{border-collapse:collapse;}th,td{overflow-wrap:break-word;}tr{page-break-inside:avoid;}thead{display:table-header-group;}img{max-width:100%;}.signature,.enss-doc-footer{page-break-inside:avoid;}'+
-      (opt.word?'':'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}')+'</style><meta data-enss-std="1">';
+      (opt.word?'':'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}')+`
+        /* Sipèvizyon pedagojik — prezantasyon Direction ENSS */
+        .enss-supervision{margin:0 0 .8rem;padding:0!important;overflow:hidden;border:1px solid #d6e2ef;box-shadow:0 5px 18px rgba(18,55,89,.08)}
+        .enss-supervision-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:1rem 1.1rem;background:linear-gradient(120deg,#103a5b,#176a88 68%,#238b8e);color:#fff}
+        .enss-supervision-head h3{font-size:1.12rem;margin:.15rem 0 .3rem;color:#fff}
+        .enss-supervision-head p{font-size:.78rem;line-height:1.5;margin:0;max-width:640px;color:#e5f3fb}
+        .enss-supervision-kicker{font-size:.62rem;font-weight:800;letter-spacing:.13em;color:#b8e7ee}
+        .enss-supervision-actions{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:flex-end}
+        .enss-supervision-actions .btn{font-size:.7rem;padding:.42rem .65rem;white-space:nowrap}
+        .enss-supervision-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.55rem;padding:.8rem 1rem .2rem}
+        .enss-sup-stat{padding:.65rem .75rem;border:1px solid #dce7f0;border-radius:10px;background:linear-gradient(180deg,#fff,#f5f9fd)}
+        .enss-sup-stat b{display:block;font-size:1.25rem;color:#164a70;line-height:1.25}
+        .enss-sup-stat span{font-size:.67rem;color:#536a7d}
+        .enss-supervision-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.55rem;padding:.75rem 1rem}
+        .enss-supervision-filters label,.enss-sup-form label{display:block;font-size:.68rem;font-weight:700;color:#344f65;margin-bottom:.22rem}
+        .enss-supervision-filters select,.enss-supervision-filters input,.enss-sup-form input,.enss-sup-form select,.enss-sup-form textarea{width:100%;min-width:0;padding:.48rem .55rem;border:1px solid #cbd9e5;border-radius:7px;background:#fff;color:#19364d;font-size:.76rem;box-sizing:border-box}
+        .enss-supervision-table-wrap{padding:0 1rem 1rem;overflow-x:auto}
+        .enss-sup-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.72rem;min-width:780px}
+        .enss-sup-table th{background:#edf4f9;color:#1a496b;text-align:left;font-size:.67rem;padding:.65rem .55rem;border-top:1px solid #d8e4ed;border-bottom:1px solid #d8e4ed}
+        .enss-sup-table td{padding:.6rem .55rem;border-bottom:1px solid #e5edf3;vertical-align:top;color:#2a4052}
+        .enss-sup-table tr:hover td{background:#f8fbfe}
+        .enss-sup-pill{display:inline-block;border-radius:99px;padding:.2rem .5rem;background:#e3f4ec;color:#176342;font-size:.62rem;font-weight:800}
+        .enss-sup-pill.pending{background:#fff1d9;color:#8a5200}
+        .enss-sup-row-actions{display:flex;gap:.3rem;flex-wrap:wrap}
+        .enss-sup-row-actions button{font-size:.65rem;padding:.28rem .42rem}
+        .enss-sup-empty{border:1px dashed #c8d8e5;border-radius:9px;text-align:center;padding:1.5rem .8rem;color:#60798c;font-size:.78rem;background:#f8fbfd}
+        .enss-sup-form{margin:.2rem 1rem 1rem;border:1px solid #ccdeea;border-radius:11px;padding:.9rem;background:#f7fafc}
+        .enss-sup-form h4{font-size:.9rem;color:#164a70;margin:0 0 .75rem}
+        .enss-sup-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}
+        .enss-sup-form .wide{grid-column:1/-1}
+        .enss-sup-form textarea{min-height:76px;resize:vertical}
+        .enss-sup-checks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}
+        .enss-sup-check{display:flex;align-items:flex-start;gap:.4rem;padding:.5rem;border:1px solid #dce6ee;background:#fff;border-radius:7px;font-size:.7rem;color:#304b60}
+        .enss-sup-check input{width:auto;margin-top:.15rem}
+        .enss-supervision-note{margin:0;padding:.6rem 1rem .85rem;font-size:.65rem;color:#6b7f8e}
+        @media(max-width:760px){.enss-supervision-head{display:block}.enss-supervision-actions{justify-content:flex-start;margin-top:.8rem}.enss-supervision-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.enss-supervision-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.enss-sup-form-grid{grid-template-columns:1fr 1fr}.enss-sup-checks{grid-template-columns:1fr 1fr}}
+        @media(max-width:440px){.enss-supervision-filters,.enss-sup-form-grid,.enss-sup-checks{grid-template-columns:1fr}.enss-supervision-head{padding:.85rem}.enss-supervision-stats{padding:.65rem}.enss-sup-form{margin:.2rem .65rem .8rem}}
+</style><meta data-enss-std="1">`;
     out=/<\/head>/i.test(out)? out.replace(/<\/head>/i,css+'</head>') : out.replace(/<body/i,css+'<body');
     return out;
   }
@@ -19409,6 +19586,171 @@ body{ line-height:1.55; }
   window.enssV110Run=run;
   setInterval(inject,1200); setTimeout(inject,300);
   window.__ENSS_V110_TEST__={doc:doc,data:data,run:run};
+})();
+</script>
+
+
+<script>
+/* ENSS V101 — Modil sipèvizyon pedagojik, ajoute san ranplase done oswa fonksyon ki te deja la. */
+(function(){
+  'use strict';
+  var editingId = null;
+  var criteria = [
+    ['preparation','Preparasyon ak plan leson'],
+    ['objectifs','Objektif leson yo klè'],
+    ['maitrise','Metriz matyè a'],
+    ['methodes','Metòd ansèyman adapte'],
+    ['participation','Patisipasyon elèv yo'],
+    ['evaluation','Evalyasyon ak verifikasyon konpreyansyon'],
+    ['gestion','Jesyon klas ak tan'],
+    ['supports','Itilizasyon materyèl didaktik']
+  ];
+  function stateList(){ if(!window.STATE || typeof STATE!=='object') return []; if(!Array.isArray(STATE.pedagogicalSupervisions)) STATE.pedagogicalSupervisions=[]; return STATE.pedagogicalSupervisions; }
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function roleOK(){try{return typeof requireAdmin==='function' && requireAdmin('jere sipèvizyon pedagojik');}catch(e){return false;}}
+  function labelOfPerson(p){return [p.prenom,p.nom].filter(Boolean).join(' ').trim() || p.nom || p.profil || '';}
+  function classNames(){
+    var out=[];
+    (Array.isArray(STATE.students)?STATE.students:[]).forEach(function(s){if(s&&s.classe)out.push(String(s.classe));});
+    (Array.isArray(STATE.classes)?STATE.classes:[]).forEach(function(c){var v=typeof c==='string'?c:(c&&(c.nom||c.name||c.classe));if(v)out.push(String(v));});
+    (Array.isArray(STATE.classList)?STATE.classList:[]).forEach(function(c){var v=typeof c==='string'?c:(c&&(c.nom||c.name||c.classe));if(v)out.push(String(v));});
+    return Array.from(new Set(out)).sort(function(a,b){return a.localeCompare(b,'fr');});
+  }
+  function subjects(){
+    var out=[];
+    (Array.isArray(STATE.matieres)?STATE.matieres:[]).forEach(function(m){var v=typeof m==='string'?m:(m&&(m.nom||m.name||m.matiere||m.code));if(v)out.push(String(v));});
+    (Array.isArray(STATE.subjects)?STATE.subjects:[]).forEach(function(m){var v=typeof m==='string'?m:(m&&(m.nom||m.name||m.matiere));if(v)out.push(String(v));});
+    (Array.isArray(STATE.students)?STATE.students:[]).forEach(function(s){if(s&&Array.isArray(s.matieres))s.matieres.forEach(function(v){if(v)out.push(String(v));});});
+    return Array.from(new Set(out)).sort(function(a,b){return a.localeCompare(b,'fr');});
+  }
+  function teacherNames(){
+    var out=[];
+    (Array.isArray(STATE.personnel)?STATE.personnel:[]).forEach(function(p){if(p){var role=String(p.fonction||p.role||p.poste||'').toLowerCase();var n=labelOfPerson(p);if(n && (!role || /enseign|prof|ma[iî]tre|titulaire|instituteur/.test(role)))out.push(n);}});
+    return Array.from(new Set(out)).sort(function(a,b){return a.localeCompare(b,'fr');});
+  }
+  function fillSelect(id, values, first, selected){
+    var el=document.getElementById(id);if(!el)return;
+    var prev=selected!==undefined?selected:el.value;
+    el.innerHTML='<option value="">'+esc(first)+'</option>'+values.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>';}).join('');
+    if(values.indexOf(prev)>=0)el.value=prev;
+  }
+  function refreshFilterChoices(){
+    var years=Array.from(new Set([String((STATE&&STATE.anneeCourante)||new Date().getFullYear()+'-'+(new Date().getFullYear()+1))].concat(stateList().map(function(r){return r.annee||'';})).filter(Boolean))).sort().reverse();
+    fillSelect('enssSupFilterYear',years,'Tout ane lekòl',document.getElementById('enssSupFilterYear')&&document.getElementById('enssSupFilterYear').value);
+    fillSelect('enssSupFilterClass',classNames().concat(stateList().map(function(r){return r.classe||'';})).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).sort(),'Tout klas');
+    fillSelect('enssSupFilterTeacher',teacherNames().concat(stateList().map(function(r){return r.enseignant||'';})).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).sort(),'Tout anseyan');
+  }
+  function currentFiltered(){
+    var list=stateList().slice();
+    var y=(document.getElementById('enssSupFilterYear')||{}).value||'';
+    var c=(document.getElementById('enssSupFilterClass')||{}).value||'';
+    var t=(document.getElementById('enssSupFilterTeacher')||{}).value||'';
+    var q=((document.getElementById('enssSupSearch')||{}).value||'').toLowerCase().trim();
+    return list.filter(function(r){
+      return (!y||r.annee===y)&&(!c||r.classe===c)&&(!t||r.enseignant===t)&&(!q||[r.matiere,r.objectif,r.pointsForts,r.difficultes,r.recommandations,r.visiteur].join(' ').toLowerCase().indexOf(q)>=0);
+    }).sort(function(a,b){return String(b.dateVisite||'').localeCompare(String(a.dateVisite||''));});
+  }
+  window.enssSupervisionRender=function(){
+    if(!window.STATE)return;
+    var module=document.getElementById('enssSupervisionModule');
+    if(!(typeof isLoggedIn==='function'&&isLoggedIn()&&typeof isAdminUser==='function'&&isAdminUser())){
+      if(module)module.style.display='none';
+      return;
+    }
+    if(module)module.style.display='';
+    stateList();refreshFilterChoices();
+    var list=currentFiltered(), all=stateList();
+    var done=all.filter(function(r){return r.statut==='Effectué';}).length;
+    var todo=all.length-done;
+    var avg=all.length?Math.round(all.reduce(function(sum,r){return sum+Number(r.noteGlobale||0);},0)/all.length*10)/10:0;
+    var stats=document.getElementById('enssSupervisionStats');
+    if(stats)stats.innerHTML='<div class="enss-sup-stat"><b>'+all.length+'</b><span>Obsèvasyon anrejistre</span></div><div class="enss-sup-stat"><b>'+done+'</b><span>Vizit reyalize</span></div><div class="enss-sup-stat"><b>'+todo+'</b><span>Vizit planifye / an swivi</span></div><div class="enss-sup-stat"><b>'+(all.length?avg+'/5':'—')+'</b><span>Mwayèn evalyasyon</span></div>';
+    var box=document.getElementById('enssSupervisionList');if(!box)return;
+    if(!list.length){box.innerHTML='<div class="enss-sup-empty">Pa gen obsèvasyon ki koresponn ak filtè yo. Klike sou <strong>Nouvo obsèvasyon</strong> pou kòmanse.</div>';return;}
+    box.innerHTML='<table class="enss-sup-table"><thead><tr><th>Dat</th><th>Klas / Matyè</th><th>Anseyan</th><th>Direktè / Obsèvatè</th><th>Evalyasyon</th><th>Estati</th><th>Aksyon</th></tr></thead><tbody>'+list.map(function(r){
+      return '<tr><td>'+esc(r.dateVisite||'—')+'<br><small>'+esc(r.annee||'')+'</small></td><td><strong>'+esc(r.classe||'—')+'</strong><br>'+esc(r.matiere||'Matyè pa presize')+'</td><td>'+esc(r.enseignant||'—')+'</td><td>'+esc(r.visiteur||'Direksyon')+'</td><td><strong>'+esc(r.noteGlobale||'—')+(r.noteGlobale?'/5':'')+'</strong><br><small>'+esc((r.objectif||'').slice(0,90))+'</small></td><td><span class="enss-sup-pill '+(r.statut==='Effectué'?'':'pending')+'">'+esc(r.statut||'An swivi')+'</span></td><td><div class="enss-sup-row-actions"><button class="btn btn-info" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionView(this.dataset.supId)">Wè</button><button class="btn btn-primary" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionEdit(this.dataset.supId)">Modifye</button><button class="btn btn-danger" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionDelete(this.dataset.supId)">Efase</button></div></td></tr>';
+    }).join('')+'</tbody></table>';
+  };
+  function formOptions(id,arr,first,selected){return '<select id="'+id+'"><option value="">'+esc(first)+'</option>'+arr.map(function(v){return '<option value="'+esc(v)+'" '+(v===selected?'selected':'')+'>'+esc(v)+'</option>';}).join('')+'</select>';}
+  window.enssSupervisionNew=function(){
+    if(!roleOK())return;editingId=null;showForm({});
+  };
+  window.enssSupervisionEditCurrent=function(){if(editingId)window.enssSupervisionEdit(editingId);};
+  window.enssSupervisionEdit=function(id){
+    if(!roleOK())return;var r=stateList().find(function(x){return String(x.id)===String(id);});if(!r)return;editingId=id;showForm(r);
+  };
+  function showForm(r){
+    var wrap=document.getElementById('enssSupervisionFormWrap');if(!wrap)return;
+    var classes=classNames(), teachers=teacherNames(), mats=subjects();
+    var year=String(r.annee||(STATE&&STATE.anneeCourante)||'2026-2027');
+    var selectedCriteria=Array.isArray(r.criteres)?r.criteres:[];
+    wrap.hidden=false;
+    wrap.innerHTML='<div class="enss-sup-form"><div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center"><h4>'+(editingId?'✎ Modifye obsèvasyon':'＋ Nouvo obsèvasyon pedagojik')+'</h4><button type="button" class="btn btn-secondary" onclick="enssSupervisionCancel()">Fèmen</button></div>'+
+      '<div class="enss-sup-form-grid">'+
+      '<div><label for="enssSupYear">Ane lekòl *</label><input id="enssSupYear" required value="'+esc(year)+'" placeholder="2026-2027"></div>'+
+      '<div><label for="enssSupDate">Dat vizit *</label><input id="enssSupDate" type="date" required value="'+esc(r.dateVisite||new Date().toISOString().slice(0,10))+'"></div>'+
+      '<div><label for="enssSupStatus">Estati</label><select id="enssSupStatus"><option '+((r.statut||'Planifye')==='Planifye'?'selected':'')+'>Planifye</option><option '+(r.statut==='Effectué'?'selected':'')+'>Effectué</option><option '+(r.statut==='Suivi requis'?'selected':'')+'>Suivi requis</option></select></div>'+
+      '<div><label for="enssSupClass">Klas *</label>'+formOptions('enssSupClass',classes,'Chwazi klas',r.classe)+'</div>'+
+      '<div><label for="enssSupTeacher">Anseyan *</label>'+formOptions('enssSupTeacher',teachers,'Chwazi anseyan',r.enseignant)+'</div>'+
+      '<div><label for="enssSupSubject">Matyè *</label>'+formOptions('enssSupSubject',mats,'Chwazi matyè',r.matiere)+'</div>'+
+      '<div><label for="enssSupObserver">Obsèvatè / Direksyon *</label><input id="enssSupObserver" value="'+esc(r.visiteur||((STATE&&STATE.utilisateur)||'Direksyon'))+'" required></div>'+
+      '<div><label for="enssSupRating">Nòt jeneral (1–5)</label><select id="enssSupRating"><option value="">Pa evalye</option>'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'" '+(Number(r.noteGlobale)===n?'selected':'')+'>'+n+' / 5'+(n===5?' — Ekselan':n===4?' — Trè byen':n===3?' — Byen':n===2?' — Bezwen amelyorasyon':' — Sipò nesesè')+'</option>';}).join('')+'</select></div>'+
+      '<div><label for="enssSupDuration">Dire vizit (minit)</label><input id="enssSupDuration" type="number" min="0" max="600" value="'+esc(r.dire||'')+'" placeholder="45"></div>'+
+      '<div class="wide"><label>Lis kritè obsèvasyon</label><div class="enss-sup-checks">'+criteria.map(function(c){return '<label class="enss-sup-check"><input type="checkbox" name="enssSupCriterion" value="'+c[0]+'" '+(selectedCriteria.indexOf(c[0])>=0?'checked':'')+'> <span>'+esc(c[1])+'</span></label>';}).join('')+'</div></div>'+
+      '<div class="wide"><label for="enssSupObjective">Objektif leson / konpetans ki vize</label><textarea id="enssSupObjective" placeholder="Dekri objektif la ak sa elèv yo dwe metrize…">'+esc(r.objectif||'')+'</textarea></div>'+
+      '<div><label for="enssSupStrengths">Pwen fò / bon pratik</label><textarea id="enssSupStrengths" placeholder="Sa ki te byen fèt…">'+esc(r.pointsForts||'')+'</textarea></div>'+
+      '<div><label for="enssSupDifficulties">Difikilte / bezwen obsève</label><textarea id="enssSupDifficulties" placeholder="Obstak, bezwen elèv oswa anseyan…">'+esc(r.difficultes||'')+'</textarea></div>'+
+      '<div><label for="enssSupRecommendations">Rekòmandasyon ak aksyon pou pran</label><textarea id="enssSupRecommendations" placeholder="Aksyon, moun responsab, delè…">'+esc(r.recommandations||'')+'</textarea></div>'+
+      '<div class="wide"><label for="enssSupFollowup">Dat / plan swivi</label><textarea id="enssSupFollowup" placeholder="Dat pwochen vizit, sipò oswa fòmasyon ki nesesè…">'+esc(r.suivi||'')+'</textarea></div>'+
+      '<div class="wide" style="display:flex;gap:.5rem;flex-wrap:wrap"><button type="button" class="btn btn-success" onclick="enssSupervisionSave()">💾 Anrejistre obsèvasyon</button><button type="button" class="btn btn-secondary" onclick="enssSupervisionCancel()">Anile</button></div></div></div>';
+    wrap.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  window.enssSupervisionCancel=function(){editingId=null;var w=document.getElementById('enssSupervisionFormWrap');if(w){w.hidden=true;w.innerHTML='';}};
+  window.enssSupervisionSave=function(){
+    if(!roleOK())return;
+    var get=function(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';};
+    var required=[['enssSupYear','Ane lekòl'],['enssSupDate','Dat vizit'],['enssSupClass','Klas'],['enssSupTeacher','Anseyan'],['enssSupSubject','Matyè'],['enssSupObserver','Obsèvatè']];
+    for(var i=0;i<required.length;i++){if(!get(required[i][0])){alert('Tanpri ranpli chan obligatwa a: '+required[i][1]+'.');var el=document.getElementById(required[i][0]);if(el)el.focus();return;}}
+    var checked=Array.from(document.querySelectorAll('input[name="enssSupCriterion"]:checked')).map(function(e){return e.value;});
+    var record={id:editingId||('sup-'+Date.now()+'-'+Math.floor(Math.random()*100000)),annee:get('enssSupYear'),dateVisite:get('enssSupDate'),statut:get('enssSupStatus')||'Planifye',classe:get('enssSupClass'),enseignant:get('enssSupTeacher'),matiere:get('enssSupSubject'),visiteur:get('enssSupObserver'),noteGlobale:get('enssSupRating'),dire:get('enssSupDuration'),criteres:checked,objectif:get('enssSupObjective'),pointsForts:get('enssSupStrengths'),difficultes:get('enssSupDifficulties'),recommandations:get('enssSupRecommendations'),suivi:get('enssSupFollowup'),updatedAt:new Date().toISOString()};
+    var list=stateList(),index=list.findIndex(function(x){return String(x.id)===String(record.id);});
+    if(index>=0)list[index]=record;else list.push(record);
+    try{saveState();}catch(e){console.error('ENSS supervision save failed',e);alert('Anrejistreman an pa reyisi. Tanpri verifye platfòm nan.');return;}
+    window.enssSupervisionCancel();window.enssSupervisionRender();
+    alert('Obsèvasyon pedagojik la anrejistre nan done platfòm ENSS la.');
+  };
+  window.enssSupervisionDelete=function(id){
+    if(!roleOK())return;var list=stateList(),r=list.find(function(x){return String(x.id)===String(id);});if(!r)return;
+    if(!confirm('Efase obsèvasyon '+(r.dateVisite||'')+' — '+(r.enseignant||'')+'? Aksyon sa a pa ka anile.'))return;
+    STATE.pedagogicalSupervisions=list.filter(function(x){return String(x.id)!==String(id);});saveState();window.enssSupervisionRender();
+  };
+  window.enssSupervisionView=function(id){
+    if(!roleOK())return;
+    var r=stateList().find(function(x){return String(x.id)===String(id);});if(!r)return;
+    editingId=id;
+    var wrap=document.getElementById('enssSupervisionFormWrap');if(!wrap)return;
+    var c=(r.criteres||[]).map(function(k){var f=criteria.find(function(x){return x[0]===k;});return f?f[1]:k;});
+    wrap.hidden=false;wrap.innerHTML='<div class="enss-sup-form"><div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem"><h4>Fich obsèvasyon pedagojik</h4><button class="btn btn-secondary" onclick="enssSupervisionCancel()">Fèmen</button></div><div class="enss-sup-form-grid">'+[
+      ['Ane lekòl',r.annee],['Dat vizit',r.dateVisite],['Estati',r.statut],['Klas',r.classe],['Anseyan',r.enseignant],['Matyè',r.matiere],['Obsèvatè',r.visiteur],['Nòt jeneral',r.noteGlobale?(r.noteGlobale+'/5'):'Pa evalye'],['Dire',r.dire?(r.dire+' minit'):'—'],['Kritè',c.join(', ')||'Pa gen kritè chwazi'],['Objektif',r.objectif],['Pwen fò',r.pointsForts],['Difikilte',r.difficultes],['Rekòmandasyon',r.recommandations],['Plan swivi',r.suivi]
+    ].map(function(x){return '<div><label>'+esc(x[0])+'</label><div style="font-size:.76rem;white-space:pre-wrap;color:#263f52">'+esc(x[1]||'—')+'</div></div>';}).join('')+'</div><div style="margin-top:.8rem"><button class="btn btn-primary" onclick="enssSupervisionEditCurrent()">Modifye fich sa a</button></div></div>';
+    wrap.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  function exportHtml(list,title){
+    var header='<div style="text-align:center;border-bottom:3px double #174a73;padding-bottom:12px;margin-bottom:18px"><h2 style="margin:0;color:#174a73">RÉPUBLIQUE D’HAÏTI</h2><h2 style="margin:4px 0">ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)</h2><p style="margin:3px">Cité Richard, centre-ville, Sainte-Suzanne • Tél. +509 4282 5377</p><h3 style="margin:12px 0;color:#174a73">'+esc(title)+'</h3><p>Année scolaire : '+esc((STATE&&STATE.anneeCourante)||'')+'</p></div>';
+    var rows=list.map(function(r){return '<tr><td>'+esc(r.dateVisite)+'</td><td>'+esc(r.annee)+'</td><td>'+esc(r.classe)+'</td><td>'+esc(r.enseignant)+'</td><td>'+esc(r.matiere)+'</td><td>'+esc(r.visiteur)+'</td><td>'+esc(r.noteGlobale?(r.noteGlobale+'/5'):'—')+'</td><td>'+esc(r.statut)+'</td><td>'+esc(r.objectif)+'</td><td>'+esc(r.pointsForts)+'</td><td>'+esc(r.difficultes)+'</td><td>'+esc(r.recommandations)+'</td><td>'+esc(r.suivi)+'</td></tr>';}).join('');
+    return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>body{font:12px Arial,sans-serif;color:#1e293b;margin:24px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #aab9c7;padding:6px;vertical-align:top;text-align:left}th{background:#eaf2f8;color:#174a73}footer{margin-top:32px;display:flex;justify-content:space-between}small{color:#526579}@media print{body{margin:10mm}tr{break-inside:avoid}}</style></head><body>'+header+'<table><thead><tr><th>Date</th><th>Année</th><th>Classe</th><th>Enseignant</th><th>Matière</th><th>Observateur</th><th>Note</th><th>Statut</th><th>Objectifs</th><th>Points forts</th><th>Difficultés</th><th>Recommandations</th><th>Suivi</th></tr></thead><tbody>'+rows+'</tbody></table><footer><div>Le Directeur<br><br><br>________________________<br>Joseph Mary CHARLES</div><div>Cachet officiel de l’établissement<br><br><br>________________________</div></footer><small>Document généré depuis la plateforme ENSS. Les dossiers originaux restent enregistrés dans la plateforme.</small></body></html>';
+  }
+  window.enssSupervisionExportWord=function(){
+    if(!roleOK())return;var list=currentFiltered();if(!list.length){alert('Pa gen obsèvasyon pou ekspòte ak filtè aktyèl yo.');return;}
+    var blob=new Blob(['\\ufeff',exportHtml(list,'RAPPORT DE SUPERVISION PÉDAGOGIQUE')],{type:'application/msword;charset=utf-8'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ENSS_Rapport_Supervision_Pedagogique_'+new Date().toISOString().slice(0,10)+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  };
+  window.enssSupervisionPrint=function(){
+    if(!roleOK())return;var list=currentFiltered();if(!list.length){alert('Pa gen obsèvasyon pou enprime ak filtè aktyèl yo.');return;}
+    var w=window.open('','_blank');if(!w){alert('Navigatè a bloke fenèt enprime a. Tanpri pèmèt pop-up pou platfòm sa a.');return;}
+    w.document.open();w.document.write(exportHtml(list,'RAPPORT DE SUPERVISION PÉDAGOGIQUE'));w.document.close();setTimeout(function(){w.focus();w.print();},350);
+  };
+  document.addEventListener('DOMContentLoaded',function(){try{window.enssSupervisionRender();}catch(e){console.warn('ENSS supervision initial render',e);}});
 })();
 </script>
 
