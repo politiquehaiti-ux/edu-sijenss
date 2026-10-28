@@ -19831,5 +19831,43 @@ body{ line-height:1.55; }
 })();
 </script>
 
+
+<script id="enss-fix-une-seule-ligne-enseignant-prescolaire-6e">
+/* ENSS — Correction ciblée : Préscolaire à 6e AF n'affiche qu'une seule ligne enseignant.
+   On conserve l'affectation et les données; on masque uniquement le panneau redondant.
+   Le comportement des classes 7e–9e AF reste inchangé. */
+(function(){
+  'use strict';
+  function norm(v){return String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();}
+  function isPrescolaireToSix(c){
+    try{if(typeof window.isSecondaryClass==='function' && window.isSecondaryClass(c))return false;}catch(e){}
+    var n=norm(c);
+    if(/presc|prescolaire/.test(n))return true;
+    return /(?:^|\s)[1-6](?:e|ere|eme)(?:\s|$)/.test(n) || /(?:^|\s)[1-6](?:ere|eme)\s*af\b/.test(n);
+  }
+  function hideDuplicatePanel(c){
+    if(!isPrescolaireToSix(c))return;
+    var box=document.getElementById('classeTeacherAssignmentsBox');
+    if(box){box.style.setProperty('display','none','important');box.setAttribute('aria-hidden','true');}
+  }
+  var oldRender=window.renderClasseTeachers;
+  window.renderClasseTeachers=function(c){
+    var r=oldRender?oldRender.apply(this,arguments):null;
+    hideDuplicatePanel(c);
+    return r;
+  };
+  var oldShow=window.showClasseDetail;
+  if(typeof oldShow==='function'){
+    window.showClasseDetail=function(c){
+      var r=oldShow.apply(this,arguments);
+      hideDuplicatePanel(c);
+      [80,250,600].forEach(function(ms){setTimeout(function(){hideDuplicatePanel(c);},ms);});
+      return r;
+    };
+  }
+  document.addEventListener('DOMContentLoaded',function(){hideDuplicatePanel(window.currentClasseNotes||'');});
+})();
+</script>
+
 </body>
 </html>
