@@ -2589,7 +2589,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V114-EGRESS-REVISION-CACHE-NO-RESET';
+        var ENSS_APP_VERSION = 'V117-EGRESS-NOOP-YEAR-HISTORY-NO-RESET';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, lastRemoteRevision: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -3116,6 +3116,8 @@
             finally{ ENSS_CENTRAL.syncing=false; }
         }
         async function centralPushState(force){
+            // V117: si pa gen chanjman an atant, pa fè requèt PostgREST.
+            if(!force && !ENSS_CENTRAL_PENDING) return true;
             // Yon sèl operasyon santral alafwa. Si yon pull deja ap fèt lè push la rive,
             // pa abandone chanjman ki an atant: pwograme push la ankò apre operasyon an.
             if(ENSS_CENTRAL.syncing){
@@ -3215,15 +3217,20 @@
 
         function scheduleCentralPush(){
             if(!hasCentralConfig() || !ENSS_CENTRAL.session || !ENSS_CENTRAL.ready) return;
+            // V117: evite ekriti/rezo lè saveState() pa chanje done pataje yo.
+            var base=centralGetBaseSnapshot(), local=centralSanitizeStateForRemote();
+            if(base && centralDeepEqual(centralSanitizeStateForRemoteObject(local),centralSanitizeStateForRemoteObject(base))){
+                ENSS_CENTRAL_PENDING=false;
+                if(ENSS_CENTRAL.timer){clearTimeout(ENSS_CENTRAL.timer);ENSS_CENTRAL.timer=null;}
+                return;
+            }
             ENSS_CENTRAL_PENDING=true;
-            // Pa rekòmanse revèy la chak fwa saveState() rele: sa te ka anpeche
-            // ekriti santral la kòmanse si aplikasyon an sove/normalize done souvan.
             if(ENSS_CENTRAL.timer) return;
-            centralStatus('⏳ Chanjman anrejistre lokalman; senkronizasyon santral an kou...', null);
+            centralStatus('⏳ Chanjman anrejistre lokalman; senkronizasyon santral ap rasanble chanjman yo...', null);
             ENSS_CENTRAL.timer=setTimeout(function(){
                 ENSS_CENTRAL.timer=null;
-                centralPushState(false);
-            },500);
+                if(ENSS_CENTRAL_PENDING) centralPushState(false);
+            },1800);
         }
         // Si itilizatè a rafrechi/fèmen paj la pandan done yo poko konfime nan Supabase,
         // navigatè a mande l rete sou paj la pou li ka tann anrejistreman an fini.
@@ -7036,8 +7043,13 @@
         function deleteSelectedStudents() {
             if (!canModifyData('eleves')) return requireLogin('modifye done sa yo', 'eleves');
             if (selectedStudents.size === 0) return alert('Aucun élève sélectionné.');
-            if (!confirm("Supprimer " + selectedStudents.size + " \xE9l\xE8ve(s) ?")) return;
-            STATE.students = STATE.students.filter(function(s) { return !selectedStudents.has(s.nisu); });
+            var activeYear=String(STATE.anneeCourante||'');
+            if (!confirm("Retire elèv sa yo nan ane aktif "+(activeYear||'(ane aktyèl)')+" la sèlman? Istorik ane pase yo ap rete konsève.")) return;
+            STATE.students = STATE.students.filter(function(s) {
+                if(!selectedStudents.has(s.nisu)) return true;
+                var yr=String(s._YEAR||s.annee||s.anneeScolaire||activeYear);
+                return yr!==activeYear;
+            });
             selectedStudents.clear();
             saveState();
             renderStudents();
@@ -7048,10 +7060,15 @@
         function deleteStudent(nisu) {
             if (!canEditStudentRecord()) return;
             if (!canModifyData('eleves')) return requireLogin('modifye done sa yo', 'eleves');
-            STATE.students = STATE.students.filter(function(s) { return s.nisu !== nisu; });
+            var activeYear=String(STATE.anneeCourante||'');
+            STATE.students = STATE.students.filter(function(s) {
+                if(String(s.nisu||s.NISU||'')!==String(nisu)) return true;
+                var yr=String(s._YEAR||s.annee||s.anneeScolaire||activeYear);
+                return yr!==activeYear;
+            });
             selectedStudents.delete(nisu);
-            STATE.securite.users = STATE.securite.users.filter(function(u) { return !(u.role === 'eleve' && u
-                    .studentNisu === nisu); });
+            var hasOtherYear=(STATE.students||[]).some(function(st){return String(st.nisu||st.NISU||'')===String(nisu);});
+            if(!hasOtherYear) STATE.securite.users = STATE.securite.users.filter(function(u) { return !(u.role === 'eleve' && String(u.studentNisu||u.nisu||'') === String(nisu)); });
             saveState();
             renderStudents();
             renderDashboard();
@@ -7314,8 +7331,15 @@
         }
 
         // --- === DOSYE ELEV === ---
+        var ENSS_STUDENT_DOSSIER_YEAR = {};
+        function openStudentDossierYear(nisu, year){ ENSS_STUDENT_DOSSIER_YEAR[String(nisu)]=String(year||'all'); openStudentDossier(nisu); }
         function openStudentDossier(nisu) {
-            var s = STATE.students.find(function(st) { return String(st.nisu) === String(nisu); });
+            var sameStudent=(STATE.students||[]).filter(function(st){return String(st.nisu||st.NISU||'')===String(nisu);});
+            if(!sameStudent.length) return;
+            var yearOf=function(st){return String(st._YEAR||st.annee||st.anneeScolaire||STATE.anneeCourante||'');};
+            var years=Array.from(new Set(sameStudent.map(yearOf).filter(Boolean))).sort();
+            var requestedYear=ENSS_STUDENT_DOSSIER_YEAR[String(nisu)]||String(STATE.anneeCourante||'all');
+            var s=requestedYear==='all'?(sameStudent.find(function(st){return yearOf(st)===String(STATE.anneeCourante||'');})||sameStudent[0]):(sameStudent.find(function(st){return yearOf(st)===requestedYear;})||sameStudent[0]);
             if (!s) return;
             if (getRole() === 'eleve') {
                 var loggedStudent = getCurrentUserObj();
@@ -7332,7 +7356,11 @@
             var editButton = canEditThisStudent ? ("<button class=\"btn btn-primary\" onclick=\"openEditStudent('" +
                 nisu +
                 "')\" style=\"padding:0.15rem 0.5rem;font-size:0.75rem;\">\u270F\uFE0F Modifier</button>") : '';
-            var html = "<div class=\"dossier-header\" style=\"background:var(--bg);padding:0.6rem;border-radius:var(--radius-sm);margin-bottom:0.6rem;\">\n            <div class=\"flex-between\">\n                <h3 style=\"font-size:1rem;\">\uD83D\uDCC1 Dossier de l'\xE9l\xE8ve</h3>\n                <div>" + editButton + "</div>\n            </div>\n            <div class=\"info-grid\" style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.3rem;\">\n                <div class=\"item\" style=\"font-size:0.75rem;\"><strong>NISU :</strong> " +
+            var yearOptions='<option value="all"'+(requestedYear==='all'?' selected':'')+'>Tout ane lekòl yo</option>'+years.map(function(y){return '<option value="'+y.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"'+(requestedYear===y?' selected':'')+'>'+y+'</option>';}).join('');
+            var yearSelector='<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem;padding:.5rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px"><label for="enssDossierYear" style="font-weight:700;font-size:.75rem">📚 Ane lekòl nan dosye a</label><select id="enssDossierYear" data-nisu="'+String(nisu)+'" onchange="openStudentDossierYear(this.dataset.nisu,this.value)" style="padding:.35rem;border-radius:6px;border:1px solid #94a3b8">'+yearOptions+'</select><span style="font-size:.68rem;color:#475569">'+sameStudent.length+' dosye ane</span></div>';
+            var historyHtml='';
+            if(requestedYear==='all'&&sameStudent.length>1){historyHtml='<div style="margin:.5rem 0;padding:.55rem;border:1px solid #cbd5e1;border-radius:8px"><h4 style="margin:0 0 .4rem;font-size:.82rem">📚 Istorik tout ane yo</h4><div class="table-wrap"><table><thead><tr><th>Ane</th><th>Klas</th><th>Mwayèn</th><th>Desizyon</th><th></th></tr></thead><tbody>'+sameStudent.slice().sort(function(a,b){return yearOf(b).localeCompare(yearOf(a));}).map(function(st){var mm=st.moyennes||{};return '<tr><td>'+yearOf(st)+'</td><td>'+String(st.classe||'-')+'</td><td>'+String(mm.finale==null?'-':mm.finale)+'</td><td>'+String(st.decision||'-')+'</td><td><button type="button" class="btn btn-primary" style="padding:.15rem .4rem;font-size:.65rem" data-nisu="'+String(nisu)+'" data-year="'+yearOf(st)+'" onclick="openStudentDossierYear(this.dataset.nisu,this.dataset.year)">Ouvri</button></td></tr>';}).join('')+'</tbody></table></div></div>'; }
+            var html = yearSelector + historyHtml + "<div class=\"dossier-header\" style=\"background:var(--bg);padding:0.6rem;border-radius:var(--radius-sm);margin-bottom:0.6rem;\">\n            <div class=\"flex-between\">\n                <h3 style=\"font-size:1rem;\">\uD83D\uDCC1 Dossier de l'\xE9l\xE8ve</h3>\n                <div>" + editButton + "</div>\n            </div>\n            <div class=\"info-grid\" style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.3rem;\">\n                <div class=\"item\" style=\"font-size:0.75rem;\"><strong>NISU :</strong> " +
                 s.nisu +
                 "</div>\n                <div class=\"item\" style=\"font-size:0.75rem;\"><strong>Nom :</strong> " + s.nom +
                 "</div>\n                <div class=\"item\" style=\"font-size:0.75rem;\"><strong>Pr\xE9nom :</strong> " + s
