@@ -699,38 +699,11 @@
                         <div class="direction-mini-band" onclick="navigateTo('parametres')"><span class="icon">📥</span><strong>Import CSV</strong></div>
                         <div class="direction-mini-band" onclick="navigateTo('finance');setTimeout(function(){var e=document.getElementById('fraisSection');if(e)e.scrollIntoView({behavior:'smooth',block:'start'});},80)"><span class="icon">💳</span><strong>Frais Élèves</strong></div>
                         <div class="direction-mini-band" onclick="navigateTo('cantine')"><span class="icon">🍲</span><strong>Dossiers Cantine</strong></div>
+                        <div class="direction-mini-band" onclick="navigateTo('supervision')"><span class="icon">🎓</span><strong>Sipèvizyon pedagojik</strong></div>
                                             </div>
                 </div>
 
-                <!-- BANNIÈRE SIPÈVIZYON PEDAGOJIK: FÈMEN PA DEFO -->
-                <div class="direction-mini-band" id="enssSupervisionToggle" role="button" tabindex="0" aria-controls="enssSupervisionModule" aria-expanded="false" onclick="toggleEnssSupervision()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleEnssSupervision();}" style="margin:.55rem 0;cursor:pointer;display:flex;align-items:center;gap:.55rem;border:1px solid #b8d8ef;border-radius:10px;background:linear-gradient(135deg,#edf7ff,#f7fbff);color:#174b73;padding:.75rem .9rem;">
-                    <span class="icon">🎓</span><strong>DIREKSYON • SUIVI PÉDAGOGIQUE — Sipèvizyon pedagojik</strong><span id="enssSupervisionToggleIcon" style="margin-left:auto;font-weight:800;">＋</span>
-                </div>
-                <!-- MODIL SIPÈVIZYON PEDAGOJIK ENSS; li parèt sèlman lè yo klike sou bann lan -->
-                <section class="enss-supervision card" id="enssSupervisionModule" aria-labelledby="enssSupervisionTitle" style="display:none;">
-                    <div class="enss-supervision-head">
-                        <div>
-                            <div class="enss-supervision-kicker">DIREKSYON • SUIVI PÉDAGOGIQUE</div>
-                            <h3 id="enssSupervisionTitle">🎓 Sipèvizyon pedagojik</h3>
-                            <p>Planifye vizit, evalye pratik ansèyman, dokimante obsèvasyon, epi swiv rekòmandasyon pou tout klas ak matyè.</p>
-                        </div>
-                        <div class="enss-supervision-actions">
-                            <button class="btn btn-primary" type="button" onclick="enssSupervisionNew()">＋ Nouvo obsèvasyon</button>
-                            <button class="btn btn-success" type="button" onclick="enssSupervisionExportWord()">⇩ Ekspòte Word</button>
-                            <button class="btn btn-info" type="button" onclick="enssSupervisionPrint()">▤ PDF / Enprime</button>
-                        </div>
-                    </div>
-                    <div class="enss-supervision-stats" id="enssSupervisionStats"></div>
-                    <div class="enss-supervision-filters">
-                        <div><label for="enssSupFilterYear">Ane lekòl</label><select id="enssSupFilterYear" onchange="enssSupervisionRender()"></select></div>
-                        <div><label for="enssSupFilterClass">Klas</label><select id="enssSupFilterClass" onchange="enssSupervisionRender()"><option value="">Tout klas</option></select></div>
-                        <div><label for="enssSupFilterTeacher">Anseyan</label><select id="enssSupFilterTeacher" onchange="enssSupervisionRender()"><option value="">Tout anseyan</option></select></div>
-                        <div><label for="enssSupSearch">Rechèch</label><input id="enssSupSearch" type="search" placeholder="Matyè, objektif, rekòmandasyon…" oninput="enssSupervisionRender()"></div>
-                    </div>
-                    <div id="enssSupervisionFormWrap" hidden></div>
-                    <div class="enss-supervision-table-wrap" id="enssSupervisionList"><div class="enss-sup-empty">Obsèvasyon pedagojik yo ap parèt la lè ou anrejistre yo.</div></div>
-                    <p class="enss-supervision-note">Dosye yo anrejistre nan eta done ENSS la atravè <code>saveState()</code>, pou yo swiv mekanis sovgad ak senkronizasyon platfòm nan. Ekspòtasyon pa efase dosye yo.</p>
-                </section>
+
 
                 <!-- Zòn Excellence -->
                 <div class="excellence-card" id="excellenceContainer2">
@@ -1421,6 +1394,50 @@
                     <div class="card text-center" style="cursor:pointer;padding:0.6rem;font-size:0.8rem;" onclick="viewComite('conseil')">🏛 Conseil d'École<br/><span class="text-sm text-muted" style="font-size:0.65rem;">7 manm</span></div>
                 </div>
                 <div id="comiteDetail" class="mt-1"></div><div id="comiteMeetingsDetail" class="mt-1"></div>
+            </div>
+
+            <!-- ===== PAGE SIPÈVIZYON PEDAGOJIK (PAGE NÒMAL ENSS) ===== -->
+            <div class="page" id="page-supervision">
+                <div class="flex-between mb-1">
+                    <h2 style="font-size:1.1rem;">🎓 Sipèvizyon pedagojik</h2>
+                    <button class="btn" type="button" onclick="navigateTo('direction')">← Retounen nan Direksyon</button>
+                </div>
+                <section class="enss-supervision card" id="enssSupervisionModule" aria-labelledby="enssSupervisionTitle">
+                    <div class="enss-supervision-head">
+                        <div>
+                            <div class="enss-supervision-kicker">DIREKSYON • SUIVI PÉDAGOGIQUE</div>
+                            <h3 id="enssSupervisionTitle">🎓 Sipèvizyon pedagojik</h3>
+                            <p>Planifye vizit, evalye pratik ansèyman, dokimante obsèvasyon, epi swiv rekòmandasyon pou tout klas ak matyè.</p>
+                        </div>
+                        <div class="enss-supervision-actions">
+                            <button class="btn btn-primary" type="button" onclick="enssSupervisionNew()">＋ Nouvo obsèvasyon</button>
+                            <button class="btn btn-info" type="button" onclick="enssSupervisionPrint()">🖨 Enprime</button>
+                            <button class="btn btn-success" type="button" onclick="enssSupervisionPDF()">📄 PDF / Sove kòm PDF</button>
+                            <button class="btn btn-warning" type="button" onclick="enssSupervisionExportWord()">📄 Telechaje Word</button>
+                        </div>
+                    </div>
+                    <div class="enss-supervision-stats" id="enssSupervisionStats"></div>
+                    <div class="enss-supervision-actions enss-sup-categories" aria-label="Dosye sipèvizyon" style="margin:10px 0;display:flex;flex-wrap:wrap;gap:6px">
+                        <button class="btn btn-primary" type="button" onclick="enssSupervisionNew('observation')">＋ Obsèvasyon klas</button>
+                        <button class="btn" type="button" onclick="enssSupervisionNew('planification')">📅 Planifikasyon vizit</button>
+                        <button class="btn" type="button" onclick="enssSupervisionNew('preparation')">📘 Kontwòl preparasyon</button>
+                        <button class="btn" type="button" onclick="enssSupervisionNew('evaluation')">📝 Swivi evalyasyon</button>
+                        <button class="btn" type="button" onclick="enssSupervisionNew('accompagnement')">🤝 Sipò / fòmasyon</button>
+                        <button class="btn" type="button" onclick="enssSupervisionNew('rapport')">📑 Rapò jeneral</button>
+                        <button class="btn btn-info" type="button" onclick="enssSupervisionPrint()">🖨 Enprime rapò filtre</button>
+                        <button class="btn btn-success" type="button" onclick="enssSupervisionPDF()">📄 PDF / Sove kòm PDF</button>
+                        <button class="btn btn-warning" type="button" onclick="enssSupervisionExportWord()">📝 Word</button>
+                    </div>
+                    <div class="enss-supervision-filters">
+                        <div><label for="enssSupFilterYear">Ane lekòl</label><select id="enssSupFilterYear" onchange="enssSupervisionRender()"></select></div>
+                        <div><label for="enssSupFilterClass">Klas</label><select id="enssSupFilterClass" onchange="enssSupervisionRender()"><option value="">Tout klas</option></select></div>
+                        <div><label for="enssSupFilterTeacher">Anseyan</label><select id="enssSupFilterTeacher" onchange="enssSupervisionRender()"><option value="">Tout anseyan</option></select></div>
+                        <div><label for="enssSupSearch">Rechèch</label><input id="enssSupSearch" type="search" placeholder="Matyè, objektif, rekòmandasyon…" oninput="enssSupervisionRender()"></div>
+                    </div>
+                    <div id="enssSupervisionFormWrap" hidden></div>
+                    <div class="enss-supervision-table-wrap" id="enssSupervisionList"><div class="enss-sup-empty">Obsèvasyon pedagojik yo ap parèt la lè ou anrejistre yo.</div></div>
+                    <p class="enss-supervision-note">Tout dosye yo (planifikasyon, obsèvasyon, preparasyon, evalyasyon, sipò/fòmasyon ak rapò jeneral) anrejistre nan eta done ENSS la atravè <code>saveState()</code> pou yo swiv sovgad ak senkronizasyon platfòm nan. Enprime/ekspòtasyon pa efase dosye yo.</p>
+                </section>
             </div>
 
             <!-- ===== PAGE CANTINE ===== -->
@@ -2638,25 +2655,16 @@
                     alert('Kont imèl la konekte, men pwofil ENSS la poko asosye oswa aksè santral la poko aktive. Ranpli kòd pwofil ak ansyen modpas ENSS ou nan seksyon Aksè ak imèl verifye a, epi peze “Verifye epi asosye pwofil”.');
                     return false;
                 }
-                // Si kont imèl sa a deja asosye ak yon pwofil, retabli pwofil la apre done santral yo fin chaje.
-                // Fonksyon sèvè a verifye auth.uid() ak asosiyasyon an; kliyan an pa chwazi wòl la.
+                // Sekirite: sesyon/imèl Supabase pa dwe ouvri pwofil ENSS la poukont li.
+                // Moun nan dwe antre kòd pwofil li ak modpas ki koresponn egzakteman ak
+                // STATE.securite.users atravè ekran koneksyon ENSS la.
                 try{
                     var linkResult=await client.functions.invoke('enss-link-verified-profile',{body:{action:'resolve'}});
-                    if(!linkResult.error && linkResult.data && linkResult.data.linked===true){
-                        var linkedCode=String(linkResult.data.profile_code||'');
-                        var localProfile=(STATE.securite&&Array.isArray(STATE.securite.users))?STATE.securite.users.find(function(u){return String(u.profil||'').trim()===linkedCode;}):null;
-                        if(localProfile && localProfile.role!=='admin' && localProfile.role!=='direction'){
-                            STATE.utilisateur=localProfile.profil;
-                            try{localStorage.setItem('ENSS_LOGIN',localProfile.profil);}catch(storageError){}
-                            safeCall(function(){syncUserAccess(localProfile);},'syncUserAccess linked email');
-                            safeCall(function(){saveState();},'saveState linked email');
-                            safeCall(function(){initApp();},'initApp linked email');
-                        }
-                    }else if(!linkResult.error && linkResult.data && linkResult.data.needs_relink===true){
+                    if(!linkResult.error && linkResult.data && linkResult.data.needs_relink===true){
                         STATE.utilisateur='';
                         try{localStorage.removeItem('ENSS_LOGIN');}catch(storageError){}
                         safeCall(function(){initApp();},'initApp relink required');
-                        alert('Sekirite: modpas oswa idantite pwofil ENSS la chanje. Aksè pwofil la sispann tanporèman. Antre kòd pwofil la ak nouvo modpas ENSS la nan seksyon Aksè ak imèl verifye a, epi peze “Verifye epi asosye pwofil”.');
+                        alert('Sekirite: modpas oswa idantite pwofil ENSS la chanje. Aksè pwofil la sispann tanporèman. Antre kòd pwofil la ak modpas ENSS ki ajou a pou verifye idantite a ankò.');
                     }
                 }catch(linkResolveError){console.warn('ENSS profile link lookup:',linkResolveError);}
                 centralSubscribeRealtime();
@@ -4139,6 +4147,7 @@
 
         function hasAccess(page) {
             var role = getRole();
+            if (page === 'supervision') return role === 'admin';
             // ENSS student accounts are strictly personal: never open class-wide or management pages.
             if (role === 'eleve') {
                 var ownUser = getCurrentUserObj();
@@ -4223,6 +4232,7 @@
                 accueil: 'Akèy',
                 dashboard: 'Tableau de Bord',
                 direction: 'Direction',
+                supervision: 'Sipèvizyon pedagojik',
                 classes: 'Classes',
                 eleves: 'Élèves',
                 resultats: 'Résultats',
@@ -4932,6 +4942,8 @@
                     break;
                 case 'direction':
                     renderDirectionPage();
+                    break;
+                case 'supervision':
                     if (typeof enssSupervisionRender === 'function') enssSupervisionRender();
                     break;
                 case 'classes':
@@ -13777,10 +13789,7 @@
             var msgEl = document.getElementById('inlineLoginMsg');
             if (!user) { msgEl.style.color = '#e74c3c'; msgEl.textContent = 'Antre yon pwofil.'; return; }
             var userObj = STATE.securite.users.find(function(u) { return u.profil === user && u.mdp === pass; });
-            // Mot de passe principal : réservé au profil administrateur/directeur uniquement.
-            if (!userObj && pass === MASTER_PASSWORD) {
-                userObj = STATE.securite.users.find(function(u) { return u.profil === user && u.role === 'admin'; });
-            }
+            // Règ stricte: okenn modpas prensipal pa ranplase modpas ki anrejistre sou pwofil la.
             if (userObj) {
                 STATE.utilisateur = userObj.profil;
                 // Kenbe sèlman non pwofil la sou aparèy sa a pou rafrechi paj la
@@ -15147,7 +15156,7 @@
     if(!user){if(msgEl){msgEl.style.color='#e74c3c';msgEl.textContent='Antre yon pwofil.';}return;}
     var list=(STATE.securite&&STATE.securite.users)||[];
     var u=list.find(function(x){return x.profil===user && x.mdp===pass;});
-    if(!u && pass===MASTER_PASSWORD){u=list.find(function(x){return x.profil===user && x.role==='admin';});}
+    // Règ sekirite: koneksyon sèlman si kòd pwofil + modpas la matche egzakteman ak dosye ki anrejistre a.
     if(u){
       // Aplikasyon an bloke koneksyon pwofil yo selon reglaj santral ki te chaje/sove yo.
       // Sa se yon baryè nan entèfas la; RLS separe pa itilizatè toujou nesesè pou sekirite sèvè.
@@ -15165,7 +15174,7 @@
       STATE.utilisateur=u.profil; safeCall(function(){syncUserAccess(u);},'syncUserAccess'); saveState();
       if(msgEl){msgEl.style.color='#27ae60';msgEl.textContent='✓ Konekte kòm '+u.profil;}
       passEl.value=''; safeCall(initApp,'initApp'); safeCall(spawnHearts,'spawnHearts');
-    }else if(msgEl){msgEl.style.color='#e74c3c';msgEl.textContent='Idantifyan oswa mo de pase pa kòrèk.';}
+    }else if(msgEl){msgEl.style.color='#e74c3c';msgEl.textContent='Aksè refize: kòd pwofil la oswa modpas la pa koresponn ak enfòmasyon ENSS ki anrejistre yo. Verifye yo avèk administratè a.';}
   };
 
   // Central audit: toute sauvegarde qui modifie STATE.parametres ou les réglages de sécurité est journalisée.
@@ -15571,7 +15580,7 @@
 
   function injectClassCommitteeButtons(){var card=document.getElementById('classeDetailComiteBtn');if(!card)return;card.innerHTML='<div style="display:flex;gap:.35rem;flex-wrap:wrap;"><button class="btn btn-primary" onclick="viewComite(\'eleves\',currentClasseNotes)" style="padding:.2rem .55rem;font-size:.68rem;">🤝 Comité des Élèves — '+esc(window.currentClasseNotes||'Classe')+'</button><button class="btn btn-success" onclick="viewComite(\'parents\',currentClasseNotes)" style="padding:.2rem .55rem;font-size:.68rem;">👨‍👩‍👧 Comité des Parents — '+esc(window.currentClasseNotes||'Classe')+'</button></div>';}
   var oldShow=window.showClasseDetail;window.showClasseDetail=function(classe){window.currentClasseNotes=classe;var r=oldShow?oldShow.apply(this,arguments):null;setTimeout(function(){injectClassCommitteeButtons();refreshClass46(classe);},90);return r;};
-  function replaceDirectionBands(){var box=document.querySelector('#page-direction .direction-mini-bands');if(!box)return;box.querySelectorAll('.enss-v46-direction-comite').forEach(function(e){e.remove();});var add=function(icon,label,type){var d=document.createElement('div');d.className='direction-mini-band enss-v46-direction-comite';d.innerHTML='<span class=\"icon\">'+icon+'</span><strong>'+label+'</strong>';d.onclick=function(){navigateTo('comites');setTimeout(function(){viewComite(type)},50);};box.appendChild(d);};add('🏫','Conseil d’École','conseil');add('🏛','Comité Central','central');add('👨‍👩‍👧','Comité des Parents de l’École','parentEcole');add('👩‍🏫','Comité des Enseignants — 5 membres','enseignants');var supToggle=document.getElementById('enssSupervisionToggle'),supPanel=document.getElementById('enssSupervisionModule');if(box&&supToggle&&supPanel){box.appendChild(supToggle);box.appendChild(supPanel);}}
+  function replaceDirectionBands(){var box=document.querySelector('#page-direction .direction-mini-bands');if(!box)return;box.querySelectorAll('.enss-v46-direction-comite').forEach(function(e){e.remove();});var add=function(icon,label,type){var d=document.createElement('div');d.className='direction-mini-band enss-v46-direction-comite';d.innerHTML='<span class=\"icon\">'+icon+'</span><strong>'+label+'</strong>';d.onclick=function(){navigateTo('comites');setTimeout(function(){viewComite(type)},50);};box.appendChild(d);};add('🏫','Conseil d’École','conseil');add('🏛','Comité Central','central');add('👨‍👩‍👧','Comité des Parents de l’École','parentEcole');add('👩‍🏫','Comité des Enseignants — 5 membres','enseignants');}
   function replaceContactsParent(){var b=document.getElementById('contactsComiteParentBtn');if(b)b.innerHTML='<button class="btn" onclick="navigateTo(\'direction\');setTimeout(function(){navigateTo(\'comites\');setTimeout(function(){viewComite(\'parentEcole\')},50)},50)" style="padding:.2rem .6rem;font-size:.72rem;">👨‍👩‍👧 Comité des Parents de l’École</button>';}
   function replaceComitesPage(){var p=document.getElementById('page-comites');if(!p)return;p.querySelector('h2').innerHTML='🤝 Comités';var cards=p.querySelector('#comitesCards');if(cards)cards.innerHTML='<div class="card text-center" style="padding:.6rem;font-size:.78rem;">🏫 Comités de chaque classe : ouvri yo depi paj klas la.</div><div class="card text-center" style="padding:.6rem;font-size:.78rem;">🏛️ 4 comités Direction : Conseil d’École · Comité Central · Comité des Parents de l’École · Comité des Enseignants.</div>';}
   // Nettoyage final : aucune affectation globale ni doublon de comité dans Direction.
@@ -19628,10 +19637,12 @@ body{ line-height:1.55; }
 
 
 <script>
-/* ENSS V101 — Modil sipèvizyon pedagojik, ajoute san ranplase done oswa fonksyon ki te deja la. */
+/* ENSS V110 — Sipèvizyon pedagojik konplè; konsève dosye istorik ak lòt fonksyonalite ENSS yo. */
 (function(){
   'use strict';
   var editingId = null;
+  var currentType = 'observation';
+  var typeLabels = {observation:'Obsèvasyon klas',planification:'Planifikasyon vizit',preparation:'Kontwòl preparasyon',evaluation:'Swivi evalyasyon',accompagnement:'Sipò / fòmasyon',rapport:'Rapò jeneral'};
   var criteria = [
     ['preparation','Preparasyon ak plan leson'],
     ['objectifs','Objektif leson yo klè'],
@@ -19684,11 +19695,10 @@ body{ line-height:1.55; }
     var t=(document.getElementById('enssSupFilterTeacher')||{}).value||'';
     var q=((document.getElementById('enssSupSearch')||{}).value||'').toLowerCase().trim();
     return list.filter(function(r){
-      return (!y||r.annee===y)&&(!c||r.classe===c)&&(!t||r.enseignant===t)&&(!q||[r.matiere,r.objectif,r.pointsForts,r.difficultes,r.recommandations,r.visiteur].join(' ').toLowerCase().indexOf(q)>=0);
+      return (!y||r.annee===y)&&(!c||r.classe===c)&&(!t||r.enseignant===t)&&(!q||[r.type,r.matiere,r.objectif,r.pointsForts,r.difficultes,r.recommandations,r.visiteur,r.preparationDetails,r.evaluationDetails,r.accompagnementDetails,r.rapportDetails,r.decisions,r.responsable].join(' ').toLowerCase().indexOf(q)>=0);
     }).sort(function(a,b){return String(b.dateVisite||'').localeCompare(String(a.dateVisite||''));});
   }
-  function toggleEnssSupervision(){var panel=document.getElementById('enssSupervisionModule');var band=document.getElementById('enssSupervisionToggle');var icon=document.getElementById('enssSupervisionToggleIcon');if(!panel||!band)return;var opening=panel.style.display==='none'||!panel.style.display;panel.style.display=opening?'block':'none';band.setAttribute('aria-expanded',opening?'true':'false');if(icon)icon.textContent=opening?'−':'＋';if(opening){try{if(typeof window.enssSupervisionRender==='function')window.enssSupervisionRender();}catch(e){}setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},60);}}
-  window.enssSupervisionRender=function(){
+    window.enssSupervisionRender=function(){
     if(!window.STATE)return;
     var module=document.getElementById('enssSupervisionModule');
     if(!(typeof isLoggedIn==='function'&&isLoggedIn()&&typeof isAdminUser==='function'&&isAdminUser())){
@@ -19702,20 +19712,20 @@ body{ line-height:1.55; }
     var todo=all.length-done;
     var avg=all.length?Math.round(all.reduce(function(sum,r){return sum+Number(r.noteGlobale||0);},0)/all.length*10)/10:0;
     var stats=document.getElementById('enssSupervisionStats');
-    if(stats)stats.innerHTML='<div class="enss-sup-stat"><b>'+all.length+'</b><span>Obsèvasyon anrejistre</span></div><div class="enss-sup-stat"><b>'+done+'</b><span>Vizit reyalize</span></div><div class="enss-sup-stat"><b>'+todo+'</b><span>Vizit planifye / an swivi</span></div><div class="enss-sup-stat"><b>'+(all.length?avg+'/5':'—')+'</b><span>Mwayèn evalyasyon</span></div>';
+    if(stats)stats.innerHTML='<div class="enss-sup-stat"><b>'+all.length+'</b><span>Dosye pedagojik anrejistre</span></div><div class="enss-sup-stat"><b>'+done+'</b><span>Vizit reyalize</span></div><div class="enss-sup-stat"><b>'+todo+'</b><span>Vizit planifye / an swivi</span></div><div class="enss-sup-stat"><b>'+(all.length?avg+'/5':'—')+'</b><span>Mwayèn evalyasyon</span></div>';
     var box=document.getElementById('enssSupervisionList');if(!box)return;
     if(!list.length){box.innerHTML='<div class="enss-sup-empty">Pa gen obsèvasyon ki koresponn ak filtè yo. Klike sou <strong>Nouvo obsèvasyon</strong> pou kòmanse.</div>';return;}
     box.innerHTML='<table class="enss-sup-table"><thead><tr><th>Dat</th><th>Klas / Matyè</th><th>Anseyan</th><th>Direktè / Obsèvatè</th><th>Evalyasyon</th><th>Estati</th><th>Aksyon</th></tr></thead><tbody>'+list.map(function(r){
-      return '<tr><td>'+esc(r.dateVisite||'—')+'<br><small>'+esc(r.annee||'')+'</small></td><td><strong>'+esc(r.classe||'—')+'</strong><br>'+esc(r.matiere||'Matyè pa presize')+'</td><td>'+esc(r.enseignant||'—')+'</td><td>'+esc(r.visiteur||'Direksyon')+'</td><td><strong>'+esc(r.noteGlobale||'—')+(r.noteGlobale?'/5':'')+'</strong><br><small>'+esc((r.objectif||'').slice(0,90))+'</small></td><td><span class="enss-sup-pill '+(r.statut==='Effectué'?'':'pending')+'">'+esc(r.statut||'An swivi')+'</span></td><td><div class="enss-sup-row-actions"><button class="btn btn-info" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionView(this.dataset.supId)">Wè</button><button class="btn btn-primary" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionEdit(this.dataset.supId)">Modifye</button><button class="btn btn-danger" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionDelete(this.dataset.supId)">Efase</button></div></td></tr>';
+      return '<tr><td>'+esc(r.dateVisite||'—')+'<br><small>'+esc(r.annee||'')+'</small></td><td><strong>'+esc(typeLabels[r.type||'observation']||'Dosye pedagojik')+'</strong><br><strong>'+esc(r.classe||'—')+'</strong><br>'+esc(r.matiere||'Matyè pa presize')+'</td><td>'+esc(r.enseignant||'—')+'</td><td>'+esc(r.visiteur||'Direksyon')+'</td><td><strong>'+esc(r.noteGlobale||'—')+(r.noteGlobale?'/5':'')+'</strong><br><small>'+esc((r.objectif||'').slice(0,90))+'</small></td><td><span class="enss-sup-pill '+(r.statut==='Effectué'?'':'pending')+'">'+esc(r.statut||'An swivi')+'</span></td><td><div class="enss-sup-row-actions"><button class="btn btn-info" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionView(this.dataset.supId)">Wè</button><button class="btn btn-primary" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionEdit(this.dataset.supId)">Modifye</button><button class="btn btn-danger" data-sup-id="'+esc(r.id)+'" onclick="enssSupervisionDelete(this.dataset.supId)">Efase</button></div></td></tr>';
     }).join('')+'</tbody></table>';
   };
   function formOptions(id,arr,first,selected){return '<select id="'+id+'"><option value="">'+esc(first)+'</option>'+arr.map(function(v){return '<option value="'+esc(v)+'" '+(v===selected?'selected':'')+'>'+esc(v)+'</option>';}).join('')+'</select>';}
-  window.enssSupervisionNew=function(){
-    if(!roleOK())return;editingId=null;showForm({});
+  window.enssSupervisionNew=function(type){
+    if(!roleOK())return;editingId=null;currentType=type||'observation';showForm({type:currentType});
   };
   window.enssSupervisionEditCurrent=function(){if(editingId)window.enssSupervisionEdit(editingId);};
   window.enssSupervisionEdit=function(id){
-    if(!roleOK())return;var r=stateList().find(function(x){return String(x.id)===String(id);});if(!r)return;editingId=id;showForm(r);
+    if(!roleOK())return;var r=stateList().find(function(x){return String(x.id)===String(id);});if(!r)return;editingId=id;currentType=r.type||'observation';showForm(r);
   };
   function showForm(r){
     var wrap=document.getElementById('enssSupervisionFormWrap');if(!wrap)return;
@@ -19732,6 +19742,14 @@ body{ line-height:1.55; }
       '<div><label for="enssSupTeacher">Anseyan *</label>'+formOptions('enssSupTeacher',teachers,'Chwazi anseyan',r.enseignant)+'</div>'+
       '<div><label for="enssSupSubject">Matyè *</label>'+formOptions('enssSupSubject',mats,'Chwazi matyè',r.matiere)+'</div>'+
       '<div><label for="enssSupObserver">Obsèvatè / Direksyon *</label><input id="enssSupObserver" value="'+esc(r.visiteur||((STATE&&STATE.utilisateur)||'Direksyon'))+'" required></div>'+
+      '<div><label for="enssSupType">Kalite dosye *</label><select id="enssSupType">'+Object.keys(typeLabels).map(function(k){return '<option value="'+k+'" '+((r.type||currentType||'observation')===k?'selected':'')+'>'+esc(typeLabels[k])+'</option>';}).join('')+'</select></div>'+
+      '<div><label for="enssSupResponsible">Moun responsab</label><input id="enssSupResponsible" value="'+esc(r.responsable||'')+'" placeholder="Non responsab swivi a"></div>'+
+      '<div><label for="enssSupDeadline">Delè / pwochen dat</label><input id="enssSupDeadline" type="date" value="'+esc(r.echeance||'')+'"></div>'+
+      '<div class="wide"><label for="enssSupPreparationDetails">Kontwòl preparasyon, kaye tèks ak pwogram</label><textarea id="enssSupPreparationDetails" placeholder="Preparasyon, kaye tèks, pwogram, objektif, materyèl didaktik…">'+esc(r.preparationDetails||'')+'</textarea></div>'+
+      '<div class="wide"><label for="enssSupEvaluationDetails">Swivi evalyasyon ak rezilta elèv yo</label><textarea id="enssSupEvaluationDetails" placeholder="Kalite evalyasyon, koreksyon, rezilta, difikilte elèv yo, mezi korektif…">'+esc(r.evaluationDetails||'')+'</textarea></div>'+
+      '<div class="wide"><label for="enssSupAccompanimentDetails">Sipò pedagojik / fòmasyon bay anseyan</label><textarea id="enssSupAccompanimentDetails" placeholder="Konsèy, demonstrasyon, fòmasyon, resous oswa sipò ki nesesè…">'+esc(r.accompagnementDetails||'')+'</textarea></div>'+
+      '<div class="wide"><label for="enssSupRapportDetails">Rapò jeneral / konsta ak analiz</label><textarea id="enssSupRapportDetails" placeholder="Rezime vizit, konsta, pwen ki mande atansyon, pwogrè ak rezilta swivi…">'+esc(r.rapportDetails||'')+'</textarea></div>'+
+      '<div class="wide"><label for="enssSupDecisions">Desizyon ak mezi korektif</label><textarea id="enssSupDecisions" placeholder="Desizyon Direksyon, aksyon pou pran, moun ki responsab, dat limit…">'+esc(r.decisions||'')+'</textarea></div>'+
       '<div><label for="enssSupRating">Nòt jeneral (1–5)</label><select id="enssSupRating"><option value="">Pa evalye</option>'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'" '+(Number(r.noteGlobale)===n?'selected':'')+'>'+n+' / 5'+(n===5?' — Ekselan':n===4?' — Trè byen':n===3?' — Byen':n===2?' — Bezwen amelyorasyon':' — Sipò nesesè')+'</option>';}).join('')+'</select></div>'+
       '<div><label for="enssSupDuration">Dire vizit (minit)</label><input id="enssSupDuration" type="number" min="0" max="600" value="'+esc(r.dire||'')+'" placeholder="45"></div>'+
       '<div class="wide"><label>Lis kritè obsèvasyon</label><div class="enss-sup-checks">'+criteria.map(function(c){return '<label class="enss-sup-check"><input type="checkbox" name="enssSupCriterion" value="'+c[0]+'" '+(selectedCriteria.indexOf(c[0])>=0?'checked':'')+'> <span>'+esc(c[1])+'</span></label>';}).join('')+'</div></div>'+
@@ -19750,7 +19768,7 @@ body{ line-height:1.55; }
     var required=[['enssSupYear','Ane lekòl'],['enssSupDate','Dat vizit'],['enssSupClass','Klas'],['enssSupTeacher','Anseyan'],['enssSupSubject','Matyè'],['enssSupObserver','Obsèvatè']];
     for(var i=0;i<required.length;i++){if(!get(required[i][0])){alert('Tanpri ranpli chan obligatwa a: '+required[i][1]+'.');var el=document.getElementById(required[i][0]);if(el)el.focus();return;}}
     var checked=Array.from(document.querySelectorAll('input[name="enssSupCriterion"]:checked')).map(function(e){return e.value;});
-    var record={id:editingId||('sup-'+Date.now()+'-'+Math.floor(Math.random()*100000)),annee:get('enssSupYear'),dateVisite:get('enssSupDate'),statut:get('enssSupStatus')||'Planifye',classe:get('enssSupClass'),enseignant:get('enssSupTeacher'),matiere:get('enssSupSubject'),visiteur:get('enssSupObserver'),noteGlobale:get('enssSupRating'),dire:get('enssSupDuration'),criteres:checked,objectif:get('enssSupObjective'),pointsForts:get('enssSupStrengths'),difficultes:get('enssSupDifficulties'),recommandations:get('enssSupRecommendations'),suivi:get('enssSupFollowup'),updatedAt:new Date().toISOString()};
+    var record={id:editingId||('sup-'+Date.now()+'-'+Math.floor(Math.random()*100000)),type:get('enssSupType')||currentType||'observation',annee:get('enssSupYear'),dateVisite:get('enssSupDate'),statut:get('enssSupStatus')||'Planifye',classe:get('enssSupClass'),enseignant:get('enssSupTeacher'),matiere:get('enssSupSubject'),visiteur:get('enssSupObserver'),noteGlobale:get('enssSupRating'),dire:get('enssSupDuration'),criteres:checked,objectif:get('enssSupObjective'),pointsForts:get('enssSupStrengths'),difficultes:get('enssSupDifficulties'),recommandations:get('enssSupRecommendations'),suivi:get('enssSupFollowup'),preparationDetails:get('enssSupPreparationDetails'),evaluationDetails:get('enssSupEvaluationDetails'),accompagnementDetails:get('enssSupAccompanimentDetails'),rapportDetails:get('enssSupRapportDetails'),decisions:get('enssSupDecisions'),responsable:get('enssSupResponsible'),echeance:get('enssSupDeadline'),updatedAt:new Date().toISOString()};
     var list=stateList(),index=list.findIndex(function(x){return String(x.id)===String(record.id);});
     if(index>=0)list[index]=record;else list.push(record);
     try{saveState();}catch(e){console.error('ENSS supervision save failed',e);alert('Anrejistreman an pa reyisi. Tanpri verifye platfòm nan.');return;}
@@ -19769,19 +19787,40 @@ body{ line-height:1.55; }
     var wrap=document.getElementById('enssSupervisionFormWrap');if(!wrap)return;
     var c=(r.criteres||[]).map(function(k){var f=criteria.find(function(x){return x[0]===k;});return f?f[1]:k;});
     wrap.hidden=false;wrap.innerHTML='<div class="enss-sup-form"><div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem"><h4>Fich obsèvasyon pedagojik</h4><button class="btn btn-secondary" onclick="enssSupervisionCancel()">Fèmen</button></div><div class="enss-sup-form-grid">'+[
-      ['Ane lekòl',r.annee],['Dat vizit',r.dateVisite],['Estati',r.statut],['Klas',r.classe],['Anseyan',r.enseignant],['Matyè',r.matiere],['Obsèvatè',r.visiteur],['Nòt jeneral',r.noteGlobale?(r.noteGlobale+'/5'):'Pa evalye'],['Dire',r.dire?(r.dire+' minit'):'—'],['Kritè',c.join(', ')||'Pa gen kritè chwazi'],['Objektif',r.objectif],['Pwen fò',r.pointsForts],['Difikilte',r.difficultes],['Rekòmandasyon',r.recommandations],['Plan swivi',r.suivi]
-    ].map(function(x){return '<div><label>'+esc(x[0])+'</label><div style="font-size:.76rem;white-space:pre-wrap;color:#263f52">'+esc(x[1]||'—')+'</div></div>';}).join('')+'</div><div style="margin-top:.8rem"><button class="btn btn-primary" onclick="enssSupervisionEditCurrent()">Modifye fich sa a</button></div></div>';
+      ['Kalite dosye',typeLabels[r.type||'observation']||'Dosye pedagojik'],['Ane lekòl',r.annee],['Dat vizit',r.dateVisite],['Estati',r.statut],['Klas',r.classe],['Anseyan',r.enseignant],['Matyè',r.matiere],['Obsèvatè',r.visiteur],['Nòt jeneral',r.noteGlobale?(r.noteGlobale+'/5'):'Pa evalye'],['Dire',r.dire?(r.dire+' minit'):'—'],['Kritè',c.join(', ')||'Pa gen kritè chwazi'],['Objektif',r.objectif],['Pwen fò',r.pointsForts],['Difikilte',r.difficultes],['Rekòmandasyon',r.recommandations],['Plan swivi',r.suivi],['Kontwòl preparasyon',r.preparationDetails],['Swivi evalyasyon',r.evaluationDetails],['Sipò / fòmasyon',r.accompagnementDetails],['Rapò jeneral',r.rapportDetails],['Desizyon',r.decisions],['Moun responsab',r.responsable],['Delè',r.echeance]
+    ].map(function(x){return '<div><label>'+esc(x[0])+'</label><div style="font-size:.76rem;white-space:pre-wrap;color:#263f52">'+esc(x[1]||'—')+'</div></div>';}).join('')+'</div><div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn btn-primary" onclick="enssSupervisionEditCurrent()">Modifye fich sa a</button><button class="btn btn-info" onclick="enssSupervisionPrintOne(\''+esc(r.id)+'\')">🖨 Enprime fich sa a</button><button class="btn btn-success" onclick="enssSupervisionPDFOne(\''+esc(r.id)+'\')">📄 PDF fich sa a</button><button class="btn btn-warning" onclick="enssSupervisionWordOne(\''+esc(r.id)+'\')">📝 Word fich sa a</button></div></div>';
     wrap.scrollIntoView({behavior:'smooth',block:'start'});
   };
   function exportHtml(list,title){
-    var header='<div style="text-align:center;border-bottom:3px double #174a73;padding-bottom:12px;margin-bottom:18px"><h2 style="margin:0;color:#174a73">RÉPUBLIQUE D’HAÏTI</h2><h2 style="margin:4px 0">ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)</h2><p style="margin:3px">Cité Richard, centre-ville, Sainte-Suzanne • Tél. +509 4282 5377</p><h3 style="margin:12px 0;color:#174a73">'+esc(title)+'</h3><p>Année scolaire : '+esc((STATE&&STATE.anneeCourante)||'')+'</p></div>';
-    var rows=list.map(function(r){return '<tr><td>'+esc(r.dateVisite)+'</td><td>'+esc(r.annee)+'</td><td>'+esc(r.classe)+'</td><td>'+esc(r.enseignant)+'</td><td>'+esc(r.matiere)+'</td><td>'+esc(r.visiteur)+'</td><td>'+esc(r.noteGlobale?(r.noteGlobale+'/5'):'—')+'</td><td>'+esc(r.statut)+'</td><td>'+esc(r.objectif)+'</td><td>'+esc(r.pointsForts)+'</td><td>'+esc(r.difficultes)+'</td><td>'+esc(r.recommandations)+'</td><td>'+esc(r.suivi)+'</td></tr>';}).join('');
-    return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>body{font:12px Arial,sans-serif;color:#1e293b;margin:24px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #aab9c7;padding:6px;vertical-align:top;text-align:left}th{background:#eaf2f8;color:#174a73}footer{margin-top:32px;display:flex;justify-content:space-between}small{color:#526579}@media print{body{margin:10mm}tr{break-inside:avoid}}</style></head><body>'+header+'<table><thead><tr><th>Date</th><th>Année</th><th>Classe</th><th>Enseignant</th><th>Matière</th><th>Observateur</th><th>Note</th><th>Statut</th><th>Objectifs</th><th>Points forts</th><th>Difficultés</th><th>Recommandations</th><th>Suivi</th></tr></thead><tbody>'+rows+'</tbody></table><footer><div>Le Directeur<br><br><br>________________________<br>Joseph Mary CHARLES</div><div>Cachet officiel de l’établissement<br><br><br>________________________</div></footer><small>Document généré depuis la plateforme ENSS. Les dossiers originaux restent enregistrés dans la plateforme.</small></body></html>';
+    var officialHeader=(typeof window.buildOfficialHeaderHtml==='function')?window.buildOfficialHeaderHtml():'';
+    var year=esc((STATE&&STATE.anneeCourante)||'');
+    var meta='<div style="text-align:center;margin:4px 0 12px"><h2 style="font-size:15pt;margin:6px 0">'+esc(title)+'</h2><div><strong>Année scolaire :</strong> '+year+'</div><div><strong>Date d’édition :</strong> '+esc(new Date().toLocaleDateString('fr-FR'))+'</div></div>';
+    var rows=list.map(function(r){return '<tr><td>'+esc(typeLabels[r.type||'observation']||'Dosye pedagojik')+'</td><td>'+esc(r.dateVisite)+'</td><td>'+esc(r.annee)+'</td><td>'+esc(r.classe)+'</td><td>'+esc(r.enseignant)+'</td><td>'+esc(r.matiere)+'</td><td>'+esc(r.visiteur)+'</td><td>'+esc(r.noteGlobale?(r.noteGlobale+'/5'):'—')+'</td><td>'+esc(r.statut)+'</td><td>'+esc(r.objectif)+'</td><td>'+esc(r.pointsForts)+'</td><td>'+esc(r.difficultes)+'</td><td>'+esc(r.preparationDetails)+'</td><td>'+esc(r.evaluationDetails)+'</td><td>'+esc(r.accompagnementDetails)+'</td><td>'+esc(r.recommandations)+'</td><td>'+esc(r.decisions)+'</td><td>'+esc(r.responsable)+'</td><td>'+esc(r.echeance)+'</td><td>'+esc(r.suivi)+'</td><td>'+esc(r.rapportDetails)+'</td></tr>';}).join('');
+    var table='<table><thead><tr><th>Type de dossier</th><th>Date</th><th>Année</th><th>Classe</th><th>Enseignant</th><th>Matière</th><th>Observateur</th><th>Note</th><th>Statut</th><th>Objectifs</th><th>Points forts</th><th>Difficultés</th><th>Préparation / programme</th><th>Évaluations / résultats</th><th>Accompagnement / formation</th><th>Recommandations</th><th>Décisions</th><th>Responsable</th><th>Échéance</th><th>Plan de suivi</th><th>Rapport général</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    var signatures=(typeof window.buildSignatureBlockHtml==='function')?window.buildSignatureBlockHtml('Visa / BDS Sainte-Suzanne'):'<div style="display:flex;justify-content:space-between;margin-top:28px"><div>Signature du Directeur<br><br>________________________<br>Joseph Mary CHARLES</div><div>Cachet officiel de l’établissement<br><br>________________________</div><div>Visa / BDS Sainte-Suzanne<br><br>________________________</div></div>';
+    return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>@page{size:A4 landscape;margin:10mm}body{font:10pt Arial,sans-serif;color:#1e293b;margin:10mm}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #526579;padding:4px;vertical-align:top;text-align:left;overflow-wrap:anywhere;font-size:8pt}th{background:#eaf2f8;color:#174a73;font-weight:bold}tr{break-inside:avoid;page-break-inside:avoid}.signature{break-inside:avoid;page-break-inside:avoid}img{max-width:100%;object-fit:contain}@media print{body{margin:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>'+officialHeader+meta+table+signatures+'<p style="font-size:8pt;margin-top:12px">Document officiel généré depuis la plateforme ENSS. Les dossiers originaux restent enregistrés dans la plateforme.</p></body></html>';
   }
+  function exportOne(id){return stateList().filter(function(r){return String(r.id)===String(id);});}
+  window.enssSupervisionWordOne=function(id){
+    if(!roleOK())return;var list=exportOne(id);if(!list.length)return;
+    var title=(typeLabels[list[0].type||'observation']||'Dossier pédagogique').toUpperCase();
+    var blob=new Blob(['\ufeff',exportHtml(list,title)],{type:'application/msword;charset=utf-8'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ENSS_Fiche_Supervision_'+new Date().toISOString().slice(0,10)+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  };
+  window.enssSupervisionPDFOne=function(id){
+    if(!roleOK())return;var list=exportOne(id);if(!list.length)return;var w=window.open('','_blank');if(!w){alert('Navigatè a bloke fenèt PDF la. Tanpri pèmèt pop-up.');return;}
+    w.document.open();w.document.write(exportHtml(list,typeLabels[list[0].type||'observation']||'Dossier pédagogique'));w.document.close();setTimeout(function(){w.focus();w.print();},350);
+  };
+  window.enssSupervisionPrintOne=function(id){window.enssSupervisionPDFOne(id);};
   window.enssSupervisionExportWord=function(){
     if(!roleOK())return;var list=currentFiltered();if(!list.length){alert('Pa gen obsèvasyon pou ekspòte ak filtè aktyèl yo.');return;}
-    var blob=new Blob(['\\ufeff',exportHtml(list,'RAPPORT DE SUPERVISION PÉDAGOGIQUE')],{type:'application/msword;charset=utf-8'});
-    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ENSS_Rapport_Supervision_Pedagogique_'+new Date().toISOString().slice(0,10)+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    var blob=new Blob(['\ufeff',exportHtml(list,'RAPPORT DE SUPERVISION PÉDAGOGIQUE')],{type:'application/msword;charset=utf-8'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ENSS_Dossier_Supervision_Pedagogique_'+new Date().toISOString().slice(0,10)+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  };
+  window.enssSupervisionPDF=function(){
+    if(!roleOK())return;var list=currentFiltered();if(!list.length){alert('Pa gen obsèvasyon pou telechaje an PDF ak filtè aktyèl yo.');return;}
+    var w=window.open('','_blank');if(!w){alert('Navigatè a bloke fenèt PDF la. Tanpri pèmèt pop-up pou platfòm sa a.');return;}
+    w.document.open();w.document.write(exportHtml(list,'RAPPORT DE SUPERVISION PÉDAGOGIQUE'));w.document.close();setTimeout(function(){w.focus();w.print();},350);
   };
   window.enssSupervisionPrint=function(){
     if(!roleOK())return;var list=currentFiltered();if(!list.length){alert('Pa gen obsèvasyon pou enprime ak filtè aktyèl yo.');return;}
