@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>ENSS V101 — Nouvo Elèv 2026-2027 — ENSS — SIJENSS</title>
+    <title>ENSS V113 — Bibliyotèk Videyo Pedagojik — ENSS — SIJENSS</title>
     <style>
         /* ===== RESET & BASE (PA TOUCHE) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -396,6 +396,20 @@
 #quizSavedResults table{font-size:.68rem;}
 #quizSavedResults th,#quizSavedResults td{padding:4px 5px;white-space:nowrap;}
 #quizSavedResults th:first-child,#quizSavedResults td:first-child{position:sticky;left:0;background:#fff;z-index:2;}
+
+        .accueil-menu .menu-item[data-page="videoLibrary"]{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:2px solid #ddd6fe;}
+        .module-action-band.video-library-band{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;padding:.35rem .55rem;border-radius:7px;font-size:.7rem;font-weight:800;border:2px solid #ddd6fe;}
+        .video-library-resource-links{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+        .video-library-resource-links a{display:inline-block;padding:.4rem .55rem;border:1px solid #c4b5fd;border-radius:8px;background:#f5f3ff;color:#4c1d95;font-size:.68rem;font-weight:700;text-decoration:none}
+        .video-library-resource-links a:hover{background:#ede9fe;text-decoration:underline}
+        .enss-video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem}
+        .enss-video-card{background:var(--card);border:1px solid var(--border);border-top:4px solid #7c3aed;border-radius:10px;padding:.7rem;box-shadow:var(--shadow);min-width:0}
+        .enss-video-card h4{font-size:.78rem;line-height:1.35;margin:0 0 .35rem;color:var(--text)}
+        .enss-video-card .video-meta{font-size:.65rem;color:var(--text-light);margin-bottom:.45rem}
+        .enss-video-card .video-open{display:inline-block;background:#7c3aed;color:white;text-decoration:none;border-radius:7px;padding:.4rem .55rem;font-size:.68rem;font-weight:800}
+        .enss-video-card .video-open:hover{background:#6d28d9}
+        .enss-video-card .video-custom-delete{float:right;border:0;background:#fee2e2;color:#991b1b;border-radius:5px;padding:.2rem .35rem;cursor:pointer}
+        @media(max-width:600px){.enss-video-grid{grid-template-columns:1fr}.video-library-resource-links a{flex:1 1 100%}}
 </style>
 <style id="frais-harmonisation-v2">
 .fee-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:.55rem}.fee-summary-card{background:#fff;border:1px solid #e4e9ef;border-radius:12px;padding:.55rem .7rem;box-shadow:0 5px 16px rgba(15,35,70,.06)}.fee-summary-card .fee-name{font-weight:900;font-size:.75rem;margin-bottom:.3rem}.fee-lines{display:flex;flex-direction:column;gap:.2rem;font-size:.68rem}.fee-forecast{background:#fff3a6;padding:.2rem .35rem;border-radius:5px}.fee-paid{background:#c9f3d3;padding:.2rem .35rem;border-radius:5px}.fee-total-card{grid-column:1/-1}.fee-cell{vertical-align:middle;text-align:center;font-weight:800;min-width:105px}.fee-forecast-cell{background:#fff8c9!important}.fee-paid-cell{background:#d9f7df!important}.fee-check{display:inline-flex;align-items:center;gap:.2rem;margin-top:.2rem;padding:.12rem .3rem;border-radius:5px;background:#fff;border:1px solid #cfd8e3;font-size:.58rem;font-weight:800;cursor:pointer}.fee-paid-cell .fee-check{background:#b9ebc4;border-color:#72c982;color:#155724}.fee-check input{accent-color:#218838}.fee-total{font-weight:900;text-align:center}.forecast-total{background:#fff3a6!important}.paid-total{background:#c9f3d3!important}.balance-total{background:#eef2f6!important}@media(max-width:900px){.fee-summary-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.fee-summary-grid{grid-template-columns:1fr}}
@@ -1577,6 +1591,7 @@
                     <h2 style="font-size:1.1rem;">📚 Bibliyotèk ENSS</h2>
                     <div class="flex gap-1" style="flex-wrap:wrap;">
                         <button class="btn btn-primary" onclick="renderStandaloneLibrary()" style="padding:.2rem .5rem;font-size:.7rem;">🔄 Rafrechi</button>
+                        <button class="btn btn-success" type="button" aria-label="Louvri Bibliyotèk Videyo Pedagojik" onclick="navigateTo('videoLibrary')" style="padding:.3rem .55rem;font-size:.72rem;">🎬 Videyokou gratis</button>
                     </div>
                 </div>
                 <div class="card" style="padding:.7rem;margin-bottom:.6rem;border-left:4px solid #16a34a;">
@@ -1591,6 +1606,50 @@
                     </div>
                 </div>
                 <div id="standaloneLibraryContent"></div>
+            </div>
+
+            <!-- ===== ENSS — BIBLIYOTÈK VIDEYO PEDAGOJIK ===== -->
+            <div class="page" id="page-videoLibrary">
+                <div class="flex-between mb-1" style="gap:.5rem;flex-wrap:wrap;">
+                    <div class="module-action-band video-library-band">🎬 VIDEYO KOU</div>
+                    <h2 style="font-size:1.1rem;margin:0;">🎬 Bibliyotèk Videyo Pedagojik ENSS</h2>
+                    <div class="flex gap-1" style="flex-wrap:wrap;">
+                        <button class="btn" type="button" onclick="navigateTo('library')" style="padding:.3rem .55rem;font-size:.72rem;">📚 Retounen Bibliyotèk</button>
+                        <button class="btn btn-primary" onclick="renderENSSVideoLibrary()" style="padding:.3rem .55rem;font-size:.72rem;">🔄 Rafrechi</button>
+                    </div>
+                </div>
+                <div class="card" style="padding:.7rem;margin-bottom:.65rem;border-left:4px solid #7c3aed;">
+                    <strong style="font-size:.8rem;">Aprann pa klas, matyè ak sijè</strong>
+                    <p style="font-size:.7rem;color:var(--text-light);margin:.25rem 0;">Chèche leson gratis sou YouTube epi jwenn resous pedagojik gratis. Katalòg la sèvi ak sijè rechèch klase dapre nivo fondamantal la; verifye kontni chak videyo ak leson pwofesè a ak pwogram MENFP la. YouTube ka montre plizyè rezilta, kidonk chwazi videyo ki apwopriye pou klas la.</p>
+                    <div class="video-library-resource-links">
+                        <a href="https://www.haitifutur.com/ressources/" target="_blank" rel="noopener">📘 Haïti Futur — kou ak videyo gratis</a>
+                        <a href="https://menfp.reseau-canope.fr/?lang=fr" target="_blank" rel="noopener">🏛️ NectarEduProfHaïti — resous MENFP</a>
+                        <a href="https://projet-nectar.prof.scenari.cloud/projet-nectar/index.html" target="_blank" rel="noopener">📑 Pwojè Nectar — pwogram ak sekans modèl</a>
+                        <a href="https://www.haitidocs.org/series/menfp-curriculum-fondamental?lang=fr" target="_blank" rel="noopener">📚 Kourikoulòm fondamantal MENFP/IPN</a>
+                        <a href="https://www.quizayiti.com/videos" target="_blank" rel="noopener">🎯 Quiz Ayiti — kou gratis ak quiz</a>
+                    </div>
+                </div>
+                <div class="card" style="padding:.7rem;margin-bottom:.65rem;">
+                    <div class="grid grid-2" style="gap:.55rem;align-items:end;">
+                        <div><label for="enssVideoClasse" style="font-size:.68rem;">Klas</label><select id="enssVideoClasse" onchange="renderENSSVideoLibrary()" style="width:100%;padding:.4rem;font-size:.75rem;"></select></div>
+                        <div><label for="enssVideoMatiere" style="font-size:.68rem;">Matyè</label><select id="enssVideoMatiere" onchange="renderENSSVideoLibrary()" style="width:100%;padding:.4rem;font-size:.75rem;"><option value="">Tout matyè yo</option></select></div>
+                        <div style="grid-column:1/-1;"><label for="enssVideoSearch" style="font-size:.68rem;">Chèche yon leson, chapit oswa mo kle</label><input id="enssVideoSearch" type="search" oninput="renderENSSVideoLibrary()" placeholder="Egzanp: fraksyon, gramè, fotosentèz…" style="width:100%;padding:.45rem;font-size:.75rem;"></div>
+                    </div>
+                    <div id="enssVideoLibraryCount" style="font-size:.68rem;color:var(--text-light);margin-top:.45rem;"></div>
+                </div>
+                <div id="enssVideoLibraryCards" class="enss-video-grid"></div>
+                <div class="card" id="enssVideoAdminBox" style="display:none;padding:.75rem;margin-top:.75rem;border-top:4px solid #2563eb;">
+                    <h3 style="font-size:.9rem;margin:0 0 .5rem;">➕ Ajoute yon lòt lyen videyo</h3>
+                    <p style="font-size:.68rem;color:var(--text-light);">Seksyon sa a rezève pou administratè. Itilize lyen videyo YouTube oswa lòt resous edikatif gratis ou verifye.</p>
+                    <div class="grid grid-2" style="gap:.5rem;">
+                        <div><label style="font-size:.68rem;">Tit leson an</label><input id="enssVideoNewTitle" maxlength="180" placeholder="Tit videyo a" style="width:100%;padding:.4rem;"></div>
+                        <div><label style="font-size:.68rem;">URL videyo/resous la</label><input id="enssVideoNewUrl" type="url" placeholder="https://..." style="width:100%;padding:.4rem;"></div>
+                        <div><label style="font-size:.68rem;">Klas</label><select id="enssVideoNewClass" style="width:100%;padding:.4rem;"></select></div>
+                        <div><label style="font-size:.68rem;">Matyè</label><input id="enssVideoNewSubject" maxlength="100" placeholder="Matematik, Kreyòl…" style="width:100%;padding:.4rem;"></div>
+                    </div>
+                    <button class="btn btn-success" onclick="addENSSVideoLink()" style="margin-top:.55rem;font-size:.72rem;">💾 Anrejistre lyen an</button>
+                    <span id="enssVideoAdminStatus" style="font-size:.68rem;margin-left:.4rem;"></span>
+                </div>
             </div>
 
             <!-- ===== PAGE PARAMÈTRES ===== -->
@@ -4061,6 +4120,17 @@
             return isLoggedIn() && (isAdminUser() || String(STATE.utilisateur || '').trim().toLowerCase() === 'joseph mary charles');
         }
 
+        // Pwopriyetè Bibliyotèk la: sèlman profil « admin » ak « Joseph Mary Charles » (pa nenpòt lòt kont admin).
+        // Sèvi pou ajoute/efase lyen videyo ak fichye/kesyon nan Bibliyotèk la.
+        function isLibraryOwner() {
+            try {
+                if (!isLoggedIn()) return false;
+                var who = String(STATE.utilisateur || '').trim().toLowerCase();
+                if (who === 'joseph mary charles') return true;
+                return who === 'admin' && getRole() === 'admin';
+            } catch (e) { return false; }
+        }
+
         function getAuthorizationGrants(profil) {
             var all = STATE.parametres && STATE.parametres.authorizationGrants;
             if (!all || typeof all !== 'object') return {};
@@ -4152,6 +4222,7 @@
 
         function hasAccess(page) {
             var role = getRole();
+            if (page === 'videoLibrary') return ['admin','secretaire','secrétaire','enseignant','enseignante','enseignant(e)','enseignant(e) titulaire','teacher','eleve','élève','student'].includes(String(role || '').toLowerCase());
             if (page === 'supervision') return role === 'admin';
             // ENSS student accounts are strictly personal: never open class-wide or management pages.
             if (role === 'eleve') {
@@ -4220,6 +4291,7 @@
                 { id: 'quiz', label: 'Quiz', icon: '🎯' },
                 { id: 'evaluation', label: 'Évaluation', icon: '📝' },
                 { id: 'library', label: 'Bibliyotèk', icon: '📚' },
+                { id: 'videoLibrary', label: 'Videyo Kou', icon: '🎬' },
                 { id: 'personnelPresences', label: 'Prezans Pèsonèl', icon: '🗓️' },
                 { id: 'finance', label: 'Finance', icon: '💰' },
                 { id: 'comites', label: 'Comités', icon: '🤝' },
@@ -4254,6 +4326,7 @@
                 parametres: 'Paramètres',
                 contacts: 'Kontak Responsab',
                 devoirs: 'Devwa',
+                videoLibrary: 'Bibliyotèk Videyo Pedagojik',
                 personnelPresences: 'Prezans Pèsonèl',
                 inscription: 'Enskripsyon Elèv'
             };
@@ -4804,7 +4877,7 @@
         var ENSS_LIBRARY_STORAGE_BUCKET='enss-library';
         function libraryCentralClient(){var c=ensureCentralClient();if(!c)throw new Error('Baz santral la poko konfigire.');return c;}
         function uploadLibraryFileToCentral(file,meta){var client=libraryCentralClient();return centralRefreshSession().then(function(session){if(!session)throw new Error('Pa gen sesyon Supabase aktif. Konekte anvan ou mete fichye pou tout aparèy.');var safeName=String(file.name||'fichier').replace(/[^a-zA-Z0-9._-]+/g,'_'),path='ENSS-SCHOOL-1/'+meta.id+'_'+safeName;return client.storage.from(ENSS_LIBRARY_STORAGE_BUCKET).upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false}).then(function(r){if(r.error)throw new Error('Bucket Supabase "'+ENSS_LIBRARY_STORAGE_BUCKET+'" oswa dwa depo li yo poko pare: '+r.error.message);meta.storageBucket=ENSS_LIBRARY_STORAGE_BUCKET;meta.storagePath=path;meta.centralStored=true;return meta;});});}
-        function deleteLibraryFile(id){if(!isPrivilegedModifier())return;if(!confirm('Retire fichye sa a nan bibliyotèk la?'))return;var meta=(STATE.libraryUploads||[]).find(function(x){return String(x.id)===String(id);}),remote=Promise.resolve();if(meta&&meta.storagePath){try{remote=libraryCentralClient().storage.from(meta.storageBucket||ENSS_LIBRARY_STORAGE_BUCKET).remove([meta.storagePath]).then(function(r){if(r.error)throw r.error;});}catch(e){remote=Promise.reject(e);}}remote.then(function(){return openENSSLibraryDB();}).then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=function(){db.close();resolve();};tx.onerror=function(){db.close();reject(tx.error);};});}).then(function(){STATE.libraryUploads=(STATE.libraryUploads||[]).filter(function(x){return String(x.id)!==String(id);});saveState();if(typeof renderStandaloneLibraryContent==='function')renderStandaloneLibraryContent();else renderEvaluationLibrary();}).catch(function(e){showAccessNotice('Fichye a pa t efase nèt. '+(e&&e.message?e.message:''),'library-delete-error');});}
+        function deleteLibraryFile(id){if(!isLibraryOwner())return;if(!confirm('Retire fichye sa a nan bibliyotèk la?'))return;var meta=(STATE.libraryUploads||[]).find(function(x){return String(x.id)===String(id);}),remote=Promise.resolve();if(meta&&meta.storagePath){try{remote=libraryCentralClient().storage.from(meta.storageBucket||ENSS_LIBRARY_STORAGE_BUCKET).remove([meta.storagePath]).then(function(r){if(r.error)throw r.error;});}catch(e){remote=Promise.reject(e);}}remote.then(function(){return openENSSLibraryDB();}).then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=function(){db.close();resolve();};tx.onerror=function(){db.close();reject(tx.error);};});}).then(function(){STATE.libraryUploads=(STATE.libraryUploads||[]).filter(function(x){return String(x.id)!==String(id);});saveState();if(typeof renderStandaloneLibraryContent==='function')renderStandaloneLibraryContent();else renderEvaluationLibrary();}).catch(function(e){showAccessNotice('Fichye a pa t efase nèt. '+(e&&e.message?e.message:''),'library-delete-error');});}
         function downloadLibraryFile(id){listLibraryFilesIndexedDB().then(function(list){var f=list.find(function(x){return String(x.id)===String(id);});if(f&&f.data){var url=URL.createObjectURL(f.data),a=document.createElement('a');a.href=url;a.download=f.name;a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);return;}var meta=(STATE.libraryUploads||[]).find(function(x){return String(x.id)===String(id);});if(!meta||!meta.storagePath){showAccessNotice('Fichye sa a pa nan depo santral la; li te sove sou yon lòt aparèy sèlman.','library-local-only');return;}try{libraryCentralClient().storage.from(meta.storageBucket||ENSS_LIBRARY_STORAGE_BUCKET).download(meta.storagePath).then(function(r){if(r.error)throw r.error;var url=URL.createObjectURL(r.data),a=document.createElement('a');a.href=url;a.download=meta.name||'fichye';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1500);}).catch(function(e){showAccessNotice('Telechajman santral la echwe: '+(e&&e.message?e.message:''),'library-download-error');});}catch(e){showAccessNotice(e.message||'Koneksyon santral la pa disponib.','library-download-error');}}).catch(function(e){console.warn(e);});}
         function libraryClassCycleLabel(cycle){
             return ({'1-2':'1er–2e AF','3-4':'3e–4e AF','5-6':'5e–6e AF','7-9':'7e–9e AF'})[cycle] || cycle || '';
@@ -4905,7 +4978,7 @@
             });
             if(!qs.length) parts+='<div class="text-muted" style="font-size:.7rem;">Pa gen kesyon ki disponib pou seleksyon sa a.</div>';
             parts+='</div>';
-            var uploadAllowed=isPrivilegedModifier();
+            var uploadAllowed=isLibraryOwner();
             if(uploadAllowed){
                 parts+='<div class="card" style="padding:.65rem;margin-bottom:.6rem;border-left:4px solid #16a34a;">'+
                     '<div style="font-size:.75rem;font-weight:800;margin-bottom:.3rem;">➕ Konplete Bibliyotèk la</div>'+
@@ -4923,7 +4996,7 @@
             }).catch(function(e){console.warn('Bibliyotèk file error',e);});
         }
         function uploadStandaloneLibraryFile(input){
-            if(!isPrivilegedModifier()||!input||!input.files||!input.files.length)return;
+            if(!isLibraryOwner()||!input||!input.files||!input.files.length)return;
             var files=Array.from(input.files),max=50*1024*1024,chosenClass=(document.getElementById('libraryClasseSelect')||{}).value||'__ALL__',chosenSubject=(document.getElementById('libraryMatiereSelect')||{}).value||'',st=document.getElementById('libraryStandaloneUploadStatus'),done=0,summary=[];
             files.reduce(function(chain,f){return chain.then(function(){if(f.size>max){summary.push(f.name+': depase limit 50 MB');return;}var meta={id:'lib-'+Date.now()+'-'+Math.random().toString(36).slice(2,9),name:f.name,size:f.size,type:f.type,uploadedAt:new Date().toISOString(),classe:chosenClass,matiere:chosenSubject};return uploadLibraryFileToCentral(f,meta).then(function(shared){return importLibraryQuestionFile(f,chosenClass,chosenSubject).then(function(res){return saveLibraryFileIndexedDB(f,shared).then(function(){STATE.libraryUploads=Array.isArray(STATE.libraryUploads)?STATE.libraryUploads:[];STATE.libraryUploads.push(shared);saveState();done++;summary.push(f.name+': santral ✓; kesyon nouvo '+(res.added||0)+', doublon '+(res.duplicates||0)+', sote '+(res.skipped||0));});});}).catch(function(e){summary.push(f.name+': echèk pataj — '+(e&&e.message?e.message:''));});});},Promise.resolve()).then(function(){if(st)st.textContent='Fini '+done+'/'+files.length+' fichye pataje. '+summary.join(' | ');input.value='';renderStandaloneLibraryContent();});
         }
@@ -4931,7 +5004,7 @@
         function renderEvaluationLibrary(){var box=document.getElementById('evaluationLibrary');if(!box)return;var cl=(document.getElementById('evalClasse')||{}).value||'',cycle=quizCycleForClass(cl);var qs=getLibraryQuestionBank().filter(function(q){return !cycle||q.cycle===cycle;});var mats=Array.from(new Set(qs.map(function(q){return q.matiere;})));var html='<div style="font-size:.68rem;color:#64748b;margin-bottom:.4rem;">Kesyon ak repons ki disponib pou klas sa a. Bibliyotèk la ka resevwa Word/PDF; bank kestyon yo sèvi kòm baz pou Quiz ak Évaluation.</div><div class="flex gap-1" style="flex-wrap:wrap;margin-bottom:.5rem;"><select id="libraryMatiere" style="padding:.25rem;font-size:.7rem;"><option value="">Tout matyè</option>'+mats.map(function(m){return '<option value="'+quizEscape(m)+'">'+quizEscape(m)+'</option>';}).join('')+'</select><button class="btn" onclick="showLibraryStudy()" style="padding:.2rem .5rem;font-size:.68rem;">📖 Afiche kesyon + repons</button></div><div id="libraryStudyList"></div>'+(isPrivilegedModifier()?'<div style="margin-top:.5rem;padding:.5rem;border-top:1px solid var(--border);"><label style="font-size:.68rem;font-weight:700;">📤 Ajoute plizyè fichye — tout fòma</label><input id="libraryFileInput" type="file" multiple onchange="uploadLibraryFile(this)" style="display:block;margin-top:.3rem;font-size:.68rem;"><div id="libraryUploadStatus" class="text-muted" style="font-size:.62rem;margin-top:.25rem;"></div></div>':'')+'<div id="libraryUploadedFiles" style="margin-top:.5rem;"></div>';box.innerHTML=html;listLibraryFilesIndexedDB().then(function(list){var out=document.getElementById('libraryUploadedFiles');if(!out)return;out.innerHTML=list.length?'<div style="font-size:.68rem;font-weight:700;margin-bottom:.25rem;">📁 Fichye ajoute yo</div>'+list.map(function(f){return '<div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;padding:.25rem 0;border-bottom:1px solid var(--border);font-size:.65rem;"><span>📄 '+quizEscape(f.name)+'</span><span class="text-muted">'+Math.round(f.size/1024)+' Ko</span><button class="btn" onclick="downloadLibraryFile(\''+quizEscape(f.id)+'\')" style="padding:.12rem .35rem;font-size:.6rem;">⬇️</button>'+(isPrivilegedModifier()?'<button class="btn btn-danger" onclick="deleteLibraryFile(\''+quizEscape(f.id)+'\')" style="padding:.12rem .35rem;font-size:.6rem;">🗑️</button>':'')+'</div>';}).join(''):'<span class="text-muted" style="font-size:.62rem;">Pa gen fichye ajoute ankò.</span>';}).catch(function(e){console.warn('Bibliyotèk file error',e);});}
         function showLibraryStudy(){var box=document.getElementById('libraryStudyList'),sel=document.getElementById('libraryMatiere'),cl=(document.getElementById('evalClasse')||{}).value||'',cycle=quizCycleForClass(cl),mat=sel?sel.value:'';if(!box)return;var qs=getLibraryQuestionBank().filter(function(q){return q.cycle===cycle&&(!mat||q.matiere===mat);});box.innerHTML='<div class="table-wrap scroll-horizontal" style="max-height:380px;overflow:auto;"><table><thead><tr><th>#</th><th>Matière</th><th>Kesyon</th><th>Repons</th><th>Odyo</th></tr></thead><tbody>'+qs.map(function(q,i){return '<tr><td>'+((i+1))+'</td><td>'+quizEscape(q.matiere)+'</td><td>'+quizEscape(q.question)+'</td><td>'+quizEscape(q.reponse)+'</td><td><button class="btn quiz-audio-btn" type="button" onclick="readLibraryQuestionAnswer(&quot;'+quizEscape(q.id)+'&quot;)">🔊 Li</button></td></tr>';}).join('')+'</tbody></table></div>'+(qs.length?'':'<p class="text-muted">Pa gen kesyon pou klas sa a.</p>');}
         function uploadLibraryFile(input){
-            if(!isPrivilegedModifier()||!input||!input.files||!input.files.length)return;
+            if(!isLibraryOwner()||!input||!input.files||!input.files.length)return;
             var files=Array.from(input.files),cl=(document.getElementById('evalClasse')||{}).value||'',mat=(document.getElementById('libraryMatiere')||{}).value||'',st=document.getElementById('libraryUploadStatus'),done=0,summary=[];
             files.reduce(function(chain,f){return chain.then(function(){if(f.size>50*1024*1024){summary.push(f.name+': depase limit 50 MB');return;}var meta={id:'lib-'+Date.now()+'-'+Math.random().toString(36).slice(2,9),name:f.name,size:f.size,type:f.type,uploadedAt:new Date().toISOString(),classe:cl,matiere:mat};return uploadLibraryFileToCentral(f,meta).then(function(shared){return importLibraryQuestionFile(f,cl,mat).then(function(res){return saveLibraryFileIndexedDB(f,shared).then(function(){STATE.libraryUploads=Array.isArray(STATE.libraryUploads)?STATE.libraryUploads:[];STATE.libraryUploads.push(shared);saveState();done++;summary.push(f.name+': santral ✓; nouvo '+(res.added||0)+', doublon '+(res.duplicates||0)+', sote '+(res.skipped||0));});});}).catch(function(e){summary.push(f.name+': echèk pataj — '+(e&&e.message?e.message:''));});});},Promise.resolve()).then(function(){if(st)st.textContent='Fini '+done+'/'+files.length+' fichye pataje. '+summary.join(' | ');input.value='';renderEvaluationLibrary();});
         }
@@ -4992,6 +5065,9 @@
                     break;
                 case 'library':
                     renderStandaloneLibrary();
+                    break;
+                case 'videoLibrary':
+                    renderENSSVideoLibrary();
                     break;
                 case 'personnelPresences':
                     refreshPersonnelPresencesModule();
@@ -19871,6 +19947,51 @@ body{ line-height:1.55; }
     };
   }
   document.addEventListener('DOMContentLoaded',function(){hideDuplicatePanel(window.currentClasseNotes||'');});
+})();
+</script>
+
+<script id="enss-video-library-module-v112">
+(function(){
+  'use strict';
+  var GRADES=['Preskolè','1e AF','2e AF','3e AF','4e AF','5e AF','6e AF','7e AF','8e AF','9e AF'];
+  var TOPICS={
+    'Matematik':['nimewo ak chif','konpare ak klase nonb','adisyon','soustraksyon','miltiplikasyon','divizyon','fraksyon','nimewo desimal','mezi longè ak mas','perimèt ak sifas','ang ak triyang','pwopòsyon ak pousantaj','ekspresyon aljebrik','ekwasyon','jeyometri ak transfòmasyon','estatistik ak pwobabilite'],
+    'Français / Communication française':['alphabet et sons','lecture compréhension','vocabulaire','grammaire les noms et déterminants','genre et nombre','verbe et conjugaison','accord sujet verbe','adjectifs et pronoms','types de phrases','orthographe','ponctuation','production écrite','texte narratif et descriptif','résumé et compréhension'],
+    'Kreyòl / Communication créole':['alfabè kreyòl ak son','lekti ak konpreyansyon','mo ak vokabilè','non ak detèminan','sijè ak predika','vèb ak tan vèb','òtopgraf kreyòl','ponktiyasyon','kalite fraz','pwovèb ak ekspresyon','redaksyon','tèks naratif ak deskriptif'],
+    'Syans eksperimantal':['kò moun ak sans yo','ijyèn ak sante','plant ak pati plant yo','bèt ak anviwònman','dlo ak sik dlo','lè ak tanperati','matyè ak eta matyè','fòs ak mouvman','enèji ak elektrisite','ekosistèm ak chèn alimantè','sistèm dijestif ak respiratwa','latè solèy ak linivè'],
+    'Syans sosyal':['fanmi ak kominote','katye ak lokalite','kat ak oryantasyon','Ayiti ak depatman yo','istwa Ayiti','endepandans Ayiti','jewografi Karayib la','dwa ak devwa sitwayen','enstitisyon peyi a','resous natirèl ak ekonomi','popilasyon ak migrasyon'],
+    'Anglais':['alphabet and greetings','classroom vocabulary','numbers and dates','family and daily routine','present simple','pronouns and adjectives','questions and negatives','reading comprehension','past tense','future forms','writing a paragraph'],
+    'Espagnol':['saludos y presentación','el alfabeto y los números','la familia','los artículos y sustantivos','verbos ser y estar','presente de indicativo','preguntas y respuestas','vocabulario escolar','comprensión lectora'],
+    'Informatique':['utilisation responsable du numérique','parties de l’ordinateur','clavier et souris','fichiers et dossiers','traitement de texte','internet et sécurité','recherche d’information fiable'],
+    'EPS — Éducation Physique et Sportive':['échauffement et mobilité','course et vitesse','sauts et lancers','équilibre et coordination','jeux traditionnels','jeux collectifs','gymnastique au sol','football','basketball','volleyball','athlétisme','hygiène sportive et sécurité'],
+    'ETAP':['outils et matériaux','pliage et découpage','travaux manuels et assemblage','mesure et dessin technique','artisanat haïtien','couture et broderie','jardinage et agriculture','cuisine et nutrition','recyclage et créations','sécurité en atelier'],
+    'EEA':['dessin et formes','couleurs et peinture','collage et arts plastiques','rythme et chants','instruments et percussions','danse et expression corporelle','théâtre et expression orale','art haïtien et artistes','histoire de l’art'],
+    'EDAC — Éducation à la Citoyenneté':['règles de vie et respect','droits et devoirs de l’enfant','symboles nationaux drapeau et hymne','civisme et vie en société','institutions d’Haïti','égalité et non-discrimination','environnement et salubrité','paix et résolution des conflits','démocratie et élections']
+  };
+  var PRETOPICS={
+    'Langage et communication':['sons et vocabulaire','contes et compréhension orale','chansons et comptines éducatives'],
+    'Pré-mathématiques':['compter et reconnaître les nombres','formes géométriques et couleurs','classer comparer et sérier'],
+    'Éveil scientifique':['corps humain et hygiène','animaux et plantes','météo et environnement'],
+    'Graphisme':['motricité fine et tracés','lignes courbes et formes','préparation à l’écriture'],
+    'Socialisation':['émotions et règles de vie','famille et communauté','coopération et respect']
+  };
+  function esc(v){return typeof window.quizEscape==='function'?window.quizEscape(String(v==null?'':v)):String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function gradeSubjects(grade){if(grade==='Preskolè')return Object.keys(PRETOPICS);var base=['Matematik','Français / Communication française','Kreyòl / Communication créole','Syans eksperimantal','Syans sosyal','Anglais','Espagnol','EPS — Éducation Physique et Sportive','ETAP','EEA','EDAC — Éducation à la Citoyenneté'];if(['7e AF','8e AF','9e AF'].includes(grade))base=base.concat(['Informatique']);return base;}
+  var KEY={'EPS — Éducation Physique et Sportive':'éducation physique et sportive','ETAP':'éducation technologique travaux manuels artisanat','EEA':'éducation artistique arts plastiques musique','EDAC — Éducation à la Citoyenneté':'éducation civique citoyenneté'};
+  function topicsFor(m,g){if(g==='Preskolè')return PRETOPICS[m]||[];var all=TOPICS[m]||[],n=all.length,gi=parseInt(g,10)||1,len=Math.max(3,Math.ceil(n*0.6)),start=Math.floor((gi-1)*(n-len)/8);return all.slice(start,start+len);}
+  function allCatalogue(){var out=[];GRADES.forEach(function(g){gradeSubjects(g).forEach(function(m){topicsFor(m,g).forEach(function(t){var kw=KEY[m]||m;var query=(g==='Preskolè'?'préscolaire Haïti activité éducative':g+' Haïti enseignement fondamental')+' '+kw+' '+t+' cours leçon';out.push({id:'catalog-'+out.length,grade:g,subject:m,title:t.charAt(0).toUpperCase()+t.slice(1),query:query,url:'https://www.youtube.com/results?search_query='+encodeURIComponent(query),source:'Recherche YouTube',custom:false});});});});return out;}
+  var LUMNI=['Lumni — leçons en vidéo','https://www.lumni.fr/'],ALLO=['Alloprof — explications et vidéos','https://www.alloprof.qc.ca/'];
+  var SITES={'Matematik':[['Khan Academy — Mathématiques','https://fr.khanacademy.org/math'],LUMNI,ALLO],'Français / Communication française':[LUMNI,ALLO],'Syans eksperimantal':[['Khan Academy — Sciences','https://fr.khanacademy.org/science'],LUMNI,ALLO],'Syans sosyal':[LUMNI,ALLO],'Anglais':[['British Council — LearnEnglish Kids','https://learnenglishkids.britishcouncil.org/'],['BBC Bitesize','https://www.bbc.co.uk/bitesize']],'EPS — Éducation Physique et Sportive':[LUMNI],'EEA':[LUMNI],'EDAC — Éducation à la Citoyenneté':[LUMNI],'Informatique':[['Khan Academy — Informatique','https://fr.khanacademy.org/computing'],LUMNI]};
+  function sites(){var out=[],subs=[],pri=GRADES.filter(function(g){return g!=='Preskolè';});GRADES.forEach(function(g){gradeSubjects(g).forEach(function(m){if(subs.indexOf(m)<0)subs.push(m);});});subs.forEach(function(m){var set=m==='Informatique'?['7e AF','8e AF','9e AF']:pri,lab=m==='Informatique'?'7e–9e AF':'1e–9e AF',kw=KEY[m]||m;out.push({id:'site-'+out.length,grade:lab,gradeSet:set,allGrades:true,subject:m,title:'Tout videyo '+m+' (rechèch YouTube)',query:kw,url:'https://www.youtube.com/results?search_query='+encodeURIComponent('cours leçon '+kw+' enseignement fondamental Haïti'),source:'Recherche YouTube',custom:false});(SITES[m]||[]).forEach(function(x){out.push({id:'site-'+out.length,grade:lab,gradeSet:set,allGrades:true,subject:m,title:x[0],query:x[0],url:x[1],source:'Sit edikatif gratis',site:true,custom:false});});});return out;}
+  function getCustom(){if(!window.STATE)return [];if(!Array.isArray(STATE.videoLibraryLinks))STATE.videoLibraryLinks=[];return STATE.videoLibraryLinks;}
+  function isAdmin(){try{return typeof window.isLibraryOwner==='function'?!!window.isLibraryOwner():false;}catch(e){return false;}}
+  function setupSelects(){var grade=document.getElementById('enssVideoClasse'),newGrade=document.getElementById('enssVideoNewClass');if(!grade||!newGrade)return;var opts='<option value="__ALL__">Tout klas yo</option>'+GRADES.map(function(g){return '<option value="'+esc(g)+'">'+esc(g)+'</option>';}).join('');var old=grade.value;grade.innerHTML=opts;if(old&&Array.from(grade.options).some(function(o){return o.value===old;}))grade.value=old;var opts2=GRADES.map(function(g){return '<option value="'+esc(g)+'">'+esc(g)+'</option>';}).join('');newGrade.innerHTML=opts2;var subject=document.getElementById('enssVideoMatiere'),selected=subject.value;var all=[];GRADES.forEach(function(g){gradeSubjects(g).forEach(function(m){if(!all.includes(m))all.push(m);});});subject.innerHTML='<option value="">Tout matyè yo</option>'+all.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join('');if(selected&&all.includes(selected))subject.value=selected;}
+  function render(){var box=document.getElementById('enssVideoLibraryCards');if(!box)return;setupSelects();var grade=document.getElementById('enssVideoClasse').value||'__ALL__';var subject=document.getElementById('enssVideoMatiere').value||'';var term=(document.getElementById('enssVideoSearch').value||'').trim().toLowerCase();var items=getCustom().map(function(v,i){return Object.assign({id:'custom-'+i,source:'Lyen administratè',custom:true},v);}).concat(sites()).concat(allCatalogue());items=items.filter(function(v){return (grade==='__ALL__'||(v.allGrades?v.gradeSet.indexOf(grade)>=0:v.grade===grade))&&(!subject||v.subject===subject)&&(!term||[v.title,v.grade,v.subject,v.query,v.url].join(' ').toLowerCase().includes(term));});var count=document.getElementById('enssVideoLibraryCount');if(count)count.textContent=items.length+' resous / sijè rechèch disponib. Klike “Chèche videyo” pou ouvri rezilta yo.';var max=window.enssVideoShowAll?items.length:60;var shown=items.slice(0,max);if(!shown.length){box.innerHTML='<div class="card"><p>Pa gen rezilta pou filtè sa yo. Eseye yon lòt mo oswa chwazi “Tout matyè yo”.</p></div>';return;}box.innerHTML=shown.map(function(v){var url=String(v.url||'');if(!/^https?:\/\//i.test(url))url='#';return '<article class="enss-video-card"><div class="video-meta">'+esc(v.grade)+' · '+esc(v.subject)+' · '+esc(v.source||'YouTube')+'</div><h4>'+esc(v.title)+'</h4>'+(v.custom&&isAdmin()?'<button class="video-custom-delete" title="Retire lyen sa a" onclick="removeENSSVideoLink('+Number(String(v.id).replace('custom-',''))+')">Retire</button>':'')+'<div style="font-size:.66rem;color:var(--text-light);margin-bottom:.55rem;">'+(v.custom?'Lyen videyo/resous ou ajoute.':(v.site?'Sit edikatif gratis pou matyè sa a.':'Sijè pou chèche videyo ki koresponn ak nivo a.'))+'</div><a class="video-open" href="'+esc(url)+'" target="_blank" rel="noopener">'+(v.site?'🌐 Louvri sit la':'▶ Chèche videyo')+'</a></article>';}).join('')+(items.length>max?'<div style="grid-column:1/-1;text-align:center;"><button class="btn btn-primary" onclick="enssVideoShowAll=true;renderENSSVideoLibrary()">Montre tout '+items.length+' rezilta yo</button></div>':'');var admin=document.getElementById('enssVideoAdminBox');if(admin)admin.style.display=isAdmin()?'block':'none';}
+  window.enssVideoShowAll=false;
+  window.renderENSSVideoLibrary=function(){try{render();}catch(e){console.error('ENSS Video Library',e);var b=document.getElementById('enssVideoLibraryCards');if(b)b.innerHTML='<div class="card">Bibliyotèk videyo a pa t kapab chaje. Rafrechi paj la.</div>';}};
+  window.addENSSVideoLink=function(){var status=document.getElementById('enssVideoAdminStatus');if(!isAdmin()){if(status)status.textContent='Aksè administratè sèlman.';return;}var title=(document.getElementById('enssVideoNewTitle').value||'').trim(),url=(document.getElementById('enssVideoNewUrl').value||'').trim(),grade=document.getElementById('enssVideoNewClass').value,subject=(document.getElementById('enssVideoNewSubject').value||'').trim();if(!title||!url||!subject){if(status)status.textContent='Ranpli tit, URL ak matyè a.';return;}try{var u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw new Error();}catch(e){if(status)status.textContent='URL la pa valab.';return;}if(!window.STATE)return;if(!Array.isArray(STATE.videoLibraryLinks))STATE.videoLibraryLinks=[];if(STATE.videoLibraryLinks.some(function(x){return String(x.url).trim()===url;})){if(status)status.textContent='Lyen sa a deja anrejistre.';return;}STATE.videoLibraryLinks.push({title:title,url:url,grade:grade,subject:subject,source:'Lyen administratè'});try{if(typeof window.saveState==='function')window.saveState();}catch(e){console.warn('ENSS video save:',e);}document.getElementById('enssVideoNewTitle').value='';document.getElementById('enssVideoNewUrl').value='';document.getElementById('enssVideoNewSubject').value='';if(status)status.textContent='Lyen an ajoute sou aparèy sa a; verifye senkronizasyon santral la pou pataj sou lòt aparèy.';window.enssVideoShowAll=false;render();};
+  window.removeENSSVideoLink=function(index){if(!isAdmin())return;var a=getCustom();if(!Number.isInteger(index)||index<0||index>=a.length)return;if(!confirm('Retire lyen videyo sa a nan katalòg ENSS la?'))return;a.splice(index,1);try{if(typeof window.saveState==='function')window.saveState();}catch(e){}render();};
+  document.addEventListener('DOMContentLoaded',function(){var grade=document.getElementById('enssVideoClasse');if(grade)window.renderENSSVideoLibrary();});
 })();
 </script>
 
