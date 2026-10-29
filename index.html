@@ -410,6 +410,13 @@
         .enss-video-card .video-open:hover{background:#6d28d9}
         .enss-video-card .video-custom-delete{float:right;border:0;background:#fee2e2;color:#991b1b;border-radius:5px;padding:.2rem .35rem;cursor:pointer}
         @media(max-width:600px){.enss-video-grid{grid-template-columns:1fr}.video-library-resource-links a{flex:1 1 100%}}
+
+/* V123: Sekirite sou yon sèl liy tankou Baz Done Santral, anlè seksyon an. */
+#page-parametres #enssSecurityAccordion>summary::-webkit-details-marker{display:none;}
+#page-parametres #enssSecurityAccordion>summary::after{content:"＋";margin-left:auto;color:#475569;font-size:.9rem;}
+#page-parametres #enssSecurityAccordion[open]>summary::after{content:"−";}
+#page-parametres #enssSecurityAccordion[open]>summary{margin-bottom:.65rem;padding-bottom:.45rem;border-bottom:1px solid #e2e8f0;}
+#page-parametres #enssSecurityAccordion .security-block{min-width:0;}
 </style>
 <style id="frais-harmonisation-v2">
 .fee-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:.55rem}.fee-summary-card{background:#fff;border:1px solid #e4e9ef;border-radius:12px;padding:.55rem .7rem;box-shadow:0 5px 16px rgba(15,35,70,.06)}.fee-summary-card .fee-name{font-weight:900;font-size:.75rem;margin-bottom:.3rem}.fee-lines{display:flex;flex-direction:column;gap:.2rem;font-size:.68rem}.fee-forecast{background:#fff3a6;padding:.2rem .35rem;border-radius:5px}.fee-paid{background:#c9f3d3;padding:.2rem .35rem;border-radius:5px}.fee-total-card{grid-column:1/-1}.fee-cell{vertical-align:middle;text-align:center;font-weight:800;min-width:105px}.fee-forecast-cell{background:#fff8c9!important}.fee-paid-cell{background:#d9f7df!important}.fee-check{display:inline-flex;align-items:center;gap:.2rem;margin-top:.2rem;padding:.12rem .3rem;border-radius:5px;background:#fff;border:1px solid #cfd8e3;font-size:.58rem;font-weight:800;cursor:pointer}.fee-paid-cell .fee-check{background:#b9ebc4;border-color:#72c982;color:#155724}.fee-check input{accent-color:#218838}.fee-total{font-weight:900;text-align:center}.forecast-total{background:#fff3a6!important}.paid-total{background:#c9f3d3!important}.balance-total{background:#eef2f6!important}@media(max-width:900px){.fee-summary-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.fee-summary-grid{grid-template-columns:1fr}}
@@ -471,6 +478,17 @@
 }
 </style>
 
+
+<style id="enss-v122-security-layout">
+#page-parametres .security-block .table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#page-parametres .security-block table{width:100%;min-width:390px;table-layout:auto;border-collapse:collapse;}
+#page-parametres .security-block th,#page-parametres .security-block td{white-space:nowrap;vertical-align:middle;padding:.18rem .28rem;line-height:1.25;}
+#page-parametres .security-block td:nth-child(1){min-width:125px;white-space:normal;overflow-wrap:anywhere;}
+#page-parametres .security-block td:nth-child(2){min-width:100px;max-width:240px;white-space:nowrap;overflow-x:auto;}
+#page-parametres .security-block td:nth-child(3){min-width:105px;}
+#page-parametres .security-block button{white-space:nowrap;}
+#page-parametres #enssCentralDbPanel input{max-width:100%;box-sizing:border-box;}
+</style>
 </head>
 <body>
 
@@ -531,7 +549,7 @@
                     <button class="btn btn-primary" onclick="inlineLogin()" style="padding:0.25rem 0.6rem;font-size:0.75rem;">🔐 Konekte</button>
                     <span id="inlineLoginMsg" style="font-size:0.7rem;color:#e74c3c;"></span>
                 </div>
-                <!-- V119: retire bwat imèl/OTP nan Akèy; jesyon verifikasyon rete nan Paramètres. -->
+                <!-- V127: koneksyon santral itilize imèl ak modpas kont administratè Supabase. -->
                 <!-- VERIFIKASYON ELÈV -->
                 <div class="card" id="verificationCard" style="padding:0.5rem 0.7rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
                     <span style="font-size:0.75rem;font-weight:600;">🔎 Verifikasyon:</span>
@@ -1901,7 +1919,7 @@
                     <!-- ===== CARTE SÉCURITÉ AVEC MENU CACHÉ ET CACHE NOTES ===== -->
                     <div class="card" style="padding:0.8rem;">
                         <h4 data-t="security" style="font-size:0.85rem;">🔒 Sécurité</h4>
-                        <p class="text-sm text-muted" style="font-size:0.65rem;">Kont yo klase an 4 blòk pou fè jesyon an pi fasil.</p>
+                        <p class="text-sm text-muted" style="font-size:0.65rem;">Kont yo klase an 4 blòk pou fè jesyon an pi fasil. Nan tablo elèv yo, non ak prenon parèt apre mo de pase a.</p>
                         <p class="text-sm text-muted" style="font-size:0.65rem;">🔑 <strong>Profil klas/matyè predefini:</strong> Préscolaire 1–3 ak 1ère–6ème AF gen TLM (Toutes Les Matières). 7ème–9ème AF gen yon profil pa klas ak pa matyè, selon kòd matyè a. Tout profil ak modpas sa yo rete modifyab pa administratè a.</p>
                         <div class="security-block direction-security-card" style="margin-bottom:0.6rem;border:1px solid #cbdcf5;border-radius:10px;padding:0.55rem;background:linear-gradient(135deg,#f5f9ff,#ffffff);">
                             <h5 style="font-size:0.78rem;margin:0 0 0.25rem;">🏛️ Accès sécurisé — Direction</h5>
@@ -1930,7 +1948,7 @@
                         </div>
                         <div class="security-block" style="margin-bottom:0.6rem;border:1px solid var(--border);border-radius:8px;padding:0.4rem;">
                             <h5 style="font-size:0.75rem;margin:0 0 0.2rem 0;">🎓 4. Tout Élèves</h5>
-                            <div class="table-wrap scroll-horizontal scroll-vertical" style="max-height:220px;"><table><thead><tr><th style="font-size:0.6rem;">Profil</th><th style="font-size:0.6rem;">Mot de passe</th><th style="font-size:0.6rem;">Actions</th></tr></thead><tbody id="securiteUsersBody_eleve"></tbody></table></div>
+                            <div class="table-wrap scroll-horizontal scroll-vertical" style="max-height:220px;"><table><thead><tr><th style="font-size:0.6rem;">Profil</th><th style="font-size:0.6rem;">Mot de passe</th><th style="font-size:0.6rem;">Nom et prénom de l’élève</th><th style="font-size:0.6rem;">Actions</th></tr></thead><tbody id="securiteUsersBody_eleve"></tbody></table></div>
                         </div>
                         <div class="mt-1 flex gap-1" style="flex-wrap:wrap;">
                             <input type="text" id="secNewUser" placeholder="Nouveau profil" style="width:auto;flex:1;padding:0.2rem 0.4rem;font-size:0.75rem;" />
@@ -2575,7 +2593,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V121-EGRESS-GZIP-READ-NO-RESET';
+        var ENSS_APP_VERSION = 'V126-ADMIN-EMAIL-PASSWORD-SECURITY-ACCESS';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, lastRemoteRevision: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2619,7 +2637,7 @@
             var school=document.getElementById('enssCentralSchoolId'); if(school && school.value!==c.schoolId) school.value=c.schoolId;
             if (ENSS_CENTRAL.session) centralStatus('Sesyon Supabase aktif; aksè lekòl la dwe verifye.', null);
             else if (!c.url || !c.key) centralStatus('Baz santral la poko konfigire.', null);
-            else centralStatus('Konfigirasyon an pare, men done santral yo poko verifye. Konekte ak yon kont Supabase otorize.', null);
+            else centralStatus('Konfigirasyon an pare; antre imèl ak modpas kont administratè Supabase ki deja otorize a pou konekte.', null);
         }
         function ensureCentralClient() {
             var c=getCentralConfig();
@@ -2685,63 +2703,41 @@
             return Promise.race([Promise.resolve(promise),timeoutPromise]).finally(function(){clearTimeout(timeoutId);});
         }
         async function centralSignIn(){
-            // V119: bwat imel/OTP pa parèt nan Akèy; verifikasyon imel la rete nan Paramètres.
-            return centralSendEmailVerification();
-        }
-        async function centralCreateAccount(){
-            // V118: pa kreye modpas kont imel nan aplikasyon an; voye kòd OTP olye.
-            return centralSendEmailVerification();
-        }
-
-        async function centralSendEmailVerification(){
-            var email=(((document.getElementById('enssHomeEmail')||{}).value)||((document.getElementById('enssCentralEmail')||{}).value)||'').trim().toLowerCase();
-            var msg=(((document.getElementById('enssHomeEmail')||{}).value)?document.getElementById('enssHomeEmailMsg'):document.getElementById('enssCentralAuthMsg'))||document.getElementById('enssHomeEmailMsg');
-            if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Antre yon adrès imèl ki valab.');return false;}
+            var email=((document.getElementById('enssCentralEmail')||{}).value||'').trim().toLowerCase();
+            var password=((document.getElementById('enssCentralPassword')||{}).value||'');
+            var msg=document.getElementById('enssCentralAuthMsg');
+            if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Antre imèl kont administratè Supabase ENSS la.');return false;}
+            if(!password){alert('Antre modpas kont Supabase administratè a.');return false;}
             try{
                 var client=ensureCentralClient();
-                // Supabase Auth voye OTP pa imel; modpas imel la pa janm mande.
-                var r=await client.auth.signInWithOtp({email:email,options:{shouldCreateUser:true}});
+                if(!client) throw new Error('Konfigirasyon Supabase ENSS la pa disponib.');
+                var r=await client.auth.signInWithPassword({email:email,password:password});
                 if(r.error) throw r.error;
-                if(msg) msg.textContent='✓ Demann kòd la voye bay '+email+'. Tcheke bwat resepsyon ak Spam, epi antre kòd la anba a.';
-                alert('Nou voye demann kòd verifikasyon an. Antre kòd ki nan imèl la nan espas ki anba a.');
-                return true;
-            }catch(e){
-                var message=(e&&e.message)||String(e||'Erè enkoni');
-                if(msg) msg.textContent='Voye kòd la echwe: '+message;
-                alert('Nou pa t kapab voye kòd la: '+message);
-                return false;
-            }
-        }
-
-        async function centralVerifyEmailCode(){
-            var email=(((document.getElementById('enssHomeEmail')||{}).value)||((document.getElementById('enssCentralEmail')||{}).value)||'').trim().toLowerCase();
-            var token=(((document.getElementById('enssHomeEmailOtp')||{}).value)||((document.getElementById('enssCentralOtp')||{}).value)||'').trim().replace(/\s+/g,'');
-            var msg=(((document.getElementById('enssHomeEmail')||{}).value)?document.getElementById('enssHomeEmailMsg'):document.getElementById('enssCentralAuthMsg'))||document.getElementById('enssHomeEmailMsg');
-            if(!email||!token){alert('Antre imèl ou ak kòd verifikasyon ou resevwa a.');return false;}
-            try{
-                var client=ensureCentralClient();
-                var r=await client.auth.verifyOtp({email:email,token:token,type:'email'});
-                if(r.error) throw r.error;
-                if(!r.data||!r.data.session) throw new Error('Supabase pa retounen yon sesyon verifye. Verifye modèl imel OTP a nan Supabase Auth (li dwe montre {{ .Token }}).');
+                if(!r.data||!r.data.session) throw new Error('Supabase pa retounen yon sesyon. Verifye imèl ak modpas administratè a.');
                 ENSS_CENTRAL.session=r.data.session;
-                var otpEl=document.getElementById('enssHomeEmailOtp')||document.getElementById('enssCentralOtp'); if(otpEl) otpEl.value='';
-                if(msg) msg.textContent='✓ Imèl verifye. Kounye a antre kòd pwofil ENSS ou ak modpas pwofil ENSS ou nan seksyon asosiyasyon an. Pa antre modpas imel la.';
-                centralStatus('✓ Imèl verifye; sesyon Supabase aktive. Fini asosiyasyon pwofil ENSS la.',true);
-                var linkCode=document.getElementById('enssLinkProfileCode');
-                if(linkCode){ linkCode.focus(); try{linkCode.scrollIntoView({behavior:'smooth',block:'center'});}catch(scrollError){} }
-                alert('✓ Imèl verifye. Dènye etap la: antre kòd pwofil ENSS ou ak modpas pwofil ENSS ou. Modpas imel ou pa nesesè.');
-                return true;
+                var passEl=document.getElementById('enssCentralPassword'); if(passEl) passEl.value='';
+                if(msg) msg.textContent='✓ Kont administratè Supabase la konekte. Aplikasyon an ap verifye dwa aksè ENSS yo.';
+                centralStatus('✓ Sesyon Supabase ouvè; verifikasyon dwa aksè ENSS ap fèt…',null);
+                var pulled=await centralPullState(true);
+                if(pulled){
+                    centralStatus('✓ Administratè Supabase la konekte epi done santral ENSS yo chaje.',true);
+                    if(msg) msg.textContent='✓ Koneksyon administratè a reyisi. Ou kapab jere pwofil yo ak dwa aksè yo nan 🔒 Sekirite.';
+                }else{
+                    centralStatus('Sesyon an ouvè, men dwa aksè lekòl la poko konfime. Verifye school_members/RLS pou kont sa a.',false);
+                    if(msg) msg.textContent='Sesyon Supabase la ouvè, men aplikasyon an poko konfime aksè ENSS. Pa bay lòt pwofil yo aksè san verifikasyon RLS.';
+                }
+                return !!pulled;
             }catch(e){
                 var message=(e&&e.message)||String(e||'Erè enkoni');
-                if(msg) msg.textContent='Kòd la pa valide: '+message;
-                alert('Verifikasyon kòd la echwe: '+message+'\nSi imèl la montre sèlman yon lyen, modèl OTP nan Supabase Auth dwe mete {{ .Token }} pou afiche kòd la.');
+                if(msg) msg.textContent='Koneksyon an echwe: '+message;
+                centralStatus('Koneksyon administratè Supabase la echwe: '+message,false);
+                alert('Koneksyon Supabase la echwe: '+message+'\nVerifye imèl/modpas la epi asire kont lan gen otorizasyon ENSS.');
                 return false;
             }
         }
-
         async function centralCreateAccount(){
-            // V118: koneksyon fèt ak kòd OTP; aplikasyon an pa mande modpas kont imel.
-            return centralSendEmailVerification();
+            alert('Pa kreye kont Supabase nan ekran koneksyon an. Administratè a dwe konekte ak kont ki deja otorize a.');
+            return false;
         }
 
         async function centralProvisionProfile(){
@@ -3449,6 +3445,8 @@
 
         function saveState() {
             try {
+                // Mete ajou lyen kont elèv yo anvan chak sove: NISU/modpas/non/class pwofil la swiv dosye elèv la.
+                try { syncStudentAccounts(); } catch (studentSyncError) { console.warn('Student profile sync:', studentSyncError); }
                 markStateVersion();
                 var raw = JSON.stringify(STATE);
                 // Une copie de secours précède toujours l'écriture principale.
@@ -4093,23 +4091,54 @@
         }
 
         function syncStudentAccounts() {
-            if (!STATE.students) return;
+            if (!STATE || !Array.isArray(STATE.students)) return;
+            if (!STATE.securite || !Array.isArray(STATE.securite.users)) {
+                if (!STATE.securite) STATE.securite = {users:[],permissions:{}};
+                if (!Array.isArray(STATE.securite.users)) STATE.securite.users = [];
+            }
+            var users = STATE.securite.users;
+            // ID entèn stable: li pa chanje lè administratè a korije NISU a.
             STATE.students.forEach(function(s) {
-                if (!s.nisu) return;
+                if (!s || !s.nisu) return;
+                if (!s._enssStudentId) s._enssStudentId = 'enss-student-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
                 var profil = getStudentLoginProfile(s);
                 var mdp = String(s.nisu);
-                var existing = STATE.securite.users.find(function(u) { return u.role === 'eleve' && u.studentNisu === s.nisu; });
+                var existing = users.find(function(u) {
+                    return u && u.role === 'eleve' && (
+                        (u.studentId && String(u.studentId) === String(s._enssStudentId)) ||
+                        (!u.studentId && String(u.studentNisu || u.nisu || '') === String(s.nisu))
+                    );
+                });
+                if (!existing) {
+                    // Migrasyon san pèt: eseye mare ansyen kont ki gen menm non/prenon/ane,
+                    // men sèlman lè gen yon sèl kandida san lyen ki klè.
+                    var candidates = users.filter(function(u) {
+                        if (!u || u.role !== 'eleve' || u.studentId) return false;
+                        var oldStudent = STATE.students.find(function(st) {
+                            return st && String(st.nisu || '') === String(u.studentNisu || u.nisu || '');
+                        });
+                        return oldStudent && oldStudent._enssStudentId === s._enssStudentId;
+                    });
+                    if (candidates.length === 1) existing = candidates[0];
+                }
                 if (existing) {
+                    existing.studentId = s._enssStudentId;
+                    existing.studentNisu = String(s.nisu);
+                    existing.nisu = String(s.nisu);
                     existing.mdp = mdp;
                     existing.profil = profil;
+                    existing.role = 'eleve';
                 } else {
-                    var byProfile = STATE.securite.users.find(function(u) { return u.profil === profil; });
-                    if (byProfile && !byProfile.studentNisu) {
-                        byProfile.studentNisu = s.nisu;
+                    // Pa pran yon kont ki deja mare ak yon lòt NISU pou evite melanje elèv yo.
+                    var byProfile = users.find(function(u) { return u && u.profil === profil && u.role === 'eleve' && !u.studentNisu && !u.studentId; });
+                    if (byProfile) {
+                        byProfile.studentId = s._enssStudentId;
+                        byProfile.studentNisu = String(s.nisu);
+                        byProfile.nisu = String(s.nisu);
                         byProfile.role = 'eleve';
                         byProfile.mdp = mdp;
                     } else {
-                        STATE.securite.users.push({ profil: profil, mdp: mdp, role: 'eleve', studentNisu: s.nisu });
+                        users.push({ profil: profil, mdp: mdp, role: 'eleve', studentNisu: String(s.nisu), nisu: String(s.nisu), studentId: s._enssStudentId });
                     }
                 }
             });
@@ -7198,6 +7227,7 @@
             var isEdit = !!student;
             var title = isEdit ? '✏️ Modifier Élève' : '➕ Ajouter Élève';
             var s = student || {};
+            var originalNisu = String(s.nisu || '');
             var role = getRole();
             var classOptions = ALL_CLASSES;
             if (role === 'enseignant' || role === 'Enseignant' || role === 'enseignant(e)') {
@@ -7207,7 +7237,7 @@
                 }
             }
             var html = "\n            <div class=\"form-row\">\n                <div class=\"form-group\"><label style=\"font-size:0.75rem;\">NISU *</label><input type=\"text\" id=\"fNisu\" value=\"" +
-                (s.nisu || '') + "\" " + (isEdit ? 'readonly' : '') +
+                (s.nisu || '') + "\" " + (isEdit ? '' : '') +
                 " placeholder=\"NISU...\" style=\"padding:0.2rem 0.4rem;font-size:0.8rem;\" /></div>\n                <div class=\"form-group\"><label style=\"font-size:0.75rem;\">Nom</label><input type=\"text\" id=\"fNom\" value=\"" +
                 (s.nom || '') + "\" style=\"padding:0.2rem 0.4rem;font-size:0.8rem;\" /></div>\n                <div class=\"form-group\"><label style=\"font-size:0.75rem;\">Pr\xE9nom</label><input type=\"text\" id=\"fPrenom\" value=\"" +
                 (s.prenom || '') + "\" style=\"padding:0.2rem 0.4rem;font-size:0.8rem;\" /></div>\n                <div class=\"form-group\"><label style=\"font-size:0.75rem;\">Classe</label><select id=\"fClasse\" style=\"padding:0.2rem 0.4rem;font-size:0.8rem;\">" +
@@ -7251,11 +7281,11 @@
                     alert('Nom est obligatoire.');
                     return;
                 }
+                if (STATE.students.some(function(st) { return st && String(st.nisu || '') === nisu && st._YEAR === getYear() && (!isEdit || st !== student); })) {
+                    alert('Cet NISU existe déjà pour cette année.');
+                    return;
+                }
                 if (!isEdit) {
-                    if (STATE.students.find(function(s) { return s.nisu === nisu && s._YEAR === getYear(); })) {
-                        alert('Cet NISU existe déjà pour cette année.');
-                        return;
-                    }
                     STATE.students.push({
                         nisu: nisu,
                         nom: nom,
@@ -7276,8 +7306,9 @@
                         decision: ''
                     });
                 } else {
-                    var target = STATE.students.find(function(s) { return s.nisu === nisu; });
+                    var target = STATE.students.find(function(s) { return s === student; }) || STATE.students.find(function(s) { return String(s.nisu || '') === originalNisu && String(s._YEAR || '') === String(getYear() || ''); }) || STATE.students.find(function(s) { return String(s.nisu || '') === originalNisu; });
                     if (target) {
+                        target.nisu = nisu;
                         target.nom = nom;
                         target.prenom = prenom;
                         target.classe = classe;
@@ -11693,6 +11724,12 @@
             }
             var isTeacher = (u.role === 'enseignant' || u.role === 'Enseignant' || u.role === 'enseignant(e)');
             var isStudent = u.role === 'eleve';
+            var linkedStudent = null;
+            if (isStudent) {
+                var studentNisu = String(u.studentNisu || u.nisu || '');
+                linkedStudent = (STATE.students || []).find(function(st) { return studentNisu && String(st.nisu || '') === studentNisu; }) || null;
+            }
+            var studentFullName = linkedStudent ? [linkedStudent.nom || '', linkedStudent.prenom || ''].filter(Boolean).join(' ').trim() : '';
             var linkedPersonnel = resolveLinkedPersonnel(u);
             var linkedFirstName = linkedPersonnel ? getPersonnelDisplayFirstName(linkedPersonnel) : '';
             var genBtn = isTeacher ? ("<button onclick=\"applyGeneratedPassword(" + i +
@@ -11705,7 +11742,9 @@
                     .personnelId ? ' 🔗' : '') + (linkedFirstName ? ' — ' + escapeHtml(linkedFirstName) : '') + "</span></td>\n            <td style=\"font-size:0.6rem;\">\n                " +
                 pwdDisplay +
                 (isStudent ? "<br><span class=\"text-muted\" style=\"font-size:0.5rem;\">NISU = mot de passe</span>" : "") +
-                "\n            </td>\n            <td style=\"font-size:0.6rem;\">\n                " + editBtn + " " +
+                "\n            </td>" +
+                (isStudent ? "\n            <td style=\"font-size:0.6rem;min-width:120px;\">" + (studentFullName ? escapeHtml(studentFullName) : '<span class=\"text-muted\">NISU pa lye ak yon elèv</span>') + "</td>" : "") +
+                "\n            <td style=\"font-size:0.6rem;\">\n                " + editBtn + " " +
                 "<button onclick=\"togglePasswordVisibility()\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDC41</button>\n                <button onclick=\"changeUserPassword(" +
                 i +
                 ")\" style=\"padding:0.05rem 0.2rem;font-size:0.5rem;\">\uD83D\uDD11</button>" + genBtn +
@@ -11722,6 +11761,8 @@
             });
             var emptyRow =
                 '<tr><td colspan="3" class="text-center text-muted" style="font-size:0.7rem;">Okenn kont</td></tr>';
+            var emptyStudentRow =
+                '<tr><td colspan="4" class="text-center text-muted" style="font-size:0.7rem;">Okenn kont elèv</td></tr>';
             var bodyAdmin = document.getElementById('securiteUsersBody_admin');
             if (bodyAdmin) bodyAdmin.innerHTML = groups.admin.join('') || emptyRow;
             var body16 = document.getElementById('securiteUsersBody_1_6');
@@ -11729,7 +11770,7 @@
             var body79 = document.getElementById('securiteUsersBody_7_9');
             if (body79) body79.innerHTML = groups['7_9'].join('') || emptyRow;
             var bodyEleve = document.getElementById('securiteUsersBody_eleve');
-            if (bodyEleve) bodyEleve.innerHTML = groups.eleve.join('') || emptyRow;
+            if (bodyEleve) bodyEleve.innerHTML = groups.eleve.join('') || emptyStudentRow;
             var perSel = document.getElementById('secNewPersonnel');
             if (perSel) {
                 var teachers = (STATE.personnel || []).filter(function(p) {
@@ -16491,6 +16532,36 @@
 <script>
 (function(){
   'use strict';
+  function ensureSecuritySection(page, centralPanel){
+    if(!page) return;
+    var existing=document.getElementById('enssSecurityAccordion');
+    if(!existing){
+      var heading=page.querySelector('h4[data-t="security"]');
+      var oldCard=heading && heading.closest('.card');
+      if(oldCard){
+        var details=document.createElement('details');
+        details.id='enssSecurityAccordion';
+        details.className='card';
+        details.style.cssText='padding:.65rem .8rem;margin:.6rem 0;border-left:4px solid #64748b;';
+        var summary=document.createElement('summary');
+        summary.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;cursor:pointer;list-style:none;font-size:.9rem;font-weight:700;';
+        summary.innerHTML='<span>🔒 Sekirite</span><span style="font-size:.68rem;font-weight:500;color:#64748b;">Pwofil, modpas ak pèmisyon · Klike pou ouvri/fèmen</span>';
+        details.appendChild(summary);
+        Array.from(oldCard.children).forEach(function(child){ if(child!==heading) details.appendChild(child); });
+        oldCard.remove();
+        details.open=false;
+        existing=details;
+      }
+    }
+    if(existing){
+      if(centralPanel && centralPanel.parentNode===page){
+        if(existing.parentNode!==page || existing.nextElementSibling!==centralPanel){
+          if(existing.parentNode) existing.parentNode.removeChild(existing);
+          centralPanel.insertAdjacentElement('beforebegin',existing);
+        }
+      } else if(existing.parentNode!==page){ page.insertBefore(existing,page.firstChild); }
+    }
+  }
   function ensureCentralUi(){
     var page=document.getElementById('page-parametres'); if(!page) return;
     var box=document.getElementById('enssCentralDbPanel');
@@ -16501,17 +16572,17 @@
        +'<div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center;flex-wrap:wrap;">'
        +'<h4 style="margin:0;font-size:.9rem;">☁️ Baz Done Santral ENSS</h4>'
        +'<span id="enssCentralStatus" style="font-size:.68rem;color:#475569;">Baz santral la poko konfigire.</span></div>'
-       +'<p style="font-size:.68rem;color:#475569;margin:.35rem 0;">Supabase se sous done santral la. Vèsyon lokal la rete kòm backup. Pou itilizatè yo, kòmanse ak kòd verifikasyon imèl la, epi mare kòd pwofil ENSS la. Pa itilize modpas imel pèsonn, epi pa mete service_role key la isit la.</p>'
+       +'<p style="font-size:.68rem;color:#475569;margin:.35rem 0;">Supabase se sous done santral ENSS la; kopi lokal la rete kòm sekou. Administratè a konekte isit la ak imèl ak modpas kont Supabase li deja genyen. Apre koneksyon an, li jere pwofil ENSS yo ak otorizasyon yo nan Sekirite. Pa mete modpas kont lan nan fichye a, epi pa mete service_role key la nan navigatè a.</p>'
        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.35rem;">'
        +'<input id="enssCentralUrl" placeholder="Supabase Project URL" style="padding:.28rem .4rem;font-size:.7rem;">'
        +'<input id="enssCentralKey" placeholder="Publishable key" style="padding:.28rem .4rem;font-size:.7rem;">'
        +'<input id="enssCentralSchoolId" placeholder="ID lekòl la" style="padding:.28rem .4rem;font-size:.7rem;">'
        +'</div>'
        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.35rem;margin-top:.35rem;">'
-       +'<input id="enssCentralEmail" type="email" autocomplete="email" placeholder="Adrès imèl pèsonèl ou" style="padding:.28rem .4rem;font-size:.7rem;">'
-       +'<input id="enssCentralOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Kòd verifikasyon imèl" style="padding:.28rem .4rem;font-size:.7rem;">'
+       +'<input id="enssCentralEmail" type="email" autocomplete="username" placeholder="Imèl kont administratè Supabase" style="padding:.35rem .4rem;font-size:.72rem;">'
+       +'<div style="display:flex;gap:.25rem;align-items:center;min-width:0;"><input id="enssCentralPassword" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" placeholder="Modpas kont Supabase" style="padding:.35rem .4rem;font-size:.72rem;flex:1;min-width:0;"><button type="button" class="btn" onclick="(function(){var e=document.getElementById(\'enssCentralPassword\');if(e)e.type=e.type===\'password\'?\'text\':\'password\';})()" title="Montre/kache modpas la" style="padding:.3rem .45rem;">👁️</button></div>'
        +'</div>'
-       +'<p id="enssCentralAuthMsg" style="font-size:.62rem;color:#475569;margin:.3rem 0 0;">ENSS pa mande modpas kont imel ou. Voye kòd verifikasyon an, epi antre kòd la pou konekte.</p>'
+       +'<p id="enssCentralAuthMsg" style="font-size:.62rem;color:#475569;margin:.3rem 0 0;">Konekte ak kont administratè Supabase ENSS ki deja otorize a. Modpas la sèvi sèlman pou koneksyon an; aplikasyon an pa sove li nan konfigirasyon an.</p>'
        +'<div style="margin-top:.55rem;padding:.55rem;border:1px solid #cbd5e1;border-radius:.5rem;background:#f8fafc;">'
        +'<strong style="display:block;font-size:.74rem;margin-bottom:.35rem;">👤 Kreye kont epi asosye yon pwofil ENSS</strong>'
        +'<p style="font-size:.64rem;color:#475569;margin:.2rem 0 .4rem;">Itilize yon imèl reyèl moun nan kapab louvri. Sistèm nan voye envitasyon pou li kreye pwòp modpas li; li pa montre ni estoke modpas klè.</p>'
@@ -16521,26 +16592,26 @@
        +'<select id="enssProvisionRole" style="padding:.35rem;font-size:.72rem;"><option value="teacher">Anseyan</option><option value="secretary">Sekretè</option><option value="direction">Direksyon</option><option value="student">Elèv</option><option value="parent">Paran</option></select>'
        +'</div><button type="button" class="btn btn-primary" onclick="centralProvisionProfile()" style="margin-top:.4rem;padding:.3rem .6rem;font-size:.7rem;">✉️ Envite epi asosye pwofil la</button></div>'
        +'<div style="margin-top:.55rem;padding:.55rem;border:1px solid #93c5fd;border-radius:.5rem;background:#eff6ff;">'
-       +'<strong style="display:block;font-size:.74rem;margin-bottom:.3rem;">🔗 Premye asosiyasyon imèl mwen / reprann aksè</strong>'
-       +'<p style="font-size:.64rem;color:#334155;margin:.2rem 0 .4rem;">Voye kòd la nan seksyon verifikasyon imèl la, valide kòd la, epi antre kòd pwofil ENSS ou ak modpas pwofil ou pou asosye yo. Modpas pwofil la verifye sou sèvè a; li pa sove kòm modpas kont imèl la.</p>'
-       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.35rem;">'
-       +'<input id="enssLinkProfileCode" autocomplete="off" placeholder="Kòd pwofil ENSS ou" style="padding:.35rem;font-size:.72rem;">'
-       +'<input id="enssLinkProfilePassword" type="password" autocomplete="current-password" placeholder="Modpas pwofil ENSS ou" style="padding:.35rem;font-size:.72rem;">'
-       +'</div><button type="button" class="btn btn-primary" onclick="centralLinkVerifiedProfile()" style="margin-top:.4rem;padding:.3rem .6rem;font-size:.7rem;">🔐 Verifye epi asosye pwofil mwen</button>'
-       +'<p style="font-size:.62rem;color:#64748b;margin:.35rem 0 0;">Si pwofil la deja mare ak yon lòt kont ki toujou egziste, sistèm nan pa pral deplase li otomatikman: administratè a dwe verifye demann lan.</p></div>'
+       +'<strong style="display:block;font-size:.74rem;margin-bottom:.3rem;">🔐 Konekte epi jere sekirite ENSS</strong>'
+       +'<p style="font-size:.64rem;color:#334155;margin:.2rem 0 .4rem;">Apre administratè a fin konekte, itilize 🔒 Sekirite pou jere kòd pwofil, modpas ENSS ak dwa aksè yo. Kont Supabase administratè a pa dwe sèvi kòm kont pèsonèl tout lòt pwofil yo.</p>'
+       +'<button type="button" class="btn btn-primary" onclick="centralSignIn()" style="padding:.3rem .6rem;font-size:.7rem;">🔐 Konekte ak Supabase</button></div>'
        +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">'
-       +'<button class="btn" onclick="centralTestConnection()" style="padding:.25rem .55rem;font-size:.68rem;">🔎 Teste</button>'
-       +'<button class="btn" onclick="centralDiagnoseRLS()" style="padding:.25rem .55rem;font-size:.68rem;">🛡️ Verifye RLS</button>'
-       +'<button class="btn btn-primary" onclick="centralSendEmailVerification()" style="padding:.25rem .55rem;font-size:.68rem;">✉️ Voye kòd OTP</button>'
-       +'<button class="btn btn-success" onclick="centralVerifyEmailCode()" style="padding:.25rem .55rem;font-size:.68rem;">✓ Verifye kòd la</button>'
+       +'<button class="btn btn-primary" onclick="centralSignIn()" style="padding:.25rem .55rem;font-size:.68rem;">🔐 Konekte</button>'
        +'<button class="btn" onclick="centralSignOut()" style="padding:.25rem .55rem;font-size:.68rem;">🚪 Dekonekte</button>'
-       +'<button class="btn btn-success" onclick="centralSeedCurrentState()" style="padding:.25rem .55rem;font-size:.68rem;">⬆️ Inisyalize baz</button>'
-       +'<button class="btn" onclick="centralPullForAll()" style="padding:.25rem .55rem;font-size:.68rem;">⬇️ Rale done</button>'
        +'</div>'
-       +'<p style="font-size:.62rem;color:#64748b;margin:.4rem 0 0;">Koneksyon an mande konfigirasyon Supabase ak dwa aksè ki kòrèk. Pa itilize “Inisyalize baz” pou eseye ranje koneksyon; li pa nesesè pou verifikasyon OTP nòmal la.</p>';
+       +'<details style="margin-top:.5rem;border:1px solid #cbd5e1;border-radius:.45rem;padding:.45rem;background:#f8fafc;">'
+       +'<summary style="cursor:pointer;font-size:.72rem;font-weight:700;">🛠️ Antretyen administratè sèlman</summary>'
+       +'<p style="font-size:.64rem;color:#64748b;margin:.35rem 0;">Zouti dyagnostik ak senkronizasyon manyèl. Pa gen bouton inisyalizasyon isit la pou evite ekriti santral ki pa nesesè.</p>'
+       +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;">'
+       +'<button class="btn" onclick="centralTestConnection()" style="padding:.25rem .55rem;font-size:.68rem;">🔎 Teste koneksyon</button>'
+       +'<button class="btn" onclick="centralDiagnoseRLS()" style="padding:.25rem .55rem;font-size:.68rem;">🛡️ Verifye RLS</button>'
+       +'<button class="btn" onclick="centralPullForAll()" style="padding:.25rem .55rem;font-size:.68rem;">⬇️ Rale done</button>'
+       +'</div></details>'
+       +'<p style="font-size:.62rem;color:#64748b;margin:.4rem 0 0;">URL Supabase, kle piblik ak ID lekòl la rete konfigirasyon ENSS; pa antre modpas kont Supabase nan okenn lòt seksyon.</p>';
       page.appendChild(box);
     }
     try{ updateCentralPanel(); }catch(e){}
+    try{ ensureSecuritySection(page,box); }catch(e){console.error('ENSS security layout',e);}
     try{ renderCentralRoleAccessPanel(page); }catch(e){console.error('ENSS role access panel',e);}
   }
   // V98: vizib, separe kontwòl aksè pa gwoup pwofil. Sa se konfigirasyon aplikasyon an;
