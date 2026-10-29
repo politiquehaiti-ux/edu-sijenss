@@ -531,21 +531,7 @@
                     <button class="btn btn-primary" onclick="inlineLogin()" style="padding:0.25rem 0.6rem;font-size:0.75rem;">🔐 Konekte</button>
                     <span id="inlineLoginMsg" style="font-size:0.7rem;color:#e74c3c;"></span>
                 </div>
-                <!-- Verifikasyon pa kòd OTP: pa janm mande modpas imèl moun nan -->
-                <div class="card" id="enssHomeEmailAccess" style="padding:.65rem .75rem;margin-bottom:.6rem;border-left:3px solid #2563eb;">
-                    <strong style="display:block;font-size:.78rem;margin-bottom:.25rem;">☁️ Verifye imèl ou ak yon kòd</strong>
-                    <p style="font-size:.66rem;color:#475569;margin:.2rem 0 .45rem;">Antre imèl ou, mande kòd verifikasyon an, epi antre kòd 6 chif la. Apre sa antre kòd pwofil ENSS ou ak modpas ENSS ou. Menm imèl la fèt pou kapab sèvi ak plizyè pwofil, si konfigirasyon baz santral la pèmèt sa. Pa janm antre modpas kont imèl ou nan platfòm nan.</p>
-                    <div style="display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:.35rem;align-items:center;">
-                        <input id="enssHomeEmail" type="email" autocomplete="email" placeholder="Adrès imèl pèsonèl ou" style="padding:.4rem .5rem;font-size:.75rem;min-width:0;" />
-                        <button type="button" class="btn btn-primary" onclick="centralSendEmailVerification()" style="padding:.35rem .6rem;font-size:.72rem;">✉️ Voye kòd la</button>
-                    </div>
-                    <div style="display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:.35rem;align-items:center;margin-top:.4rem;">
-                        <input id="enssHomeEmailOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Kòd verifikasyon ki nan imèl la" style="padding:.4rem .5rem;font-size:.75rem;min-width:0;" />
-                        <button type="button" class="btn btn-success" onclick="centralVerifyEmailCode()" style="padding:.35rem .6rem;font-size:.72rem;">✓ Verifye kòd la</button>
-                    </div>
-                    <p id="enssHomeEmailMsg" style="font-size:.65rem;color:#475569;margin:.35rem 0 0;">Apre kòd la valide, antre kòd pwofil ENSS ou ak modpas pwofil ou pou anrejistre asosiyasyon an nan Supabase.</p>
-                </div>
-
+                <!-- V119: retire bwat imèl/OTP nan Akèy; jesyon verifikasyon rete nan Paramètres. -->
                 <!-- VERIFIKASYON ELÈV -->
                 <div class="card" id="verificationCard" style="padding:0.5rem 0.7rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
                     <span style="font-size:0.75rem;font-weight:600;">🔎 Verifikasyon:</span>
@@ -2589,7 +2575,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V118-EGRESS-OTP-NO-EMAIL-PASSWORD-YEAR-HISTORY-NO-RESET';
+        var ENSS_APP_VERSION = 'V119-EGRESS-HIDE-HOME-EMAIL-YEAR-HISTORY-NO-RESET';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, lastRemoteRevision: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2699,7 +2685,7 @@
             return Promise.race([Promise.resolve(promise),timeoutPromise]).finally(function(){clearTimeout(timeoutId);});
         }
         async function centralSignIn(){
-            // V118: pa janm mande modpas kont imel la; koneksyon santral fèt ak kòd OTP imel.
+            // V119: bwat imel/OTP pa parèt nan Akèy; verifikasyon imel la rete nan Paramètres.
             return centralSendEmailVerification();
         }
         async function centralCreateAccount(){
