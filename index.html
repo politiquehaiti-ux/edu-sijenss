@@ -1921,6 +1921,10 @@
                         <h4 data-t="security" style="font-size:0.85rem;">🔒 Sécurité</h4>
                         <p class="text-sm text-muted" style="font-size:0.65rem;">Kont yo klase an 4 blòk pou fè jesyon an pi fasil. Nan tablo elèv yo, non ak prenon parèt apre mo de pase a.</p>
                         <p class="text-sm text-muted" style="font-size:0.65rem;">🔑 <strong>Profil klas/matyè predefini:</strong> Préscolaire 1–3 ak 1ère–6ème AF gen TLM (Toutes Les Matières). 7ème–9ème AF gen yon profil pa klas ak pa matyè, selon kòd matyè a. Tout profil ak modpas sa yo rete modifyab pa administratè a.</p>
+                        <div style="margin:.25rem 0 .6rem;padding:.55rem;border:1px solid #93c5fd;border-radius:8px;background:#eff6ff;font-size:.72rem;line-height:1.45;">
+                            <strong>📌 Kijan pou chwazi pwofil la</strong><br>
+                            Gade tablo ki anba yo epi chwazi liy pwofil ou bezwen an; bouton aksyon yo sou menm liy lan. Si tablo a di « Okenn kont », sa vle di pa gen pwofil nan gwoup sa a nan done lokal ki chaje kounye a. Pou kreye yon pwofil, sèvi ak chan « Nouveau profil », « Mot de passe » ak lis wòl ki anba tablo yo, epi klike « + Ajouter ». Pa kreye yon kopi si pwofil la deja egziste.
+                        </div>
                         <div class="security-block direction-security-card" style="margin-bottom:0.6rem;border:1px solid #cbdcf5;border-radius:10px;padding:0.55rem;background:linear-gradient(135deg,#f5f9ff,#ffffff);">
                             <h5 style="font-size:0.78rem;margin:0 0 0.25rem;">🏛️ Accès sécurisé — Direction</h5>
                             <p class="text-sm text-muted" style="font-size:0.65rem;margin-bottom:0.35rem;">Dosye Direction yo pa repete nan Akèy. Se pwofil ak mo de pase Direction lan ki ouvri espas sansib sa a. Administratè a ka modifye yo.</p>
@@ -14535,9 +14539,9 @@
             var session=await centralRefreshSession();
             if(!session || !session.user) throw new Error('Konekte ak kont Supabase admin lan anvan.');
             var cfg=getCentralConfig();
-            var r=await client.rpc('enss_get_role_access',{p_school_id:cfg.schoolId});
+            var r=await client.rpc('enss_get_role_access_v2',{p_school_id:cfg.schoolId});
             if(r.error) throw r.error;
-            return r.data || {secretaire:false,enseignants:false,eleves:false};
+            return r.data || {secretaire:false,enseignants_1_6:false,enseignants_7_9:false,eleves:false};
         }
         async function enssSetRoleAccess(access){
             if(!requireAdmin('modifye aksè pwofil yo')) throw new Error('Se administratè a sèlman ki ka chanje aksè pwofil yo.');
@@ -14546,10 +14550,11 @@
             var session=await centralRefreshSession();
             if(!session || !session.user) throw new Error('Konekte ak kont Supabase admin lan anvan.');
             var cfg=getCentralConfig();
-            var r=await client.rpc('enss_set_role_access',{
+            var r=await client.rpc('enss_set_role_access_v2',{
                 p_school_id:cfg.schoolId,
                 p_secretary_enabled:!!access.secretaire,
-                p_teachers_enabled:!!access.enseignants,
+                p_teachers_1_6_enabled:!!access.enseignants_1_6,
+                p_teachers_7_9_enabled:!!access.enseignants_7_9,
                 p_students_enabled:!!access.eleves
             });
             if(r.error) throw r.error;
@@ -15348,11 +15353,16 @@
       // Sa se yon baryè nan entèfas la; RLS separe pa itilizatè toujou nesesè pou sekirite sèvè.
       var roleKey=norm(u.role), grants=(STATE.parametres&&STATE.parametres.centralRoleAccess)||{};
       var disabledGroup='';
-      if(roleKey==='secretaire' && grants.secretaire!==true) disabledGroup='Sekretè';
-      else if(['enseignant','enseignante','professeur','teacher','anseyan'].indexOf(roleKey)!==-1 && grants.enseignants!==true) disabledGroup='Anseyan';
-      // Pwofil elèv dwe kapab konekte pou li dosye pa li; kontwòl done prive yo fèt anba a pa NISU.
-      // Pa bloke tout koneksyon elèv akoz ansyen reglaj global ki te rete false nan baz santral la.
-      else if(['eleve','student','etudiant','pupil'].indexOf(roleKey)!==-1) disabledGroup='';
+      if(roleKey==='admin') disabledGroup='';
+      else if(['secretaire','secretary','direction','directeur','administration'].indexOf(roleKey)!==-1 && grants.secretaire!==true) disabledGroup='Administrasyon ak Sekretarya';
+      else if(['enseignant','enseignante','professeur','teacher','anseyan'].indexOf(roleKey)!==-1){
+        var teacherClasses=Array.isArray(u.accessClasses)?u.accessClasses.join(' '):String(u.classe||u.niveau||u.classes||'');
+        var upperBand=/(^|\b)(7e|7eme|7è|8e|8eme|8è|9e|9eme|9è)(\b|$)/i.test(teacherClasses);
+        if(upperBand && grants.enseignants_7_9!==true) disabledGroup='Anseyan 7e–9e AF';
+        else if(!upperBand && grants.enseignants_1_6!==true) disabledGroup='Anseyan 1e–6e AF';
+      }
+      // Chak elèv kontinye sèvi ak pwòp pwofil li; gwoup la kontwole pa reglaj santral la.
+      else if(['eleve','student','etudiant','pupil'].indexOf(roleKey)!==-1 && grants.eleves!==true) disabledGroup='Elèv';
       if(roleKey!=='admin' && disabledGroup){
         if(msgEl){msgEl.style.color='#b91c1c';msgEl.textContent='Aksè '+disabledGroup+' dezaktive pa administratè a. Kontakte administratè ENSS la.';}
         return;
@@ -16562,6 +16572,24 @@
       } else if(existing.parentNode!==page){ page.insertBefore(existing,page.firstChild); }
     }
   }
+  window.enssOpenProfileSecurity=function(){
+    var page=document.getElementById('page-parametres');
+    var sec=document.getElementById('enssSecurityAccordion');
+    if(!sec && page){ try{ensureSecuritySection(page,document.getElementById('enssCentralDbPanel')); }catch(e){} sec=document.getElementById('enssSecurityAccordion'); }
+    if(!sec){ alert('Mwen pa jwenn seksyon Sekirite a nan Paramèt. Fèmen epi relouvri Paramèt, epi eseye ankò.'); return false; }
+    sec.open=true;
+    /* V129: rerender the profile tables after opening the accordion. This also
+       fixes cases where Parametres rendered before the security card was moved. */
+    try{ if(typeof renderSecuriteUsers==='function') renderSecuriteUsers(); }catch(e){ console.warn('ENSS: render profile tables',e); }
+    try{ if(typeof renderSecuritePermissions==='function') renderSecuritePermissions(); }catch(e){ console.warn('ENSS: render profile permissions',e); }
+    try{ if(typeof renderStudentEditAccessSettings==='function') renderStudentEditAccessSettings(); }catch(e){}
+    try{ if(typeof renderMenuVisibilitySettings==='function') renderMenuVisibilitySettings(); }catch(e){}
+    try{ if(typeof renderPublicAccessSettings==='function') renderPublicAccessSettings(); }catch(e){}
+    try{sec.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){sec.scrollIntoView();}
+    var firstTable=sec.querySelector('#securiteUsersBody_admin');
+    if(firstTable){try{firstTable.closest('.security-block').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}
+    return true;
+  };
   function ensureCentralUi(){
     var page=document.getElementById('page-parametres'); if(!page) return;
     var box=document.getElementById('enssCentralDbPanel');
@@ -16593,8 +16621,8 @@
        +'</div><button type="button" class="btn btn-primary" onclick="centralProvisionProfile()" style="margin-top:.4rem;padding:.3rem .6rem;font-size:.7rem;">✉️ Envite epi asosye pwofil la</button></div>'
        +'<div style="margin-top:.55rem;padding:.55rem;border:1px solid #93c5fd;border-radius:.5rem;background:#eff6ff;">'
        +'<strong style="display:block;font-size:.74rem;margin-bottom:.3rem;">🔐 Konekte epi jere sekirite ENSS</strong>'
-       +'<p style="font-size:.64rem;color:#334155;margin:.2rem 0 .4rem;">Apre administratè a fin konekte, itilize 🔒 Sekirite pou jere kòd pwofil, modpas ENSS ak dwa aksè yo. Kont Supabase administratè a pa dwe sèvi kòm kont pèsonèl tout lòt pwofil yo.</p>'
-       +'<button type="button" class="btn btn-primary" onclick="centralSignIn()" style="padding:.3rem .6rem;font-size:.7rem;">🔐 Konekte ak Supabase</button></div>'
+       +'<p style="font-size:.64rem;color:#334155;margin:.2rem 0 .4rem;">Apre koneksyon administratè a reyisi, bouton ki anba a ap louvri seksyon kote ou jere tout pwofil ENSS yo: kreye, modifye, chanje modpas, oswa retire pwofil. Kont Supabase administratè a pa sèvi kòm kont pèsonèl lòt pwofil yo.</p>'
+       +'<div style="display:flex;flex-wrap:wrap;gap:.35rem;"><button type="button" class="btn btn-primary" onclick="centralSignIn()" style="padding:.3rem .6rem;font-size:.7rem;">🔐 Konekte ak Supabase</button><button type="button" class="btn" onclick="enssOpenProfileSecurity()" style="padding:.3rem .6rem;font-size:.7rem;">👥 Jere lòt pwofil yo</button></div></div>'
        +'<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">'
        +'<button class="btn btn-primary" onclick="centralSignIn()" style="padding:.25rem .55rem;font-size:.68rem;">🔐 Konekte</button>'
        +'<button class="btn" onclick="centralSignOut()" style="padding:.25rem .55rem;font-size:.68rem;">🚪 Dekonekte</button>'
@@ -16614,8 +16642,7 @@
     try{ ensureSecuritySection(page,box); }catch(e){console.error('ENSS security layout',e);}
     try{ renderCentralRoleAccessPanel(page); }catch(e){console.error('ENSS role access panel',e);}
   }
-  // V98: vizib, separe kontwòl aksè pa gwoup pwofil. Sa se konfigirasyon aplikasyon an;
-  // li pa ranplase RLS/API filtre sou sèvè a pou pwoteje done sansib yo.
+  // V131: kat kontwòl aksè santral, separe pa gwoup pwofil.
   function renderCentralRoleAccessPanel(page){
     if(!page) return;
     var box=document.getElementById('enssCentralRoleAccessPanel');
@@ -16623,66 +16650,52 @@
     var state=window.STATE||{};
     if(!state.parametres) state.parametres={};
     var access=state.parametres.centralRoleAccess;
-    if(!access) access=state.parametres.centralRoleAccess={secretaire:false,enseignants:false,eleves:false};
-    var esc=function(v){return v?'checked':'';};
-    box.innerHTML='<h4 style="margin:0;font-size:.9rem;">👥 Aksè pwofil yo — Baz Done Santral</h4>'
-      +'<p style="font-size:.68rem;color:#475569;margin:.35rem 0;">Se administratè a ki dwe konekte ak Supabase pou chaje epi anrejistre reglaj santral yo.</p>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:.65rem;margin:.45rem 0;">'
-      +'<label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;"><input type="checkbox" id="enssRoleSecretary" '+esc(access.secretaire)+' style="width:18px;height:18px;"> Sekretè</label>'
-      +'<label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;"><input type="checkbox" id="enssRoleTeachers" '+esc(access.enseignants)+' style="width:18px;height:18px;"> Tout anseyan</label>'
-      +'<label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;"><input type="checkbox" id="enssRoleStudents" '+esc(access.eleves)+' style="width:18px;height:18px;"> Tout elèv</label>'
-      +'</div><button type="button" class="btn btn-primary" id="enssSaveRoleAccess" style="padding:.3rem .6rem;font-size:.7rem;">💾 Anrejistre nan baz santral la</button>'
+    if(!access) access=state.parametres.centralRoleAccess={secretaire:false,enseignants_1_6:false,enseignants_7_9:false,eleves:false};
+    function cb(id,label,checked){return '<label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:700;padding:.5rem;border:1px solid #cbd5e1;border-radius:.45rem;background:#f8fafc;margin:.35rem 0;"><input type="checkbox" id="'+id+'" '+(checked?'checked':'')+' style="width:20px;height:20px;"> '+label+'</label>';}
+    box.innerHTML='<h4 style="margin:0;font-size:.9rem;">👥 Aksè a Supabase — 4 gwoup separe</h4>'
+      +'<p style="font-size:.68rem;color:#475569;margin:.35rem 0;">Chak kaz aplike pou tout moun nan gwoup sa a sèlman. Li pa aktive lòt gwoup yo.</p>'
+      +cb('enssRoleAdmin','Administrasyon ak Sekretarya — Tout gwoup sa a',!!access.secretaire)
+      +cb('enssRoleTeachers16','Anseyan 1e–6e AF — Tout gwoup sa a',!!access.enseignants_1_6)
+      +cb('enssRoleTeachers79','Anseyan 7e–9e AF — Tout gwoup sa a',!!access.enseignants_7_9)
+      +cb('enssRoleStudents','Elèv yo — Tout elèv yo ansanm',!!access.eleves)
+      +'<button type="button" class="btn btn-primary" id="enssSaveRoleAccess" style="padding:.35rem .7rem;font-size:.74rem;">💾 Anrejistre 4 reglaj yo</button>'
       +'<span id="enssRoleAccessSaveMsg" role="status" style="display:block;font-size:.68rem;margin-top:.4rem;color:#475569;">Reglaj yo poko verifye ak baz santral la.</span>'
-      +'<p style="font-size:.65rem;color:#9a3412;margin:.45rem 0 0;">Nòt sekirite: reglaj sa yo se premye pati koneksyon an. Yo pa ranplase kont Supabase apa pou chak moun ni règleman RLS ki filtre done pa wòl.</p>';
+      +'<p style="font-size:.65rem;color:#9a3412;margin:.45rem 0 0;">Nòt: sa bay pèmisyon pou gwoup la eseye konekte; sa pa kreye kont epi li pa konekte moun otomatikman. Chak moun toujou bezwen pwòp kòd pwofil ak modpas ENSS li.</p>';
     var centralPanel=document.getElementById('enssCentralDbPanel');
     if(centralPanel && centralPanel.parentNode===page){
-      if(box.parentNode!==page || centralPanel.nextElementSibling!==box){
-        if(box.parentNode) box.parentNode.removeChild(box);
-        centralPanel.insertAdjacentElement('afterend',box);
-      }
+      if(box.parentNode!==page || centralPanel.nextElementSibling!==box){if(box.parentNode) box.parentNode.removeChild(box);centralPanel.insertAdjacentElement('afterend',box);}
     }else if(!box.parentNode){page.appendChild(box);}
-    var msg=box.querySelector('#enssRoleAccessSaveMsg');
-    var btn=box.querySelector('#enssSaveRoleAccess');
+    var msg=box.querySelector('#enssRoleAccessSaveMsg'), btn=box.querySelector('#enssSaveRoleAccess');
+    function readChosen(){return {
+      secretaire:!!box.querySelector('#enssRoleAdmin').checked,
+      enseignants_1_6:!!box.querySelector('#enssRoleTeachers16').checked,
+      enseignants_7_9:!!box.querySelector('#enssRoleTeachers79').checked,
+      eleves:!!box.querySelector('#enssRoleStudents').checked
+    };}
+    function paint(a){box.querySelector('#enssRoleAdmin').checked=!!a.secretaire;box.querySelector('#enssRoleTeachers16').checked=!!a.enseignants_1_6;box.querySelector('#enssRoleTeachers79').checked=!!a.enseignants_7_9;box.querySelector('#enssRoleStudents').checked=!!a.eleves;}
     if(btn) btn.onclick=async function(){
       btn.disabled=true;
-      if(msg){msg.style.color='#475569';msg.textContent='Ap anrejistre reglaj yo nan baz santral la…';}
+      if(msg){msg.style.color='#475569';msg.textContent='Ap anrejistre 4 gwoup yo nan baz santral la…';}
       try{
         if(typeof window.enssSetRoleAccess!=='function') throw new Error('Fonksyon Supabase pou reglaj aksè yo pa disponib.');
-        var chosen={
-          secretaire:!!box.querySelector('#enssRoleSecretary').checked,
-          enseignants:!!box.querySelector('#enssRoleTeachers').checked,
-          eleves:!!box.querySelector('#enssRoleStudents').checked
-        };
-        var saved=await window.enssSetRoleAccess(chosen);
-        var st=window.STATE||{}; if(!st.parametres) st.parametres={};
-        st.parametres.centralRoleAccess={
-          secretaire:!!saved.secretaire,
-          enseignants:!!saved.enseignants,
-          eleves:!!saved.eleves
-        };
-        if(typeof window.saveState==='function') window.saveState();
-        if(msg){msg.style.color='#166534';msg.textContent='✓ Reglaj yo anrejistre nan baz santral la.';}
-      }catch(e){
-        if(msg){msg.style.color='#b91c1c';msg.textContent='Erè: '+(e&&e.message?e.message:String(e));}
-      }finally{btn.disabled=false;}
+        var chosen=readChosen(), saved=await window.enssSetRoleAccess(chosen);
+        var normalized={secretaire:!!saved.secretaire,enseignants_1_6:!!saved.enseignants_1_6,enseignants_7_9:!!saved.enseignants_7_9,eleves:!!saved.eleves};
+        var st=window.STATE||{};if(!st.parametres)st.parametres={};st.parametres.centralRoleAccess=normalized;
+        if(typeof window.saveState==='function')window.saveState();paint(normalized);
+        if(msg){msg.style.color='#166534';msg.textContent='✓ 4 reglaj yo anrejistre nan Supabase. Chak gwoup gen pwòp aksè pa li.';}
+      }catch(e){if(msg){msg.style.color='#b91c1c';msg.textContent='Erè: '+(e&&e.message?e.message:String(e));}}
+      finally{btn.disabled=false;}
     };
-    // Chaje valè santral la yon sèl fwa chak fwa panèl la konstwi.
     if(box.getAttribute('data-central-loaded')!=='1' && typeof window.enssGetRoleAccess==='function'){
-      box.setAttribute('data-central-loaded','1');
-      if(msg) msg.textContent='Ap li reglaj yo nan baz santral la…';
+      box.setAttribute('data-central-loaded','1');if(msg)msg.textContent='Ap li 4 reglaj aksè yo nan baz santral la…';
       window.enssGetRoleAccess().then(function(remote){
-        var st=window.STATE||{}; if(!st.parametres) st.parametres={};
-        st.parametres.centralRoleAccess={secretaire:!!remote.secretaire,enseignants:!!remote.enseignants,eleves:!!remote.eleves};
-        ['Secretary','Teachers','Students'].forEach(function(k,i){
-          var el=box.querySelector('#enssRole'+k); if(el) el.checked=[!!remote.secretaire,!!remote.enseignants,!!remote.eleves][i];
-        });
-        if(msg){msg.style.color='#166534';msg.textContent='✓ Reglaj santral yo chaje.';}
-      }).catch(function(e){
-        box.setAttribute('data-central-loaded','0');
-        if(msg){msg.style.color='#b91c1c';msg.textContent='Pa kapab li reglaj santral yo: '+(e&&e.message?e.message:String(e));}
-      });
+        var normalized={secretaire:!!remote.secretaire,enseignants_1_6:!!remote.enseignants_1_6,enseignants_7_9:!!remote.enseignants_7_9,eleves:!!remote.eleves};
+        var st=window.STATE||{};if(!st.parametres)st.parametres={};st.parametres.centralRoleAccess=normalized;paint(normalized);
+        if(msg){msg.style.color='#475569';msg.textContent='✓ Reglaj santral yo chaje. Verifye chak gwoup epi anrejistre si ou fè chanjman.';}
+      }).catch(function(e){box.setAttribute('data-central-loaded','0');if(msg){msg.style.color='#b91c1c';msg.textContent='Pa kapab li reglaj santral yo: '+(e&&e.message?e.message:String(e));}});
     }
   }
+
   var oldRender=window.renderParametres;
   window.renderParametres=function(){
     var r=oldRender?oldRender.apply(this,arguments):null;
@@ -19157,8 +19170,9 @@ body{ line-height:1.55; }
       try{
         var st=window.STATE; if(st){
           st.parametres=st.parametres||{};
-          var v=(r && r.enseignants!==undefined) ? r.enseignants : (access && access.enseignants);
-          st.parametres.enseignantsAccessDisabledByAdmin=(v===false || v===0 || v==='false');
+          var v16=(r && r.enseignants_1_6!==undefined) ? r.enseignants_1_6 : (access && access.enseignants_1_6);
+          var v79=(r && r.enseignants_7_9!==undefined) ? r.enseignants_7_9 : (access && access.enseignants_7_9);
+          st.parametres.enseignantsAccessDisabledByAdmin=(v16===false || v16===0 || v16==='false') && (v79===false || v79===0 || v79==='false');
         }
       }catch(e){}
       return r;
@@ -19168,7 +19182,7 @@ body{ line-height:1.55; }
 
   function teacherBlockedByAdmin(){
     var p=(window.STATE&&STATE.parametres)||{}, g=p.centralRoleAccess||{};
-    return p.enseignantsAccessDisabledByAdmin===true && g.enseignants===false;
+    return p.enseignantsAccessDisabledByAdmin===true && g.enseignants_1_6===false && g.enseignants_7_9===false;
   }
 
   /* 2) Si lojik la te bloke yon anseyan sèlman paske paramèt la pa t konfigire, nou fini koneksyon an. */
@@ -19183,6 +19197,10 @@ body{ line-height:1.55; }
       var list=(window.STATE&&STATE.securite&&STATE.securite.users)||[];
       var u=list.find(function(x){ return x.profil===user && x.mdp===pass; });
       if(!u || TEACHER_ROLES.indexOf(norm(u.role))===-1) return res;
+      var cls=Array.isArray(u.accessClasses)?u.accessClasses.join(' '):String(u.classe||u.niveau||u.classes||'');
+      var upper=/(^|\b)(7e|7eme|7è|8e|8eme|8è|9e|9eme|9è)(\b|$)/i.test(cls);
+      var grant=(window.STATE&&STATE.parametres&&STATE.parametres.centralRoleAccess)||{};
+      if((upper && grant.enseignants_7_9===false) || (!upper && grant.enseignants_1_6===false)) return res;
       if(teacherBlockedByAdmin()) return res;
       STATE.utilisateur=u.profil;
       safeCall(function(){ syncUserAccess(u); },'syncUserAccess');
