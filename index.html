@@ -2597,11 +2597,20 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V126-ADMIN-EMAIL-PASSWORD-SECURITY-ACCESS';
+        var ENSS_APP_VERSION = 'V135-LOCAL-FIRST-OFFLINE-SYNC';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, lastRemoteRevision: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
         var ENSS_CENTRAL_PENDING = false;
+        var ENSS_CENTRAL_PENDING_KEY = 'ENSS_CENTRAL_PENDING_V1';
+        try { ENSS_CENTRAL_PENDING = localStorage.getItem(ENSS_CENTRAL_PENDING_KEY) === '1'; } catch (pendingReadError) {}
+        function setCentralPending(value) {
+            ENSS_CENTRAL_PENDING = !!value;
+            try {
+                if (ENSS_CENTRAL_PENDING) localStorage.setItem(ENSS_CENTRAL_PENDING_KEY, '1');
+                else localStorage.removeItem(ENSS_CENTRAL_PENDING_KEY);
+            } catch (pendingWriteError) {}
+        }
 
         function getCentralConfig() {
             try {
@@ -2724,6 +2733,7 @@
                 centralStatus('✓ Sesyon Supabase ouvè; verifikasyon dwa aksè ENSS ap fèt…',null);
                 var pulled=await centralPullState(true);
                 if(pulled){
+                    if(ENSS_CENTRAL_PENDING) scheduleCentralPush();
                     centralStatus('✓ Administratè Supabase la konekte epi done santral ENSS yo chaje.',true);
                     if(msg) msg.textContent='✓ Koneksyon administratè a reyisi. Ou kapab jere pwofil yo ak dwa aksè yo nan 🔒 Sekirite.';
                 }else{
@@ -3070,7 +3080,7 @@
                 ENSS_CENTRAL.ready=true;
                 if (_v79RemoteMove && _v79RemoteMove.changed) { try { saveState(); } catch(e) {} }
                 if (_enssNeedsPushAfterPull && ENSS_CENTRAL.session) {
-                    ENSS_CENTRAL_PENDING = true;
+                    setCentralPending(true);
                     setTimeout(function(){ if (ENSS_CENTRAL.session && ENSS_CENTRAL.ready) scheduleCentralPush(); }, 600);
                 }
                 centralStatus('✓ Done santral yo chaje sou aparèy sa a.', true);
@@ -3093,20 +3103,20 @@
             }
             ENSS_CENTRAL.syncing=true;
             try{
-                var client=ensureCentralClient(); if(!client){ ENSS_CENTRAL_PENDING=true; centralStatus('Senkronizasyon kanpe: konfigirasyon oswa bibliyotèk Supabase la pa pare. Done yo rete lokalman.',false); return false; }
+                var client=ensureCentralClient(); if(!client){ setCentralPending(true); centralStatus('Senkronizasyon kanpe: konfigirasyon oswa bibliyotèk Supabase la pa pare. Done yo rete lokalman.',false); return false; }
                 // Kenbe yon snapshot lokal sesyon an: yon lòt evènman auth ka mete
                 // ENSS_CENTRAL.session=null pandan demann baz done yo ap tann.
                 var syncSession=await centralAwaitWithTimeout(centralRefreshSession(),'Verifikasyon sesyon Supabase',15000);
                 if(!syncSession || !syncSession.user || !syncSession.user.id){
                     // Pa efase sesyon ki te deja konekte a sou yon repons null tanporè;
                     // centralRefreshSession ap eseye retabli li ak refresh_token nan pwochen tantativ la.
-                    ENSS_CENTRAL.ready=false; ENSS_CENTRAL_PENDING=true;
+                    ENSS_CENTRAL.ready=false; setCentralPending(true);
                     centralStatus('Senkronizasyon kanpe: sesyon Supabase la poko konfime. Eseye retabli sesyon an; si li pa reyisi, rekonekte ak kont administratè a. Chanjman lokal yo konsève.',false);
                     return false;
                 }
                 var syncUserId=syncSession.user.id;
                 var c=getCentralConfig();
-                if(!force && !ENSS_CENTRAL.ready){ ENSS_CENTRAL_PENDING=true; centralStatus('Senkronizasyon an poko kòmanse: done santral yo poko chaje sou aparèy sa a. Pa fè lòt chanjman jiskaske koneksyon an verifye.',false); return false; }
+                if(!force && !ENSS_CENTRAL.ready){ setCentralPending(true); centralStatus('Senkronizasyon an poko kòmanse: done santral yo poko chaje sou aparèy sa a. Pa fè lòt chanjman jiskaske koneksyon an verifye.',false); return false; }
                 var localState=centralSanitizeStateForRemote();
                 // V114 EGRESS: anpil sove pa bezwen telechaje tout STATE (~1.2 MB) ankò.
                 var current=await centralAwaitWithTimeout(client.from(ENSS_CENTRAL_TABLE).select('school_id,schema_version,revision,updated_at').eq('school_id',c.schoolId).maybeSingle(),'Tcheke vèsyon anvan sove',15000);
@@ -3143,7 +3153,7 @@
                     ENSS_CENTRAL.lastRemoteRevision=current.data.revision==null?null:current.data.revision;
                     try{localStorage.setItem(ENSS_CENTRAL_META_KEY,JSON.stringify({schoolId:c.schoolId,lastRemoteAt:ENSS_CENTRAL.lastRemoteAt,schema:current.data.schema_version||ENSS_DATA_SCHEMA,revision:ENSS_CENTRAL.lastRemoteRevision}));}catch(ignoreMetaNoop){}
                     centralSetBaseSnapshot(remote);
-                    ENSS_CENTRAL_PENDING=false;
+                    setCentralPending(false);
                     centralStatus('✓ Pa gen nouvo chanjman; done santral yo deja ajou.', true);
                     return true;
                 }
@@ -3158,11 +3168,11 @@
                 ENSS_CENTRAL.lastRemoteRevision=r.data.revision==null?null:r.data.revision;
                 centralSetBaseSnapshot(mergedState);
                 try{ localStorage.setItem(ENSS_CENTRAL_META_KEY,JSON.stringify({schoolId:c.schoolId,lastRemoteAt:ENSS_CENTRAL.lastRemoteAt,schema:ENSS_DATA_SCHEMA,revision:ENSS_CENTRAL.lastRemoteRevision})); }catch(e){}
-                ENSS_CENTRAL_PENDING=false;
+                setCentralPending(false);
                 centralStatus('✓ Done sove nan baz santral la.', true);
                 return true;
             }catch(e){
-                ENSS_CENTRAL_PENDING=true;
+                setCentralPending(true);
                 // V97: bay detay erè Supabase yo; timeout yo vin vizib olye mesaj 'an kou' rete san limit.
                 var cfgErr=getCentralConfig();
                 var userErr=ENSS_CENTRAL.session&&ENSS_CENTRAL.session.user?ENSS_CENTRAL.session.user:null;
@@ -3180,27 +3190,26 @@
         }
 
         function scheduleCentralPush(){
-            if(!hasCentralConfig() || !ENSS_CENTRAL.session || !ENSS_CENTRAL.ready) return;
-            // V120 EGRESS: pa voye eta konplè a pou chak ti sove youn apre lòt.
-            // Konpare ak dènye snapshot santral la anvan nou mete yon rezo an atant.
+            // LOCAL-FIRST: tout chanjman sove lokalman rete nan ke a menm san entènèt/Supabase.
+            if(!hasCentralConfig()) return;
             var base=centralGetBaseSnapshot(), local=centralSanitizeStateForRemote();
             if(base && centralDeepEqual(centralSanitizeStateForRemoteObject(local),centralSanitizeStateForRemoteObject(base))){
-                ENSS_CENTRAL_PENDING=false;
+                setCentralPending(false);
                 if(ENSS_CENTRAL.timer){clearTimeout(ENSS_CENTRAL.timer);ENSS_CENTRAL.timer=null;}
                 return;
             }
-            ENSS_CENTRAL_PENDING=true;
-            centralStatus('⏳ Chanjman yo an sekirite sou aparèy la; senkronizasyon santral ap rasanble yo...', null);
-            // Vrè debounce: chak nouvo sove rekòmanse delè a, konsa yon seri sove
-            // rapid vin yon sèl push olye plizyè upload 2+ MB youn apre lòt.
+            setCentralPending(true);
+            if(!navigator.onLine || !ENSS_CENTRAL.session || !ENSS_CENTRAL.ready){
+                centralStatus('✓ Platfòm nan ap travay an mòd lokal. Chanjman yo konsève sou aparèy sa a; yo ap tann koneksyon ak otorizasyon Supabase pou senkronize.', null);
+                return;
+            }
+            centralStatus('⏳ Chanjman lokal yo an sekirite; senkronizasyon santral ap rasanble yo...', null);
             if(ENSS_CENTRAL.timer){clearTimeout(ENSS_CENTRAL.timer);ENSS_CENTRAL.timer=null;}
             ENSS_CENTRAL.timer=setTimeout(function(){
                 ENSS_CENTRAL.timer=null;
-                if(ENSS_CENTRAL_PENDING) centralPushState(false);
+                if(ENSS_CENTRAL_PENDING && navigator.onLine && ENSS_CENTRAL.session && ENSS_CENTRAL.ready) centralPushState(false);
             },8000);
         }
-        // Si itilizatè a rafrechi/fèmen paj la pandan done yo poko konfime nan Supabase,
-        // navigatè a mande l rete sou paj la pou li ka tann anrejistreman an fini.
         window.addEventListener('beforeunload',function(e){
             if(ENSS_CENTRAL_PENDING && hasCentralConfig() && ENSS_CENTRAL.session){
                 e.preventDefault();
@@ -3321,7 +3330,24 @@
                 return pulled;
             }catch(e){ centralStatus('Baz santral pa konekte: '+(e.message||e), false); return false; }
         }
-        window.addEventListener('online' ,function(){ if(ENSS_CENTRAL.session) centralPullForAll(); });
+        window.addEventListener('online',function(){
+            // Pa janm ranplase eta lokal la ak yon telechajman brit: rale + fizyone anvan push.
+            setTimeout(async function(){
+                try{
+                    if(!hasCentralConfig()) return;
+                    var client=ensureCentralClient(); if(!client) return;
+                    var session=await centralRefreshSession();
+                    if(!session || !session.user || !session.user.id){
+                        centralStatus('Koneksyon entènèt retounen. Done yo toujou lokal; konekte ak kont Supabase otorize a pou voye chanjman ki an atant.', null);
+                        return;
+                    }
+                    var pulled=await centralPullState(true);
+                    if(pulled && ENSS_CENTRAL_PENDING) scheduleCentralPush();
+                }catch(reconnectError){
+                    centralStatus('Koneksyon retounen, men senkronizasyon an poko reyisi. Done lokal yo konsève; sistèm nan ap eseye ankò.', false);
+                }
+            },1200);
+        });
         document.addEventListener('visibilitychange',function(){ if(!document.hidden && ENSS_CENTRAL.session) centralPullForAll(); });
         setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden && !ENSS_CENTRAL.syncing) centralPullForAll(); },900000); // V120: sekou 15 min; Realtime rete prensipal la pou diminye requèt repete.
         function loadState() {
@@ -13991,7 +14017,7 @@
                 // asosye sesyon sa a ak pwofil/modpas ENSS li deja genyen an.
                 try { enssAssociateVerifiedEmailAfterProfileLogin(userObj, pass); } catch (emailLinkError) {}
                 msgEl.style.color = '#27ae60';
-                msgEl.textContent = '✓ Konekte kòm ' + userObj.profil;
+                msgEl.textContent = (navigator.onLine ? '✓ Konekte kòm ' : '✓ Konekte lokalman kòm ') + userObj.profil + (navigator.onLine ? '' : ' — done yo ap tann senkronizasyon.');
                 document.getElementById('accueilLoginPass').value = '';
                 safeCall(initApp, 'initApp');
                 safeCall(spawnHearts, 'spawnHearts');
