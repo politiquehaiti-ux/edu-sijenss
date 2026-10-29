@@ -2575,7 +2575,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V119-EGRESS-HIDE-HOME-EMAIL-YEAR-HISTORY-NO-RESET';
+        var ENSS_APP_VERSION = 'V121-EGRESS-GZIP-READ-NO-RESET';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, lastRemoteRevision: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -2981,6 +2981,28 @@
             return JSON.parse(JSON.stringify(local));
         }
 
+        // V121: gwo lekti eta a pase nan Edge Function ki verifye manm lekòl la epi voye JSON gzip.
+        // fetch() nan navigatè a dekonprese Content-Encoding:gzip otomatikman.
+        async function centralReadCompressedState(schoolId){
+            var c=getCentralConfig();
+            var session=ENSS_CENTRAL.session;
+            if(!c.url || !c.key || !session || !session.access_token) return {data:null,error:new Error('Sesyon oswa konfigirasyon Supabase pa disponib pou lekti konprese a.')};
+            var response;
+            try{
+                response=await fetch(c.url.replace(/\/$/,'')+'/functions/v1/enss-read-school-state',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','apikey':c.key,'Authorization':'Bearer '+session.access_token},
+                    body:JSON.stringify({school_id:schoolId}),
+                    cache:'no-store'
+                });
+            }catch(e){ return {data:null,error:new Error('Lektè konprese a pa disponib: '+(e&&e.message||e))}; }
+            var data=null;
+            try{ data=await response.json(); }catch(e){}
+            if(!response.ok) return {data:null,error:new Error(data&&data.error?data.error:'Lektè konprese a retounen HTTP '+response.status+'.')};
+            if(!data || !data.state || typeof data.state!=='object') return {data:null,error:new Error('Repons konprese a pa gen eta lekòl la.')};
+            return {data:data,error:null};
+        }
+
         async function centralPullState(allowMerge, deferRender){
             if(ENSS_CENTRAL.syncing) return false;
             try{
@@ -3017,7 +3039,7 @@
                     ENSS_CENTRAL.lastRemoteRevision=meta.data.revision;
                     return true;
                 }
-                var r=await centralAwaitWithTimeout(client.from(ENSS_CENTRAL_TABLE).select('state,schema_version,updated_at,revision').eq('school_id',c.schoolId).maybeSingle(),'Lekti done santral yo',20000);
+                var r=await centralAwaitWithTimeout(centralReadCompressedState(c.schoolId),'Lekti konprese done santral yo',20000);
                 if(r.error) throw r.error;
                 var localUser=STATE&&STATE.utilisateur?STATE.utilisateur:null;
                 var localPage=STATE&&STATE.currentPage?STATE.currentPage:'accueil';
@@ -3095,7 +3117,7 @@
                 if(current.data && base && savedMeta && String(savedMeta.schoolId||'')===String(c.schoolId) && savedMeta.revision!=null && current.data.revision!=null && String(savedMeta.revision)===String(current.data.revision) && String(savedMeta.lastRemoteAt||'')===String(current.data.updated_at||'')){
                     remote=base;
                 }else if(current.data){
-                    var full=await centralAwaitWithTimeout(client.from(ENSS_CENTRAL_TABLE).select('state,schema_version,revision,updated_at').eq('school_id',c.schoolId).maybeSingle(),'Li chanjman santral ki nouvo yo',20000);
+                    var full=await centralAwaitWithTimeout(centralReadCompressedState(c.schoolId),'Li chanjman santral konprese yo',20000);
                     if(full.error) throw full.error;
                     remote=full.data&&full.data.state&&typeof full.data.state==='object'?full.data.state:null;
                     if(full.data) current.data=full.data;
