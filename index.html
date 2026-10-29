@@ -3065,7 +3065,7 @@
             if(ENSS_CENTRAL.syncing){
                 if(ENSS_CENTRAL_PENDING && ENSS_CENTRAL.session && ENSS_CENTRAL.ready){
                     clearTimeout(ENSS_CENTRAL.timer);
-                    ENSS_CENTRAL.timer=setTimeout(function(){ ENSS_CENTRAL.timer=null; centralPushState(force); },800);
+                    ENSS_CENTRAL.timer=setTimeout(function(){ ENSS_CENTRAL.timer=null; centralPushState(force); },3000);
                 }
                 return false;
             }
@@ -3159,7 +3159,8 @@
 
         function scheduleCentralPush(){
             if(!hasCentralConfig() || !ENSS_CENTRAL.session || !ENSS_CENTRAL.ready) return;
-            // V117: evite ekriti/rezo lè saveState() pa chanje done pataje yo.
+            // V120 EGRESS: pa voye eta konplè a pou chak ti sove youn apre lòt.
+            // Konpare ak dènye snapshot santral la anvan nou mete yon rezo an atant.
             var base=centralGetBaseSnapshot(), local=centralSanitizeStateForRemote();
             if(base && centralDeepEqual(centralSanitizeStateForRemoteObject(local),centralSanitizeStateForRemoteObject(base))){
                 ENSS_CENTRAL_PENDING=false;
@@ -3167,12 +3168,14 @@
                 return;
             }
             ENSS_CENTRAL_PENDING=true;
-            if(ENSS_CENTRAL.timer) return;
-            centralStatus('⏳ Chanjman anrejistre lokalman; senkronizasyon santral ap rasanble chanjman yo...', null);
+            centralStatus('⏳ Chanjman yo an sekirite sou aparèy la; senkronizasyon santral ap rasanble yo...', null);
+            // Vrè debounce: chak nouvo sove rekòmanse delè a, konsa yon seri sove
+            // rapid vin yon sèl push olye plizyè upload 2+ MB youn apre lòt.
+            if(ENSS_CENTRAL.timer){clearTimeout(ENSS_CENTRAL.timer);ENSS_CENTRAL.timer=null;}
             ENSS_CENTRAL.timer=setTimeout(function(){
                 ENSS_CENTRAL.timer=null;
                 if(ENSS_CENTRAL_PENDING) centralPushState(false);
-            },1800);
+            },8000);
         }
         // Si itilizatè a rafrechi/fèmen paj la pandan done yo poko konfime nan Supabase,
         // navigatè a mande l rete sou paj la pou li ka tann anrejistreman an fini.
@@ -3270,7 +3273,7 @@
                         ENSS_CENTRAL_REALTIME_PULL_TIMER=setTimeout(function(){
                             ENSS_CENTRAL_REALTIME_PULL_TIMER=null;
                             if(ENSS_CENTRAL.session && !ENSS_CENTRAL.syncing) centralPullForAll();
-                        },900);
+                        },2500);
                     })
                     .subscribe(function(status){
                         if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
@@ -3298,7 +3301,7 @@
         }
         window.addEventListener('online' ,function(){ if(ENSS_CENTRAL.session) centralPullForAll(); });
         document.addEventListener('visibilitychange',function(){ if(!document.hidden && ENSS_CENTRAL.session) centralPullForAll(); });
-        setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden && !ENSS_CENTRAL.syncing) centralPullForAll(); },600000); // V118: sekou 10 min; Realtime rete prensipal la.
+        setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden && !ENSS_CENTRAL.syncing) centralPullForAll(); },900000); // V120: sekou 15 min; Realtime rete prensipal la pou diminye requèt repete.
         function loadState() {
             ensureCustomClasses();
             try {
