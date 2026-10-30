@@ -20378,5 +20378,69 @@ window.importBuiltInHistoricalArchives = function(selectedYear) {
 })();
 </script>
 
+
+<script id="enss-v135-class-repair">
+/* ===== V135 — ELÈV ANE ISTORIK YO PARÈT NAN KLAS YO =====
+   Kòz: achiv istorik yo (2018-2019, 2020-2021, 2022-2023 ...) gen lòt non klas ("1er AF", "2ère AF", "7e",
+   "7ème AF 2", "Préscolaire I") pase non aplikasyon an ("CLASSE 1ere AF", "CLASSE 7eme", "PRESCOLAIRE 1").
+   Klas la chèche egzakteman non aplikasyon an, kidonk pa t jwenn okenn elèv.
+   Reparasyon: chak elèv ki gen yon non klas ki pa konnen jwenn non kanonik la (non orijinal la kenbe nan
+   « classeOriginale »). Klas paralèl (7ème AF 1/2 → CLASSE 7eme 1/2) kreye otomatikman si yo manke.
+   Sa fèt otomatikman apre chak enpòtasyon, chak chajman ak chak sinkwonizasyon. Okenn done pa efase. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V135_CLASS_REPAIR__) return; window.__ENSS_V135_CLASS_REPAIR__=true;
+  function strip(v){ return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function canon(raw){
+    var t=String(raw==null?'':raw).trim(); if(!t) return '';
+    var all=(typeof ALL_CLASSES!=='undefined')?ALL_CLASSES:[];
+    if(all.indexOf(t)>=0) return t;
+    var n=strip(t).toLowerCase().replace(/classe/g,' ').replace(/[._-]/g,' ').replace(/\s+/g,' ').trim(), m;
+    if((m=n.match(/^pre\s?scolaire\s*(i{1,3}|[123])$/))){ var k=/^i+$/.test(m[1])?m[1].length:parseInt(m[1],10); return 'PRESCOLAIRE '+k; }
+    if((m=n.match(/^(\d)\s*(?:ere|er|re|eme|em|e)?(?:\s*annee)?(?:\s*af)?(?:\s+([123]))?$/))){
+      var g=parseInt(m[1],10); if(g<1||g>9) return '';
+      if(g<=6) return 'CLASSE '+g+(g===1?'ere':'eme')+' AF';
+      return 'CLASSE '+g+'eme'+(m[2]?' '+m[2]:'');
+    }
+    return '';
+  }
+  function ensureClass(c){
+    if(typeof ALL_CLASSES==='undefined'||!c||ALL_CLASSES.indexOf(c)>=0) return false;
+    STATE.customClasses=Array.isArray(STATE.customClasses)?STATE.customClasses:[];
+    if(STATE.customClasses.indexOf(c)<0) STATE.customClasses.push(c);
+    ALL_CLASSES.push(c); return true;
+  }
+  function repair(){
+    try{
+      if(!window.STATE||!Array.isArray(STATE.students)||typeof ALL_CLASSES==='undefined') return 0;
+      try{ if(typeof ensureCustomClasses==='function') ensureCustomClasses(); }catch(e){}
+      var fixed=0, unknown={};
+      STATE.students.forEach(function(s){
+        if(!s||!s.classe) return;
+        if(ALL_CLASSES.indexOf(s.classe)>=0) return;
+        var c=canon(s.classe);
+        if(c){ ensureClass(c); if(!s.classeOriginale) s.classeOriginale=s.classe; s.classe=c; fixed++; }
+        else unknown[s.classe]=(unknown[s.classe]||0)+1;
+      });
+      window.__ENSS_V135_UNKNOWN__=unknown;
+      if(fixed){ try{ saveState(); }catch(e){} refresh(); }
+      return fixed;
+    }catch(e){ try{console.warn('V135',e);}catch(_){} return 0; }
+  }
+  function refresh(){
+    ['renderStudents','renderClasses','renderDashboard'].forEach(function(n){ try{ if(typeof window[n]==='function') window[n](); }catch(e){} });
+    try{ if(typeof currentPage!=='undefined'&&currentPage==='classe-detail'&&typeof currentClasseNotes!=='undefined'&&currentClasseNotes&&typeof showClasseDetail==='function') showClasseDetail(currentClasseNotes); }catch(e){}
+  }
+  var sig='';
+  function check(){ var n=((window.STATE&&STATE.students)||[]).length, s=n+'|'+((window.STATE&&STATE.anneeCourante)||''); if(s!==sig){ sig=s; repair(); } }
+  var prevImp=window.importBuiltInHistoricalArchives;
+  if(typeof prevImp==='function' && !prevImp.__v135){
+    var w=function(){ var r=prevImp.apply(this,arguments); setTimeout(repair,50); return r; }; w.__v135=true; window.importBuiltInHistoricalArchives=w;
+  }
+  setTimeout(check,1200); setInterval(check,1500);
+  window.__ENSS_V135_TEST__={canon:canon,repair:repair};
+})();
+</script>
+
 </body>
 </html>
