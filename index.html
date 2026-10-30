@@ -14617,7 +14617,7 @@
         window.centralSignIn = centralSignIn;
         window.centralCreateAccount = centralCreateAccount;
          window.centralProvisionProfile = centralProvisionProfile;
-        window.centralSendEmailVerification = centralSendEmailVerification;
+        if (typeof centralSendEmailVerification === 'function') window.centralSendEmailVerification = centralSendEmailVerification;
         window.centralSignOut = centralSignOut;
         window.centralSeedCurrentState = centralSeedCurrentState;
         window.centralPullForAll = centralPullForAll;
@@ -19400,6 +19400,9 @@ body{ line-height:1.55; }
       '<select id="enssV107Mode" style="padding:.35rem;border:1px solid #cbd5e1;border-radius:8px;"><option value="old">Sèlman sa nou te espere (te nan ane anvan an)</option><option value="all">Tout elèv ane aktif la</option></select>'+
       '<input id="enssV107Q" placeholder="🔎 Chèche non / NISU / klas" style="flex:1;min-width:160px;padding:.35rem .5rem;border:1px solid #cbd5e1;border-radius:8px;">'+
       '<button type="button" id="enssV107All" class="btn" style="padding:.3rem .6rem;">Chwazi tout ki parèt</button><button type="button" id="enssV107None" class="btn" style="padding:.3rem .6rem;">Dechwazi</button></div>'+
+      '<details style="padding:.45rem 1.1rem;border-bottom:1px solid #eef2f7;"><summary style="cursor:pointer;font-weight:700;font-size:.8rem;color:#1e3a5f;">📋 Triyaj rapid: kole lis elèv ki la reyèlman</summary>'+
+      '<div style="margin-top:.4rem;"><textarea id="enssV107Real" rows="4" placeholder="Kole NISU oswa non (yon elèv pa liy). Sa ki pa nan lis la ap chwazi pou retire." style="width:100%;padding:.4rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.8rem;"></textarea>'+
+      '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.3rem;"><button type="button" id="enssV107Triage" class="btn btn-primary" style="padding:.3rem .7rem;">⚡ Triye</button><span id="enssV107TriageMsg" style="font-size:.74rem;color:#475569;"></span></div></div></details>'+
       '<div id="enssV107List" style="overflow:auto;padding:.4rem 1.1rem;flex:1;min-height:120px;"></div>'+
       '<div style="padding:.7rem 1.1rem;border-top:1px solid #e2e8f0;display:flex;flex-direction:column;gap:.45rem;">'+
       '<label style="font-size:.74rem;color:#7f1d1d;"><input type="checkbox" id="enssV107Full"> Efase tout (istorik ane anvan yo + frè + kont elèv yo)</label>'+
@@ -19424,6 +19427,27 @@ body{ line-height:1.55; }
     o.querySelector('#enssV107Mode').onchange=render; o.querySelector('#enssV107Q').oninput=render;
     o.querySelector('#enssV107All').onclick=function(){ listEl.querySelectorAll('input[data-n]').forEach(function(cb){ cb.checked=true; chosen[cb.getAttribute('data-n')]=1; }); count(); };
     o.querySelector('#enssV107None').onclick=function(){ chosen={}; render(); };
+    o.querySelector('#enssV107Triage').onclick=function(){
+      var raw=o.querySelector('#enssV107Real').value.split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean);
+      if(!raw.length){ alert('Kole lis elèv ki la reyèlman anvan.'); return; }
+      var toks=function(x){ return norm(x).replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean); };
+      var lines=raw.map(function(x){ return {raw:x,t:toks(x),flat:norm(x).replace(/\s/g,''),used:false}; });
+      var all=rows(true), found=0, miss=[];
+      all.forEach(function(r){
+        var s=r.s, nis=norm(s.nisu).replace(/\s/g,''), st=toks((s.nom||'')+' '+(s.prenom||'')), hit=false;
+        lines.forEach(function(l){
+          if(hit) return;
+          if(nis&&l.flat.indexOf(nis)>=0) hit=true;
+          else if(st.length>=2&&st.every(function(t){ return l.t.indexOf(t)>=0; })) hit=true;
+          if(hit) l.used=true;
+        });
+        if(hit) found++; else miss.push(s.nisu);
+      });
+      chosen={}; miss.forEach(function(n){ chosen[n]=1; });
+      o.querySelector('#enssV107Mode').value='all'; render();
+      var unmatched=lines.filter(function(l){ return !l.used; }).length;
+      o.querySelector('#enssV107TriageMsg').textContent=found+' elèv jwenn nan lis la · '+miss.length+' pa nan lis la (chwazi pou retire)'+(unmatched?' · '+unmatched+' liy lis la pa jwenn okenn elèv':'')+'. Verifye epi klike Efase.';
+    };
     o.querySelector('#enssV107Cancel').onclick=close;
     o.addEventListener('click',function(e){ if(e.target===o) close(); });
     o.querySelector('#enssV107Del').onclick=function(){ doDelete(Object.keys(chosen),o.querySelector('#enssV107Full').checked); };
@@ -20310,5 +20334,49 @@ window.importBuiltInHistoricalArchives = function(selectedYear) {
   alert('Enpòtasyon ane '+year+' fini.\nNouvo dosye ajoute: '+added+'.\nDosye ki te deja prezan: '+already+'.\nAne '+year+' la kounye a anrejistre nan lis « Ane lekòl ».\nLòt ane yo rete tann; ou ka enpòte yo pita, youn apre lòt.');
 };
 </script>
+
+<script id="enss-v134-year-refresh">
+/* ===== V134 — CHANJE ANE: TOUT PAJ YO SWIV ANE ANE A (Klas, detay klas, lòt paj) =====
+   Avan: chanje ane a rafrechi sèlman Akèy/Dashboard/Elèv; paj Klas la ak paj ki louvri a rete sou ane anvan an.
+   Kounye a: chak fwa ane aktif la chanje (nenpòt chemen: seleksyon, pasaj, sinkwonizasyon) — OSWA kantite elèv
+   ane a chanje (ajoute/retire) — paj ki afiche a ak seksyon Klas la re-dessine ak done ane aktif la. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V134_YEAR_REFRESH__) return; window.__ENSS_V134_YEAR_REFRESH__=true;
+  function yr(){ return String((window.STATE&&STATE.anneeCourante)||''); }
+  function cnt(){ var y=yr(),n=0,a=(window.STATE&&STATE.students)||[]; for(var i=0;i<a.length;i++){ if(a[i]&&String(a[i]._YEAR)===y) n++; } return n; }
+  function call(n){ try{ if(typeof window[n]==='function') window[n](); }catch(e){ try{console.warn('V134',n,e);}catch(_){} } }
+  var lastYear=yr(), lastCount=cnt(), lastTotal=((window.STATE&&STATE.students)||[]).length, busy=false;
+  function refresh(yearChanged){
+    if(busy) return; busy=true;
+    try{
+      if(yearChanged){
+        call('syncSelectedSchoolYearUI'); call('renderAccueilMenu');
+        try{ if(typeof selectedStudents!=='undefined'&&selectedStudents&&selectedStudents.clear) selectedStudents.clear(); }catch(e){}
+        call('renderDashboard'); call('renderAccueil');
+      }
+      call('renderStudents'); call('renderClasses');
+      var p=(typeof currentPage!=='undefined')?currentPage:((window.STATE&&STATE.currentPage)||'accueil');
+      if(p==='classe-detail' && typeof currentClasseNotes!=='undefined' && currentClasseNotes && typeof showClasseDetail==='function'){
+        try{ showClasseDetail(currentClasseNotes); }catch(e){}
+      } else if(yearChanged && p && p!=='classes' && p!=='eleves' && p!=='accueil' && p!=='dashboard' && typeof renderPage==='function'){
+        try{ renderPage(p); }catch(e){}
+      }
+    } finally { busy=false; }
+  }
+  function check(){
+    var y=yr(), c=cnt(), t=((window.STATE&&STATE.students)||[]).length;
+    if(y!==lastYear){ lastYear=y; lastCount=c; lastTotal=t; refresh(true); }
+    else if(c!==lastCount||t!==lastTotal){ lastCount=c; lastTotal=t; refresh(false); }
+  }
+  var prevSync=window.syncSelectedSchoolYearUI;
+  if(typeof prevSync==='function' && !prevSync.__v134){
+    var w=function(){ var r=prevSync.apply(this,arguments); setTimeout(check,0); return r; }; w.__v134=true; window.syncSelectedSchoolYearUI=w;
+  }
+  setInterval(check,700);
+  window.__ENSS_V134_TEST__={check:check,refresh:refresh};
+})();
+</script>
+
 </body>
 </html>
