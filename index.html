@@ -129,6 +129,7 @@
         .accueil-menu .menu-item[data-page="dashboard"] { background:#16a085; }
         .accueil-menu .menu-item[data-page="classes"] { background:#8e44ad; }
         .accueil-menu .menu-item[data-page="direction"] { background:#d35400; }
+        .accueil-menu .menu-item[data-page="efacap"] { background:#087f5b; border:2px solid #b7efcf; }
         .accueil-menu .menu-item[data-page="parametres"] { background:#34495e; }
         .accueil-menu .menu-item[data-page="quiz"] { background:#7c3aed; font-size:0.9rem; padding:0.4rem 1rem; border:2px solid #c4b5fd; box-shadow:0 2px 7px rgba(124,58,237,.28); }
         .accueil-menu .menu-item[data-page="quiz"]:hover { background:#6d28d9; transform:translateY(-2px); }
@@ -488,6 +489,156 @@
 #page-parametres .security-block td:nth-child(3){min-width:105px;}
 #page-parametres .security-block button{white-space:nowrap;}
 #page-parametres #enssCentralDbPanel input{max-width:100%;box-sizing:border-box;}
+</style>
+<style id="efacap-premium-interface">
+/* EFACAP — interface administrative et pédagogique */
+#page-efacap{padding:clamp(.55rem,2vw,1.2rem)!important;background:linear-gradient(180deg,#f3f7fa 0%,#f8fafc 42%,#eef4f7 100%);}
+#page-efacap>.card:first-child{display:none!important}
+#efacapModuleContent{max-width:1500px;margin:0 auto;font-size:14px;color:#183247}
+#efacapModuleContent .efacap-hero{position:relative;isolation:isolate;display:flex;justify-content:space-between;align-items:center;gap:1.5rem;min-height:190px;padding:clamp(1.4rem,4vw,2.8rem);border:1px solid #ffffff35;border-radius:22px;color:#fff;background:linear-gradient(115deg,#102d46 0%,#14516a 48%,#087f68 100%);box-shadow:0 16px 38px #102d4628;margin:0 0 1.1rem;overflow:hidden}
+#efacapModuleContent .efacap-hero:before,#efacapModuleContent .efacap-hero:after{content:"";position:absolute;z-index:-1;border:1px solid #ffffff20;border-radius:50%;pointer-events:none}
+#efacapModuleContent .efacap-hero:before{width:310px;height:310px;right:5%;top:-190px;box-shadow:0 0 0 22px #ffffff08,0 0 0 48px #ffffff06}
+#efacapModuleContent .efacap-hero:after{width:190px;height:190px;right:23%;bottom:-150px;box-shadow:0 0 0 20px #ffffff08}
+#efacapModuleContent .efacap-hero>div:first-child{max-width:850px;position:relative}
+#efacapModuleContent .efacap-kicker{display:inline-flex;align-items:center;gap:.45rem;padding:.38rem .7rem;border:1px solid #ffffff45;border-radius:999px;background:#ffffff14;font-size:.68rem;letter-spacing:.13em;font-weight:800;color:#f6d990}
+#efacapModuleContent .efacap-hero h2{font-size:clamp(1.55rem,4vw,2.45rem);line-height:1.12;letter-spacing:.015em;margin:.85rem 0 .5rem;color:#fff;font-weight:900}
+#efacapModuleContent .efacap-hero p{font-size:clamp(.82rem,1.5vw,1rem);line-height:1.55;margin:.35rem 0 .9rem;color:#e5f2f4;max-width:720px}
+#efacapModuleContent .efacap-hero b{display:inline-flex;padding:.5rem .8rem;border-left:3px solid #e2bd68;background:#ffffff12;border-radius:0 8px 8px 0;color:#fff;font-size:.85rem}
+#efacapModuleContent .efacap-seal{width:112px;height:112px;flex:0 0 112px;border:2px solid #e8d29a;border-radius:50%;display:grid;place-content:center;text-align:center;font-weight:950;font-size:1.75rem;color:#f7e7bd;background:radial-gradient(circle,#ffffff20,#ffffff05 68%);box-shadow:inset 0 0 0 7px #ffffff10,0 8px 25px #001b2b35;transform:rotate(-7deg)}
+#efacapModuleContent .efacap-seal small{font-size:.65rem;letter-spacing:.28em;color:#fff}
+#efacapModuleContent .efacap-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;padding:.85rem;margin:0 0 1.1rem;border:1px solid #dce6ed;border-radius:18px;background:#fff;box-shadow:0 7px 22px #1832470b;overflow:visible}
+#efacapModuleContent .efacap-nav button{position:relative;display:flex;align-items:center;gap:.65rem;min-height:58px;padding:.65rem .8rem;border:1px solid #e2eaf0;border-radius:12px;background:#f8fafc;color:#29465a;text-align:left;white-space:normal;font-size:.76rem;line-height:1.25;font-weight:750;transition:transform .16s,border-color .16s,background .16s,box-shadow .16s}
+#efacapModuleContent .efacap-nav button:before{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:#e6f2f0;color:#087f68;font-size:1rem}
+#efacapModuleContent .efacap-nav button:nth-child(1):before{content:"▦"}#efacapModuleContent .efacap-nav button:nth-child(2):before{content:"🏫"}#efacapModuleContent .efacap-nav button:nth-child(3):before{content:"👥"}#efacapModuleContent .efacap-nav button:nth-child(4):before{content:"🎓"}#efacapModuleContent .efacap-nav button:nth-child(5):before{content:"🧭"}#efacapModuleContent .efacap-nav button:nth-child(6):before{content:"📚"}#efacapModuleContent .efacap-nav button:nth-child(7):before{content:"🏗"}#efacapModuleContent .efacap-nav button:nth-child(8):before{content:"📊"}#efacapModuleContent .efacap-nav button:nth-child(9):before{content:"📈"}#efacapModuleContent .efacap-nav button:nth-child(10):before{content:"📁"}#efacapModuleContent .efacap-nav button:nth-child(11):before{content:"ℹ"}#efacapModuleContent .efacap-nav button:nth-child(12):before{content:"🔐"}
+#efacapModuleContent .efacap-nav button:hover{transform:translateY(-2px);border-color:#9fc9bf;background:#f0f8f6;box-shadow:0 5px 14px #087f6814}
+#efacapModuleContent .efacap-nav button.active{color:#fff;border-color:#087f68;background:linear-gradient(110deg,#087f68,#12637a);box-shadow:0 6px 16px #087f6830}
+#efacapModuleContent .efacap-nav button.active:before{background:#ffffff20;color:#fff}
+#efacapModuleContent .efacap-section-title{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin:1rem 0;padding:.25rem 0 .75rem;border-bottom:1px solid #dce6ed}
+#efacapModuleContent .efacap-section-title h2{font-size:1.25rem;margin:0;color:#153e56;font-weight:850}
+#efacapModuleContent .efacap-section-title>.btn{border-radius:9px;padding:.55rem .8rem;font-weight:700}
+#efacapModuleContent .efacap-stat-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem;margin:1rem 0}
+#efacapModuleContent .efacap-stat-card{position:relative;min-height:112px;padding:1rem;border:1px solid #e0e9ee;border-radius:15px;background:#fff;box-shadow:0 7px 20px #1832470a;overflow:hidden}
+#efacapModuleContent .efacap-stat-card:after{content:"";position:absolute;width:72px;height:72px;right:-22px;bottom:-30px;border-radius:50%;background:#e8f4f1}
+#efacapModuleContent .efacap-stat-card span{position:relative;z-index:1;font-size:1.2rem}
+#efacapModuleContent .efacap-stat-card b{position:relative;z-index:1;display:block;font-size:1.8rem;line-height:1.35;color:#087f68;font-weight:900}
+#efacapModuleContent .efacap-stat-card small{position:relative;z-index:1;font-size:.72rem;color:#647b8b;font-weight:650}
+#efacapModuleContent .efacap-two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+#efacapModuleContent .efacap-panel,#efacapModuleContent .efacap-info-card{background:#fff;border:1px solid #e0e9ee;border-radius:16px;padding:1.1rem;margin:.65rem 0;box-shadow:0 7px 20px #18324708}
+#efacapModuleContent .efacap-panel h3,#efacapModuleContent .efacap-info-card h3{font-size:.98rem;margin:.1rem 0 .75rem;color:#12634f;font-weight:850}
+#efacapModuleContent .efacap-panel p,#efacapModuleContent .efacap-panel li,#efacapModuleContent .efacap-info-card p{font-size:.82rem;line-height:1.7;color:#43596a}
+#efacapModuleContent .efacap-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem}
+#efacapModuleContent .efacap-info-card{margin:0;border-top:3px solid #0c8871}
+#efacapModuleContent .efacap-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;font-size:.8rem}
+#efacapModuleContent .efacap-check-grid>div{padding:.65rem .75rem;border:1px solid #e4edf1;border-radius:9px;background:#f8fbfc;color:#344e60}
+#efacapModuleContent .efacap-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin:1rem 0;padding:.8rem 1rem;border:1px solid #dfe9ee;border-radius:13px;background:#fff}
+#efacapModuleContent .efacap-toolbar span{font-size:.78rem;color:#607789;font-weight:700}
+#efacapModuleContent .efacap-table-wrap{width:100%;overflow:auto;border:1px solid #dce6ec;border-radius:14px;background:#fff;box-shadow:0 6px 18px #18324708}
+#efacapModuleContent .efacap-table{width:100%;border-collapse:separate;border-spacing:0;min-width:700px;font-size:.78rem}
+#efacapModuleContent .efacap-table th{background:#eaf3f4;color:#174b53;text-align:left;font-weight:800;position:sticky;top:0}
+#efacapModuleContent .efacap-table th,#efacapModuleContent .efacap-table td{padding:.75rem .7rem;border-bottom:1px solid #e8eef2;vertical-align:top}
+#efacapModuleContent .efacap-table tbody tr:nth-child(even){background:#f9fbfc}
+#efacapModuleContent .efacap-table tbody tr:hover{background:#f0f8f6}
+#efacapModuleContent .efacap-empty{padding:2rem 1rem;text-align:center;border:1px dashed #a8c6c1;border-radius:14px;background:#fbfefd;color:#607789;font-size:.85rem}
+#efacapModuleContent button.btn{border-radius:8px;font-weight:700}
+.efacap-modal-backdrop{backdrop-filter:blur(4px);background:#102b40b8!important}
+.efacap-modal{border:1px solid #dce7ed;box-shadow:0 24px 70px #071c2b55!important}
+.efacap-modal-head h3{color:#155b52}
+.efacap-form-grid{gap:.85rem}
+.efacap-field label{color:#29475a}
+.efacap-field input:focus,.efacap-field select:focus,.efacap-field textarea:focus{outline:2px solid #0b9275;outline-offset:1px;border-color:#0b9275}
+@media(max-width:1000px){#efacapModuleContent .efacap-stat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#efacapModuleContent .efacap-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){#page-efacap{padding:.45rem!important}#efacapModuleContent .efacap-hero{min-height:0;padding:1.2rem;border-radius:16px}#efacapModuleContent .efacap-seal{width:68px;height:68px;flex-basis:68px;font-size:1.1rem}#efacapModuleContent .efacap-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;padding:.55rem}#efacapModuleContent .efacap-nav button{min-height:54px;padding:.5rem;font-size:.7rem;gap:.4rem}#efacapModuleContent .efacap-nav button:before{flex-basis:28px;width:28px;height:28px;font-size:.85rem}#efacapModuleContent .efacap-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}#efacapModuleContent .efacap-stat-card{min-height:95px;padding:.75rem}#efacapModuleContent .efacap-stat-card b{font-size:1.5rem}#efacapModuleContent .efacap-two-col,#efacapModuleContent .efacap-info-grid{grid-template-columns:1fr}#efacapModuleContent .efacap-check-grid{grid-template-columns:1fr}#efacapModuleContent .efacap-section-title h2{font-size:1.05rem}}
+@media print{#page-efacap{background:#fff!important}#efacapModuleContent .efacap-nav,#efacapModuleContent .efacap-section-title>.btn{display:none!important}}
+
+/* EFACAP — kontrast ekriti fòm yo: tit, etikèt ak bouton dwe lizib */
+#efacapFormHost .efacap-modal-backdrop{
+  position:fixed!important;inset:0!important;z-index:99999!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:1rem!important;background:rgba(8,25,40,.78)!important;
+}
+#efacapFormHost .efacap-modal{
+  display:block!important;width:min(760px,96vw)!important;max-height:90vh!important;
+  overflow:auto!important;padding:1.25rem!important;border-radius:18px!important;
+  background:#fff!important;color:#183247!important;
+}
+#efacapFormHost .efacap-modal-head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:1rem!important;margin:0 0 1rem!important;padding:0 0 .85rem!important;
+  border-bottom:2px solid #dce8ee!important;background:#fff!important;
+}
+#efacapFormHost .efacap-modal-head h3{
+  display:block!important;margin:0!important;color:#123b52!important;
+  font-size:1.18rem!important;line-height:1.35!important;font-weight:900!important;
+  opacity:1!important;text-shadow:none!important;
+}
+#efacapFormHost .efacap-modal-head .btn{
+  color:#17394d!important;background:#edf3f6!important;border:1px solid #cbd9e1!important;
+  font-weight:800!important;
+}
+#efacapFormHost .efacap-form-grid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:1rem!important;
+}
+#efacapFormHost .efacap-field{min-width:0!important}
+#efacapFormHost .efacap-field label{
+  display:block!important;margin:0 0 .38rem!important;color:#17394d!important;
+  font-size:.84rem!important;font-weight:850!important;opacity:1!important;
+}
+#efacapFormHost .efacap-field input,
+#efacapFormHost .efacap-field select,
+#efacapFormHost .efacap-field textarea{
+  display:block!important;width:100%!important;min-height:42px!important;
+  padding:.62rem .72rem!important;border:1px solid #aebfc9!important;
+  border-radius:9px!important;background:#fff!important;color:#172f40!important;
+  font-size:.88rem!important;font-weight:550!important;opacity:1!important;
+}
+#efacapFormHost .efacap-field input::placeholder,
+#efacapFormHost .efacap-field textarea::placeholder{color:#657987!important;opacity:1!important}
+#efacapFormHost .efacap-field.efacap-wide{grid-column:1/-1!important}
+#efacapFormHost .efacap-form-actions{
+  position:sticky!important;bottom:-1.25rem!important;display:flex!important;
+  justify-content:flex-end!important;gap:.65rem!important;flex-wrap:wrap!important;
+  margin:1.1rem -1.25rem -1.25rem!important;padding:.85rem 1.25rem!important;
+  border-top:1px solid #dce6ec!important;background:#fff!important;
+}
+#efacapFormHost .efacap-form-actions button{
+  min-height:42px!important;padding:.62rem 1rem!important;border-radius:9px!important;
+  font-size:.84rem!important;font-weight:850!important;opacity:1!important;
+}
+#efacapFormHost .efacap-form-actions button[type="submit"]{
+  color:#fff!important;background:#087f68!important;border:1px solid #087f68!important;
+  text-shadow:none!important;
+}
+#efacapFormHost .efacap-form-actions button[type="button"]{
+  color:#17394d!important;background:#eaf0f4!important;border:1px solid #cbd8df!important;
+}
+@media(max-width:620px){
+  #efacapFormHost .efacap-modal{padding:1rem!important}
+  #efacapFormHost .efacap-form-grid{grid-template-columns:1fr!important}
+  #efacapFormHost .efacap-field.efacap-wide{grid-column:auto!important}
+  #efacapFormHost .efacap-form-actions{margin:1rem -1rem -1rem!important;padding:.75rem 1rem!important}
+}
+
+/* EFACAP: katalòg modèl ak editè dokiman ofisyèl */
+.efacap-template-panel{margin-top:22px!important}
+.efacap-template-intro{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:16px}
+.efacap-template-intro h3{margin:0 0 7px;color:#123b52;font-weight:900}
+.efacap-template-intro p{margin:0;color:#425d6d;line-height:1.55;max-width:850px}
+.efacap-template-count{white-space:nowrap;background:#e7f3ef;color:#075b4b;border-radius:20px;padding:7px 12px;font-weight:800}
+.efacap-template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.efacap-template-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;min-height:130px;padding:15px;border:1px solid #cbdce3;border-radius:13px;background:#fff;color:#18394c;cursor:pointer;box-shadow:0 2px 8px rgba(16,55,73,.06)}
+.efacap-template-card:hover{border-color:#087f68;box-shadow:0 5px 16px rgba(8,127,104,.12);transform:translateY(-1px)}
+.efacap-template-card span{font-size:1.45rem}.efacap-template-card b{color:#123b52;font-size:.94rem;line-height:1.35}.efacap-template-card small{color:#526b78}.efacap-template-card em{font-style:normal;color:#087f68;font-weight:800;font-size:.8rem;margin-top:auto}
+#efacapFormHost .efacap-template-editor{width:min(900px,97vw)!important}
+.efacap-template-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.efacap-template-meta label,.efacap-template-content-label{display:block;color:#17394d;font-weight:850;font-size:.86rem}
+.efacap-template-meta input{display:block;width:100%;margin-top:5px;padding:10px;border:1px solid #b8cbd4;border-radius:8px;color:#17394d;background:#fff}
+#efacapTplContent{display:block;width:100%;min-height:440px;resize:vertical;margin-top:7px;padding:14px;border:1px solid #aebfc9;border-radius:10px;background:#fff;color:#172f40;font:14px/1.65 Arial,sans-serif;white-space:pre-wrap}
+.efacap-template-editor .efacap-modal-head small{display:block;color:#526b78;margin-top:4px}
+#efacapFormHost .efacap-template-editor .efacap-form-actions{position:sticky;bottom:-1.25rem}
+@media(max-width:760px){.efacap-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.efacap-template-intro{display:block}.efacap-template-count{display:inline-block;margin-top:8px}}
+@media(max-width:520px){.efacap-template-grid{grid-template-columns:1fr}.efacap-template-meta{grid-template-columns:1fr}#efacapTplContent{min-height:360px}}
+
 </style>
 </head>
 <body>
@@ -2071,6 +2222,22 @@
                 <div class="card mt-1 text-center text-muted" id="contactsSummary" style="padding:0.6rem;font-size:0.8rem;">Total: 0 sélectionné(s) / 0 parent(s)</div>
             </div>
 
+
+            <!-- ===== MODIL ENDEPANDAN EFACAP SAINTE-SUZANNE ===== -->
+            <section class="page" id="page-efacap">
+                <div class="card" style="border-top:5px solid #087f5b;padding:1rem;margin-bottom:1rem;">
+                    <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap;">
+                        <div><div style="font-size:.75rem;font-weight:800;color:#087f5b;letter-spacing:.08em;">MINISTÈRE DE L’ÉDUCATION NATIONALE ET DE LA FORMATION PROFESSIONNELLE</div>
+                        <h2 style="margin:.25rem 0;color:#087f5b;">EFACAP SAINTE-SUZANNE</h2>
+                        <div style="font-size:.9rem;font-weight:600;">École Fondamentale d’Application – Centre d’Appui Pédagogique</div>
+                        <div style="font-size:.78rem;color:var(--text-light);margin-top:.25rem;">Coordonnateur EFACAP : Joseph Mary CHARLES · Komin Sainte-Suzanne</div></div>
+                        <div style="font-size:2.8rem;">🎓</div>
+                    </div>
+                    <p style="margin:.6rem 0 0;font-size:.82rem;color:var(--text-light);">Espas administratif ak pedagojik EFACAP la. Li fonksyone apa, san li pa ranplase oswa modifye dosye ENSS yo.</p>
+                </div>
+                <div id="efacapModuleContent"></div>
+                <div id="efacapFormHost"></div>
+            </section>
         </main>
 <!-- ENSS V137: 8 import buttons for historic school years; active years 2025-2026 and 2026-2027 untouched. -->
 <!-- ENSS COPYRIGHT FOOTER: localized, persistent bottom-of-platform notice -->
@@ -2483,6 +2650,8 @@
             return {
                 students: [],
                 personnel: [],
+                // EFACAP: espace autonome, séparé des dossiers scolaires ENSS.
+                efacap: { schools: [], staff: [], trainings: [], visits: [], resources: [], infrastructure: [], projects: [], reports: [], access: [], activeTab: 'dashboard', director: 'Joseph Mary CHARLES' },
                 matieres: JSON.parse(JSON.stringify(DEFAULT_MATIERES)),
                 matieresPrescolaire: [
                     { id: 'mp-cfrc', nom: "Com Française", code: 'CFRC' },
@@ -2617,7 +2786,7 @@
         var ENSS_CENTRAL_TABLE = 'school_state';
         // Project URL / Publishable key / School ID ENSS la deja pre-konfigire; administratè a ka modifye yo nan Paramètres si sa nesesè.
         // Publishable key la fèt pou frontend; service_role pa dwe janm mete nan fichye a.
-        var ENSS_APP_VERSION = 'V136-HISTORICAL-ARCHIVES-2018-2023';
+        var ENSS_APP_VERSION = 'V136-HISTORICAL-ARCHIVES-2018-2023-EFACAP-ADDON-1';
         var ENSS_CENTRAL_PUBLIC_CONFIG = { url: 'https://qxwzrkpzlibuxorimwon.supabase.co', key: 'sb_publishable_GFcXieuyjvv6Yzw6Ou4k3g_nLfJl5DM', schoolId: 'ENSS-SCHOOL-1' };
         var ENSS_CENTRAL = { client: null, ready: false, syncing: false, timer: null, session: null, lastRemoteAt: null, lastRemoteRevision: null, channel: null, sessionCheckPromise: null, signingOut: false };
         // V85: yon chanjman rete 'an atant' jiskaske Supabase konfime ekriti a.
@@ -4342,6 +4511,12 @@
 
         function hasAccess(page) {
             var role = getRole();
+            if (page === 'efacap') {
+                if (role === 'admin') return true;
+                var ef = STATE.efacap || {};
+                var grants = Array.isArray(ef.access) ? ef.access : [];
+                return !!STATE.utilisateur && grants.some(function(g) { return String(g.profil || '').toLowerCase() === String(STATE.utilisateur || '').toLowerCase() && g.active !== false; });
+            }
             if (page === 'videoLibrary') return ['admin','secretaire','secrétaire','enseignant','enseignante','enseignant(e)','enseignant(e) titulaire','teacher','eleve','élève','student'].includes(String(role || '').toLowerCase());
             if (page === 'supervision') return role === 'admin';
             // ENSS student accounts are strictly personal: never open class-wide or management pages.
@@ -4398,6 +4573,7 @@
                 { id: 'accueil', label: 'Akèy', icon: '🏠' },
                 { id: 'dashboard', label: 'Tableau de Bord', icon: '📊' },
                 { id: 'direction', label: 'Direction', icon: '🏛️' },
+                { id: 'efacap', label: 'EFACAP Sainte-Suzanne', icon: '🎓' },
                 { id: 'classes', label: 'Classes', icon: '🏫' },
                 { id: 'eleves', label: 'Élèves', icon: '👨‍🎓' },
                 { id: 'resultats', label: 'Résultats', icon: '📈' },
@@ -4429,6 +4605,7 @@
                 accueil: 'Akèy',
                 dashboard: 'Tableau de Bord',
                 direction: 'Direction',
+                efacap: 'EFACAP SAINTE-SUZANNE',
                 supervision: 'Sipèvizyon pedagojik',
                 classes: 'Classes',
                 eleves: 'Élèves',
@@ -5130,6 +5307,193 @@
         }
 
 
+        // ===== EFACAP SAINTE-SUZANNE : module autonome et stockage non destructif =====
+        function ensureEfacapState() {
+            if (!STATE.efacap || typeof STATE.efacap !== 'object') STATE.efacap = {};
+            var defaults = {schools:[],staff:[],trainings:[],visits:[],resources:[],infrastructure:[],projects:[],reports:[],access:[],documents:[],activeTab:'dashboard',coordinator:'Joseph Mary CHARLES'};
+            Object.keys(defaults).forEach(function(k){if(STATE.efacap[k]===undefined||STATE.efacap[k]===null)STATE.efacap[k]=JSON.parse(JSON.stringify(defaults[k]));});
+            ['schools','staff','trainings','visits','resources','infrastructure','projects','reports','access','documents'].forEach(function(k){if(!Array.isArray(STATE.efacap[k]))STATE.efacap[k]=[];});
+            if(!STATE.efacap.coordinator)STATE.efacap.coordinator='Joseph Mary CHARLES';
+            return STATE.efacap;
+        }
+        function efacapIsDirector(){return getRole()==='admin';}
+        function efacapGrant(){
+            var ef=ensureEfacapState(),who=String(STATE.utilisateur||'').toLowerCase();
+            return (ef.access||[]).find(function(g){return String(g.profil||'').toLowerCase()===who&&g.active!==false;})||null;
+        }
+        function efacapCanEdit(key){
+            if(efacapIsDirector())return true;
+            var g=efacapGrant(); if(!g)return false;
+            var role=String(g.role||'');
+            if(role==='secretariat')return ['schools','staff','trainings','visits','resources','infrastructure','projects','reports','documents'].indexOf(key)!==-1;
+            if(role==='conseiller')return ['trainings','visits','resources','reports','documents'].indexOf(key)!==-1;
+            if(role==='ecole_associee')return false;
+            return false;
+        }
+        function efacapTabLabel(t){return ({dashboard:'Tablo bò',schools:'Lekòl asosye yo',staff:'Pèsonèl EFACAP',trainings:'Fòmasyon kontinyèl',visits:'Vizit ak akonpayman',resources:'Resous pedagojik',infrastructure:'Enfrastrikti CAP',projects:'Finans ak pwojè',reports:'Rapò ak estatistik',documents:'Fòmilè ak dokiman',access:'Dwa aksè',information:'Enfòmasyon EFACAP'})[t]||t;}
+        function efacapSpecs(){
+            return {
+              schools:{title:'Dosye lekòl asosye',add:'Anrejistre lekòl',fields:[['name','Non lekòl la','text',true],['schoolType','Kalite lekòl','select',['Piblik','Prive','Kongreganis','Kominotè'],true],['commune','Komin / seksyon kominal','text',true],['address','Adrès','text'],['director','Direktè lekòl','text'],['phone','Telefòn','tel'],['email','Imèl','email'],['teachers','Kantite anseyan','number'],['students','Kantite elèv total','number'],['girls','Kantite tifi','number'],['boys','Kantite tigason','number'],['status','Estati','select',['An sèvis','An swivi','Sispann']],['notes','Obsèvasyon','textarea']]},
+              staff:{title:'Pèsonèl EFACAP',add:'Anrejistre responsab',fields:[['name','Non ak prenon','text',true],['sex','Sèks','select',['Fi','Gason'],true],['role','Fonksyon','select',['Konseye pedagojik','Sekretarya','Fòmatè','Responsab administratif','Lòt']],['specialty','Espesyalite / domèn','text'],['phone','Telefòn','tel'],['email','Imèl','email'],['status','Estati','select',['Aktif','Inaktif']],['notes','Nòt','textarea']]},
+              trainings:{title:'Fòmasyon kontinyèl',add:'Kreye fòmasyon',fields:[['title','Tèm fòmasyon','text',true],['date','Dat','date',true],['endDate','Dat fen','date'],['place','Kote','text'],['trainer','Fòmatè / responsab','text'],['target','Piblik sib','text'],['participants','Kantite patisipan','number'],['objectives','Objektif','textarea'],['content','Kontni / metòd','textarea'],['evaluation','Evalyasyon / rezilta','textarea'],['status','Estati','select',['Planifye','An kou','Reyalize','Ranvwaye']]]},
+              visits:{title:'Vizit ak akonpayman pedagojik',add:'Anrejistre vizit',fields:[['school','Lekòl vizite','text',true],['date','Dat vizit','date',true],['advisor','Konseye pedagojik','text'],['classroom','Klas / nivo obsève','text'],['teacher','Anseyan obsève','text'],['purpose','Objektif vizit','textarea'],['observations','Obsèvasyon nan klas','textarea'],['strengths','Pwen fò','textarea'],['needs','Bezwen idantifye','textarea'],['recommendations','Rekòmandasyon','textarea'],['followup','Dat / plan swivi','textarea'],['status','Estati','select',['Planifye','Fèt','Swivi nesesè','Fèmen']]]},
+              resources:{title:'Resous pedagojik',add:'Ajoute resous',fields:[['title','Tit dokiman / resous','text',true],['type','Kategori','select',['Gid pedagojik','Pwogram MENFP','Fich leson','Manyèl','Videyo','Fòmilè','Lòt']],['level','Nivo fondamantal','text'],['subject','Matyè / domèn','text'],['reference','Referans / nimewo dokiman','text'],['link','Lyen oswa chemen fichye','url'],['description','Deskripsyon','textarea']]},
+              infrastructure:{title:'Enfrastrikti ak ekipman CAP',add:'Anrejistre bezwen',fields:[['item','Enfrastrikti / ekipman','text',true],['location','Kote','text'],['condition','Eta aktyèl','select',['Bon','Mwayen','Move','Pa disponib']],['priority','Priyorite','select',['Ijan','Wo','Mwayen','Ba']],['quantity','Kantite','number'],['estimatedCost','Kout estime','number'],['notes','Detay / bezwen','textarea'],['status','Swivi','select',['Pou fèt','An kou','Reyalize']]]},
+              projects:{title:'Finansman ak pwojè',add:'Anrejistre pwojè',fields:[['title','Non pwojè a','text',true],['partner','Patnè / finansè','text'],['objective','Objektif pwojè','textarea'],['budget','Bidjè prevwa','number'],['funding','Finansman jwenn','number'],['spent','Depans fèt','number'],['startDate','Dat kòmansman','date'],['deadline','Dat limit','date'],['status','Estati','select',['Pwopoze','Apwouve','An kou','Reyalize','Sispann']],['notes','Nòt','textarea']]},
+              reports:{title:'Rapò ak estatistik',add:'Kreye rapò',fields:[['title','Tit rapò','text',true],['type','Kalite rapò','select',['Rapò aktivite','Rapò fòmasyon','Rapò vizit','Rapò finansye','Rapò anyèl','Lòt']],['period','Peryòd kouvri','text'],['date','Dat rapò','date'],['author','Responsab','text'],['summary','Rezime / rezilta','textarea'],['recommendations','Rekòmandasyon','textarea'],['status','Estati','select',['Bouyon','Valide','Voye']]]},
+              documents:{title:'Fòmilè ak dokiman administratif',add:'Ajoute dokiman',fields:[['title','Non fòmilè / dokiman','text',true],['category','Kategori','select',['Administrasyon','Fòmasyon','Vizit pedagojik','Lekòl asosye','Finans / pwojè','Evalyasyon','Lòt']],['reference','Referans ofisyèl','text'],['version','Vèsyon / dat','text'],['description','Eksplikasyon / itilizasyon','textarea'],['link','Lyen fichye','url'],['status','Estati','select',['An vigè','Pou revize','Achive']]]}
+            };
+        }
+        function efacapEscape(v){return escapeHtml(String(v==null?'':v));}
+        function efacapStats(){
+            var e=ensureEfacapState(),schools=e.schools,active=schools.filter(function(x){return x.status!=='Sispann';}).length;
+            var visits=e.visits,done=visits.filter(function(x){return x.status==='Fèt'||x.status==='Fèmen';}).length;
+            var trainings=e.trainings,trained=trainings.reduce(function(n,x){return n+(Number(x.participants)||0);},0);
+            var totalTeachers=schools.reduce(function(n,x){return n+(Number(x.teachers)||0);},0);
+            var totalStudents=schools.reduce(function(n,x){return n+(Number(x.students)||0);},0);
+            return [['Lekòl asosye',schools.length,'🏫'],['Lekòl aktif',active,'🟢'],['Anseyan nan rezo a',totalTeachers,'👩🏽‍🏫'],['Elèv nan rezo a',totalStudents,'🎒'],['Fòmasyon',trainings.length,'🎓'],['Patisipasyon fòmasyon',trained,'👥'],['Vizit pedagojik',visits.length,'🧭'],['Vizit reyalize',done,'✅'],['Pwojè',e.projects.length,'📊'],['Resous',e.resources.length,'📚']];
+        }
+        function efacapBar(label,value,max,color){var pct=max?Math.min(100,Math.round(value*100/max)):0;return '<div style="margin:.5rem 0"><div style="display:flex;justify-content:space-between;font-size:.78rem"><b>'+efacapEscape(label)+'</b><span>'+value+'</span></div><div style="height:9px;background:#e8eef1;border-radius:9px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:9px"></div></div></div>';}
+        function efacapRenderDashboard(){
+            var stats=efacapStats(),max=Math.max(1,stats.reduce(function(m,x){return Math.max(m,x[1]);},0));
+            return '<div class="efacap-stat-grid">'+stats.map(function(x,i){return '<div class="efacap-stat-card"><span>'+x[2]+'</span><b>'+x[1]+'</b><small>'+x[0]+'</small></div>';}).join('')+'</div><div class="efacap-two-col"><section class="efacap-panel"><h3>📈 Endikatè aktivite</h3>'+stats.slice(0,8).map(function(x,i){return efacapBar(x[0],x[1],max,['#147d64','#2689a6','#b98731','#8064a2'][i%4]);}).join('')+'</section><section class="efacap-panel"><h3>🎯 Misyon ak priyorite</h3><p>EFACAP se yon sant ki sèvi kòm lekòl aplikasyon ak sant sipò pedagojik. Li òganize fòmasyon kontinyèl, akonpayman pratik ansèyman, obsèvasyon klas, konsèy pedagojik ak sipò pou lekòl fondamantal asosye yo.</p><ul><li>Idantifye bezwen fòmasyon anseyan yo.</li><li>Planifye ak dokimante sesyon fòmasyon.</li><li>Fè vizit, obsèvasyon ak swivi nan lekòl asosye yo.</li><li>Prepare rapò ak rekòmandasyon pou otorite edikatif yo.</li></ul><b>Coordonnateur EFACAP : Joseph Mary CHARLES</b></section></div>';
+        }
+        function efacapRenderInfo(){
+            var sections=[
+             ['Kisa EFACAP ye?','EFACAP vle di École Fondamentale d’Application – Centre d’Appui Pédagogique. Se yon estrikti ki asosye fonksyon lekòl aplikasyon ak misyon sipò pedagojik pou amelyore kalite ansèyman ak aprantisaj.'],
+             ['Misyon prensipal','Òganize fòmasyon kontinyèl pou pèsonèl ansèyman; akonpaye anseyan yo nan pratik klas; ankouraje echanj eksperyans; sipòte lekòl fondamantal asosye yo; dokimante rezilta ak bezwen pedagojik.'],
+             ['Fòmasyon kontinyèl','Chak dosye fòmasyon dwe presize tèm, dat, kote, fòmatè, piblik sib, objektif, kontni, kantite patisipan, evalyasyon ak swivi. Konsève lis prezans ak materyèl fòmasyon yo kòm pyès jistifikatif.'],
+             ['Vizit pedagojik','Anvan vizit la, fikse objektif ak lekòl la. Pandan vizit la, obsève pratik ansèyman avèk respè. Apre vizit la, note fòs, bezwen, rekòmandasyon, responsab swivi ak dat swivi.'],
+             ['Lekòl asosye','Kenbe yon dosye separe pou chak lekòl: idantite, adrès, direksyon, kontak, kantite anseyan/elèv, bezwen, vizit ak plan akonpayman. Done lekòl asosye yo pa dwe melanje ak done prive ENSS.'],
+             ['Rapò ak rann kont','Rapò yo dwe gen peryòd, aktivite fèt, kantite moun/lekòl touche, rezilta, difikilte, depans si sa aplikab, rekòmandasyon ak pyès sipò. Verifye chif yo anvan transmisyon.'],
+             ['Fòmilè ak modèl dokiman','Espas Dokiman an sèvi pou katalòg fòmilè ak modèl yo: fich vizit, fich obsèvasyon klas, plan fòmasyon, lis prezans, evalyasyon fòmasyon, plan swivi, rapò aktivite, rapò finansye, demann materyèl ak korespondans. Modèl sa yo se zouti travay; ranpli yo selon enstriksyon MENFP/DDNE ki an vigè.'],
+             ['Nòt sou referans ofisyèl','Sikilè MENFP C-11:83 ki te prezante nan konvèsasyon an mete École Nationale de Sainte-Suzanne nan lis etablisman ki konsène pa transfòmasyon EFACAP. Pou nenpòt fòmilè obligatwa, nimewo, delè oswa pwosedi legal, sèvi ak dènye dokiman ofisyèl MENFP/DDNE; pa konsidere yon modèl jeneral kòm yon fòmilè ofisyèl valide.']
+            ];
+            return '<div class="efacap-info-grid">'+sections.map(function(x,i){return '<article class="efacap-info-card"><h3>'+['🏛️','🎯','🎓','🧭','🏫','📑','🗂️','📌'][i]+' '+x[0]+'</h3><p>'+x[1]+'</p></article>';}).join('')+'</div>'+efacapRenderTemplateCatalog();
+        }
+
+        function efacapTemplateDefinitions(){
+            return [
+                {id:"school",title:"Fich idantifikasyon lekòl asosye",category:"Lekòl asosye",content:"EFACAP DE SAINTE-SUZANNE\nFICH IDANTIFIKASYON LEKÒL ASOSYE\n\nNon lekòl : __________________________\nKalite : ☐ Piblik ☐ Prive ☐ Kongreganis ☐ Kominotè\nKomin : __________________ Seksyon : __________________\nAdrès : ______________________________________________\nDirektè / Direktèz : ______________ Telefòn : __________\nKantite anseyan : ____ Kantite elèv : ____ Tifi : ____ Tigason : ____\nBezwen pedagojik : _____________________________________\nDènye vizit : ______________ Swivi : __________________\nPrepare pa : __________________ Siyati : _______________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"annual",title:"Plan anyèl fòmasyon",category:"Fòmasyon",content:"EFACAP DE SAINTE-SUZANNE\nPLAN ANYÈL FÒMASYON\n\nAne lekòl : __________________ Dat : __________________\nObjektif jeneral : _____________________________________\nNo | Tèm | Piblik sib / Lekòl | Dat | Fòmatè | Mwayen\n01 | ____ | __________________ | ___ | ______ | ______\n02 | ____ | __________________ | ___ | ______ | ______\n03 | ____ | __________________ | ___ | ______ | ______\nResous nesesè : ________________________________________\nEndikatè rezilta : _____________________________________\nResponsab : __________________ Apwouve pa : ___________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"attendance",title:"Fich prezans fòmasyon",category:"Fòmasyon",content:"EFACAP DE SAINTE-SUZANNE\nFICH PREZANS FÒMASYON\n\nTèm fòmasyon : __________________ Dat : ______________\nKote : __________________ Fòmatè : ____________________\nNo | Non ak prenon | Lekòl | Fonksyon | Sèks | Siyati\n01 | ______________ | _____ | ________ | ____ | ______\n02 | ______________ | _____ | ________ | ____ | ______\n03 | ______________ | _____ | ________ | ____ | ______\n04 | ______________ | _____ | ________ | ____ | ______\n05 | ______________ | _____ | ________ | ____ | ______\nTotal : ____ Fi : ____ Gason : ____\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"evaluation",title:"Fich evalyasyon fòmasyon",category:"Fòmasyon",content:"EFACAP DE SAINTE-SUZANNE\nFICH EVALYASYON FÒMASYON\n\nTèm : ________________________ Dat : ________________\nFòmatè : ______________________ Lekòl : ______________\nObjektif yo te klè? ☐ Wi ☐ Pasyèlman ☐ Non\nKontni itil? ☐ Wi ☐ Pasyèlman ☐ Non\nMetòd apwopriye? ☐ Wi ☐ Pasyèlman ☐ Non\nSa mwen aprann : _______________________________________\nSa mwen pral aplike : __________________________________\nBezwen fòmasyon : ______________________________________\nSatisfaksyon : ☐ Trè byen ☐ Byen ☐ Mwayen ☐ Pa satisfezan\nSèks : ☐ Fi ☐ Gason\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"observation",title:"Fich obsèvasyon klas",category:"Vizit pedagojik",content:"EFACAP DE SAINTE-SUZANNE\nFICH OBSÈVASYON KLAS\n\nLekòl : ________________________ Dat : _______________\nKlas / Nivo : ______________ Matyè : _________________\nAnseyan : __________________ Konseye : _______________\nObjektif leson : ______________________________________\nPreparasyon : _________________________________________\nMetòd ansèyman : ______________________________________\nPatisipasyon elèv : ___________________________________\nJesyon klas : _________________________________________\nPwen fò : _____________________________________________\nBezwen : ______________________________________________\nRekòmandasyon : _______________________________________\nPlan swivi / dat : ____________________________________\nSiyati anseyan : ______________ Konseye : ____________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"visit",title:"Rapò vizit pedagojik",category:"Vizit pedagojik",content:"EFACAP DE SAINTE-SUZANNE\nRAPÒ VIZIT PEDAGOJIK\n\nLekòl vizite : __________________ Dat : ______________\nKomin : __________________ Konseye : _________________\nDirektè : __________________ Anseyan : _______________\nKlas / Matyè : ______________ Dire vizit : ___________\nObjektif vizit : ______________________________________\nSa ki te obsève : _____________________________________\nPwen fò : _____________________________________________\nDifikilte / bezwen : __________________________________\nRekòmandasyon : _______________________________________\nAksyon / responsab : ______________ Dat swivi : _______\nSiyati direktè : ______________ Konseye : ____________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"followup",title:"Plan akò / swivi pedagojik",category:"Lekòl asosye",content:"EFACAP DE SAINTE-SUZANNE\nPLAN AKÒ / SWIVI PEDAGOJIK\n\nLekòl : ________________________ Dat : ______________\nReprezantan lekòl : ___________ Konseye EFACAP : ______\nBezwen idantifye : ____________________________________\nObjektif amelyorasyon : _______________________________\nAksyon | Responsab | Dat limit | Endikatè | Estati\n_____ | __________ | _________ | ________ | ______\n_____ | __________ | _________ | ________ | ______\nDat pwochen swivi : __________ Rezilta : ______________\nSiyati lekòl : _______________ Siyati EFACAP : _______\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"quarter",title:"Rapò aktivite chak trimès",category:"Rapò",content:"EFACAP DE SAINTE-SUZANNE\nRAPÒ AKTIVITE CHAK TRIMÈS\n\nPeryòd : ______________________ Dat rapò : ___________\nResponsab : __________________ Fonksyon : ______________\nRezime : _______________________________________________\nAktivite reyalize : ___________________________________\nLekòl touche : ____ Anseyan : ____ Elèv : ____\nPatisipan fòmasyon : ____ Fi : ____ Gason : ____\nVizit fèt : ____ Fòmasyon fèt : ____\nRezilta : ______________________________________________\nDifikilte : ___________________________________________\nRekòmandasyon : _______________________________________\nPrepare pa : ______________ Verifye pa : ______________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"annualreport",title:"Rapò anyèl EFACAP",category:"Rapò",content:"EFACAP DE SAINTE-SUZANNE\nRAPÒ ANYÈL EFACAP\n\nAne : _________________________ Dat : ________________\nRezime egzekitif : ____________________________________\nLekòl asosye : ____ Anseyan touche : ____ Elèv touche : ____\nFòmasyon : ____ Patisipan : ____ Fi : ____ Gason : ____\nVizit pedagojik : ____ Pwojè : ____\nReyalizasyon prensipal : ______________________________\nDifikilte / risk : ____________________________________\nDepans / resous : _____________________________________\nRekòmandasyon pou ane k ap vini : _____________________\nPrepare pa : ______________ Viza Koòdonatè : __________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"inventory",title:"Fich envantè materyèl",category:"Administrasyon",content:"EFACAP DE SAINTE-SUZANNE\nFICH ENVANTÈ MATERYÈL\n\nDat : _________________________ Sèvis : ______________\nNo | Materyèl | Kantite | Eta | Kote | Remak\n01 | _________ | _______ | ___ | ____ | _____\n02 | _________ | _______ | ___ | ____ | _____\n03 | _________ | _______ | ___ | ____ | _____\n04 | _________ | _______ | ___ | ____ | _____\nTotal atik : ____ Bon eta : ____ Andomaje : ____\nResponsab envantè : ______________ Siyati : ___________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"equipment",title:"Demann ekipman / materyèl",category:"Administrasyon",content:"EFACAP DE SAINTE-SUZANNE\nDEMANN EKIPMAN / MATERYÈL\n\nDat : _________________________ Lekòl / Sèvis : ______\nDemannè : _____________________ Fonksyon : ____________\nMateryèl | Kantite | Itilizasyon / jistifikasyon\n_______ | _______ | ______________________________\n_______ | _______ | ______________________________\nPri estime : ______________ Ijan? ☐ Wi ☐ Non\nApwobasyon : __________________________________________\nDemannè : ________________ Koòdonatè : _______________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true},
+                {id:"budget",title:"Fich swivi pwojè ak bidjè",category:"Finans / pwojè",content:"EFACAP DE SAINTE-SUZANNE\nFICH SWIVI PWOJÈ AK BIDJÈ\n\nNon pwojè : ___________________ Peryòd : ____________\nPatnè / finansè : ______________ Responsab : __________\nObjektif : ____________________________________________\nBidjè apwouve : __________ Finansman : _______________\nDepans : _________________ Balans : __________________\nDat | Aktivite | Prevwa | Reyèl | Pyès jistifikatif\n____ | ________ | ______ | _____ | ________________\nPwogrè : ______________________________________________\nDifikilte / mezi korektif : __________________________\nPrepare pa : ______________ Verifye pa : ______________\n\nSiyati responsab : __________________________\nViza / Siyati Koòdonatè EFACAP : ______________\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]",official:true}
+            ];
+        }
+        function efacapEnsureTemplates(){
+            var e=ensureEfacapState();
+            if(!Array.isArray(e.modelTemplates)||!e.modelTemplates.length)e.modelTemplates=efacapTemplateDefinitions();
+            return e.modelTemplates;
+        }
+        function efacapRenderTemplateCatalog(){
+            var ts=efacapEnsureTemplates();
+            return '<section class="efacap-panel efacap-template-panel"><div class="efacap-template-intro"><div><h3>📋 Lis modèl fòmilè pou prepare / ajoute</h3><p>Klike sou yon modèl pou ouvri dokiman konplè a. Ou kapab ranpli li, anrejistre li, modifye li, enprime li oswa telechaje li an Word. Pou PDF, chwazi “Save as PDF / Anrejistre kòm PDF” nan fenèt enpresyon an.</p></div><span class="efacap-template-count">'+ts.length+' modèl</span></div><div class="efacap-template-grid">'+ts.map(function(t){return '<button type="button" class="efacap-template-card" onclick="efacapOpenTemplate(\''+efacapEscape(t.id)+'\')"><span>📄</span><b>'+efacapEscape(t.title)+'</b><small>'+efacapEscape(t.category||'Administrasyon')+'</small><em>Ouvri modèl la →</em></button>';}).join('')+'</div><button type="button" class="btn btn-primary" onclick="efacapAddCustomTemplate()">＋ Ajoute yon lòt modèl</button></section>';
+        }
+        function efacapOfficialDocument(title,content){
+            var safeTitle=efacapEscape(title),safe=efacapEscape(content);
+            return '<!doctype html><html><head><meta charset="utf-8"><title>'+safeTitle+'</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#172f40;font-size:11pt;line-height:1.5}.head{text-align:center;border-bottom:3px solid #087f68;padding-bottom:12px;margin-bottom:20px}.head h1{font-size:19pt;color:#075b4b;margin:0}.head h2{font-size:12pt;margin:5px 0;color:#17394d}.head p{margin:3px}.doc{white-space:pre-wrap;font-family:Arial,sans-serif;min-height:650px}.sign{display:flex;justify-content:space-between;margin-top:35px}.seal{border:2px solid #087f68;border-radius:50%;width:115px;height:90px;display:flex;align-items:center;justify-content:center;text-align:center;color:#075b4b;font-weight:bold;margin:22px auto 0}.foot{text-align:center;border-top:1px solid #9bb5bf;padding-top:8px;font-size:9pt;margin-top:24px}</style></head><body><header class="head"><h1>EFACAP DE SAINTE-SUZANNE</h1><h2>ÉCOLE FONDAMENTALE D’APPLICATION – CENTRE D’APPUI PÉDAGOGIQUE</h2><p>Coordonnateur : Joseph Mary CHARLES</p><p>Commune de Sainte-Suzanne · République d’Haïti</p></header><h2 style="text-align:center">'+safeTitle+'</h2><main class="doc">'+safe+'</main><div class="sign"><div>Préparé par : ______________________<br><br>Signature : ________________________</div><div>Visa du Coordonnateur : ____________<br><br>Signature : ________________________</div></div><div class="seal">SCEAU<br>EFACAP DE<br>SAINTE-SUZANNE</div><footer class="foot">EFACAP DE SAINTE-SUZANNE · Document administratif</footer></body></html>';
+        }
+        function efacapOpenTemplate(id){
+            var t=efacapEnsureTemplates().find(function(x){return String(x.id)===String(id);});if(!t)return;
+            var host=document.getElementById('efacapFormHost');if(!host)return;
+            host.innerHTML='<div class="efacap-modal-backdrop" onclick="if(event.target===this)efacapCloseForm()"><section class="efacap-modal efacap-template-editor"><div class="efacap-modal-head"><div><h3>'+efacapEscape(t.title)+'</h3><small>Modèl administratif EFACAP · '+efacapEscape(t.category||'')+'</small></div><button type="button" class="btn" onclick="efacapCloseForm()">✕</button></div><div class="efacap-template-meta"><label>Non modèl<input id="efacapTplTitle" value="'+efacapEscape(t.title)+'"></label><label>Kategori<input id="efacapTplCategory" value="'+efacapEscape(t.category||'')+'"></label></div><label class="efacap-template-content-label" for="efacapTplContent">Kontni konplè dokiman an (ou kapab ranpli oswa modifye li)</label><textarea id="efacapTplContent" class="efacap-template-content">'+efacapEscape(t.content||'')+'</textarea><div class="efacap-form-actions"><button type="button" class="btn" onclick="efacapCloseForm()">Fèmen</button><button type="button" class="btn" onclick="efacapPrintTemplate()">🖨 Enprime / PDF</button><button type="button" class="btn" onclick="efacapWordTemplate()">⬇ Word</button>'+(efacapCanEdit('documents')?'<button type="button" class="btn btn-primary" onclick="efacapSaveTemplate(\''+efacapEscape(t.id)+'\')">💾 Anrejistre modifikasyon</button><button type="button" class="btn btn-danger" onclick="efacapDeleteTemplate(\''+efacapEscape(t.id)+'\')">🗑 Suprime</button>':'')+'</div></section></div>';
+        }
+        function efacapCurrentTemplate(){
+            return {title:(document.getElementById('efacapTplTitle')||{}).value||'Modèl EFACAP',category:(document.getElementById('efacapTplCategory')||{}).value||'Administrasyon',content:(document.getElementById('efacapTplContent')||{}).value||''};
+        }
+        function efacapSaveTemplate(id){
+            if(!efacapCanEdit('documents'))return;var t=efacapEnsureTemplates().find(function(x){return String(x.id)===String(id);});if(!t)return;
+            var v=efacapCurrentTemplate();if(!v.title.trim()||!v.content.trim()){alert('Tit ak kontni dokiman an obligatwa.');return;}
+            t.title=v.title;t.category=v.category;t.content=v.content;t.updatedAt=new Date().toISOString();saveState();alert('Modèl la anrejistre.');efacapOpenTemplate(id);
+        }
+        function efacapAddCustomTemplate(){
+            if(!efacapCanEdit('documents')){alert('Ou pa gen dwa ajoute modèl.');return;}
+            var e=ensureEfacapState(),id='custom-'+Date.now();e.modelTemplates=efacapEnsureTemplates();e.modelTemplates.push({id:id,title:'Nouvo modèl EFACAP',category:'Administrasyon',content:'EFACAP DE SAINTE-SUZANNE\\nTIT DOKIMAN : __________________________\\n\\nDat : _________________________________\\nNon : _________________________________\\nDetay :\\n____________________________________________________________\\n\\nSiyati : ______________________________\\n[SCEAU OFISYÈL : EFACAP DE SAINTE-SUZANNE]'});saveState();efacapOpenTemplate(id);
+        }
+        function efacapDeleteTemplate(id){
+            if(!efacapCanEdit('documents')||!confirm('Èske ou vle suprime modèl sa a nèt?'))return;
+            var e=ensureEfacapState();e.modelTemplates=efacapEnsureTemplates().filter(function(x){return String(x.id)!==String(id);});saveState();efacapCloseForm();renderEfacapModule();
+        }
+        function efacapPrintTemplate(){
+            var v=efacapCurrentTemplate(),w=window.open('','_blank');if(!w){alert('Navigatè a bloke fenèt enpresyon an. Pèmèt pop-up pou sit sa a.');return;}
+            w.document.open();w.document.write(efacapOfficialDocument(v.title,v.content));w.document.close();w.focus();setTimeout(function(){w.print();},400);
+        }
+        function efacapWordTemplate(){
+            var v=efacapCurrentTemplate(),blob=new Blob(['\\ufeff'+efacapOfficialDocument(v.title,v.content)],{type:'application/msword'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+            a.href=url;a.download=(v.title||'Dokiman_EFACAP').replace(/[^a-z0-9_-]+/gi,'_')+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+        }
+
+        function efacapRenderRows(key,spec){
+            var e=ensureEfacapState(),rows=e[key]||[],can=efacapCanEdit(key);
+            if(!rows.length)return '<div class="efacap-empty">Pa gen dosye anrejistre nan rubrik sa a. '+(can?'Sèvi ak bouton “'+spec.add+'” pou kòmanse.':'')+'</div>';
+            return '<div class="efacap-table-wrap"><table class="efacap-table"><thead><tr>'+spec.fields.map(function(f){return '<th>'+efacapEscape(f[1])+'</th>';}).join('')+'<th>Aksyon</th></tr></thead><tbody>'+rows.map(function(r){return '<tr>'+spec.fields.map(function(f){var v=r[f[0]];return '<td>'+efacapEscape(v||'—')+'</td>';}).join('')+'<td><button class="btn" onclick="efacapViewRecord(\''+key+'\',\''+efacapEscape(r.id)+'\')">Wè</button> '+(can?'<button class="btn btn-primary" onclick="efacapEditRecord(\''+key+'\',\''+efacapEscape(r.id)+'\')">Modifye</button> <button class="btn btn-danger" onclick="efacapDeleteRecord(\''+key+'\',\''+efacapEscape(r.id)+'\')">Efase</button>':'')+'</td></tr>';}).join('')+'</tbody></table></div>';
+        }
+        function efacapFormField(f,value){
+            var id='efield_'+f[0],v=efacapEscape(value||''),label='<label for="'+id+'">'+efacapEscape(f[1])+(f[3]===true?' *':'')+'</label>';
+            if(f[2]==='textarea')return '<div class="efacap-field efacap-wide">'+label+'<textarea id="'+id+'" rows="3">'+v+'</textarea></div>';
+            if(f[2]==='select')return '<div class="efacap-field">'+label+'<select id="'+id+'" '+(f[4]===true?'required':'')+'><option value="">Chwazi...</option>'+f[3].map(function(o){return '<option value="'+efacapEscape(o)+'" '+(value===o?'selected':'')+'>'+efacapEscape(o)+'</option>';}).join('')+'</select></div>';
+            return '<div class="efacap-field">'+label+'<input id="'+id+'" type="'+(f[2]||'text')+'" value="'+v+'" '+(f[3]===true?'required':'')+'></div>';
+        }
+        function efacapOpenForm(key,id){
+            var spec=efacapSpecs()[key];if(!spec||!efacapCanEdit(key))return;
+            var e=ensureEfacapState(),old=id?e[key].find(function(x){return String(x.id)===String(id);}):null;
+            var host=document.getElementById('efacapFormHost');if(!host)return;
+            host.innerHTML='<div class="efacap-modal-backdrop" onclick="if(event.target===this)efacapCloseForm()"><form class="efacap-modal" onsubmit="efacapSaveForm(event,\''+key+'\',\''+(id||'')+'\')"><div class="efacap-modal-head"><h3>'+(old?'Modifye dosye':'Nouvo dosye')+' — '+efacapEscape(spec.title)+'</h3><button type="button" class="btn" onclick="efacapCloseForm()">✕</button></div><div class="efacap-form-grid">'+spec.fields.map(function(f){return efacapFormField(f,old&&old[f[0]]);}).join('')+'</div><div class="efacap-form-actions"><button type="button" class="btn" onclick="efacapCloseForm()">Anile</button><button class="btn btn-primary" type="submit">💾 Anrejistre</button></div></form></div>';
+        }
+        function efacapSaveForm(ev,key,id){
+            ev.preventDefault();var spec=efacapSpecs()[key];if(!spec||!efacapCanEdit(key))return;
+            var row={id:id||('ef-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+            for(var i=0;i<spec.fields.length;i++){var f=spec.fields[i],el=document.getElementById('efield_'+f[0]),v=el?String(el.value||'').trim():'';if(f[3]===true&&!v){alert('Tanpri ranpli chan obligatwa: '+f[1]);if(el)el.focus();return;}row[f[0]]=v;}
+            var e=ensureEfacapState();if(id){var ix=e[key].findIndex(function(x){return String(x.id)===String(id);});if(ix<0)return;row.createdAt=e[key][ix].createdAt||row.createdAt;e[key][ix]=row;}else e[key].push(row);
+            saveState();efacapCloseForm();renderEfacapModule();
+        }
+        function efacapAddRecord(key){efacapOpenForm(key,'');}
+        function efacapEditRecord(key,id){efacapOpenForm(key,id);}
+        function efacapCloseForm(){var h=document.getElementById('efacapFormHost');if(h)h.innerHTML='';}
+        function efacapViewRecord(key,id){
+            var spec=efacapSpecs()[key],r=(ensureEfacapState()[key]||[]).find(function(x){return String(x.id)===String(id);});if(!spec||!r)return;
+            var host=document.getElementById('efacapFormHost');if(!host)return;
+            host.innerHTML='<div class="efacap-modal-backdrop" onclick="if(event.target===this)efacapCloseForm()"><div class="efacap-modal"><div class="efacap-modal-head"><h3>'+efacapEscape(spec.title)+'</h3><button class="btn" onclick="efacapCloseForm()">✕</button></div>'+spec.fields.map(function(f){return '<p><b>'+efacapEscape(f[1])+':</b><br>'+efacapEscape(r[f[0]]||'—')+'</p>';}).join('')+'<div class="efacap-form-actions"><button class="btn" onclick="efacapCloseForm()">Fèmen</button>'+(efacapCanEdit(key)?'<button class="btn btn-primary" onclick="efacapCloseForm();efacapEditRecord(\''+key+'\',\''+efacapEscape(id)+'\')">Modifye</button>':'')+'</div></div></div>';
+        }
+        function efacapDeleteRecord(key,id){if(!efacapCanEdit(key)||!confirm('Èske ou sèten ou vle efase dosye sa a?'))return;var e=ensureEfacapState();e[key]=e[key].filter(function(r){return String(r.id)!==String(id);});saveState();renderEfacapModule();}
+        function efacapRenderAccess(){
+            var e=ensureEfacapState(),can=efacapIsDirector();
+            return '<section class="efacap-panel"><h3>🔐 Dwa aksè EFACAP</h3><p>Coordonnateur la kontwole aksè yo. Sekretarya, konseye pedagojik ak responsab lekòl asosye yo resevwa dwa selon travay yo. Kont pwofil la dwe egziste deja nan sekirite platfòm la.</p>'+(can?'<button class="btn btn-primary" onclick="efacapAddAccess()">➕ Bay / modifye aksè</button>':'<p>Se Coordonnateur EFACAP la sèlman ki kapab modifye dwa aksè.</p>')+'<div class="efacap-table-wrap"><table class="efacap-table"><thead><tr><th>Pwofil</th><th>Wòl</th><th>Estati</th>'+(can?'<th>Aksyon</th>':'')+'</tr></thead><tbody>'+e.access.map(function(g,i){return '<tr><td>'+efacapEscape(g.profil)+'</td><td>'+efacapEscape(g.role)+'</td><td>'+(g.active===false?'Dezaktive':'Aktif')+'</td>'+(can?'<td><button class="btn" onclick="efacapToggleAccess('+i+')">'+(g.active===false?'Aktive':'Dezaktive')+'</button> <button class="btn btn-danger" onclick="efacapRemoveAccess('+i+')">Retire</button></td>':'')+'</tr>';}).join('')+'</tbody></table></div></section>';
+        }
+        function efacapAddAccess(){
+            if(!efacapIsDirector())return;
+            var profil=prompt('Antre egzak pwofil responsab la jan li parèt nan kont ENSS la:');if(!profil)return;
+            var exists=(STATE.securite.users||[]).some(function(u){return String(u.profil||'').toLowerCase()===profil.toLowerCase();});
+            if(!exists){alert('Pwofil sa a pa egziste nan sekirite ENSS la. Kreye kont lan anvan.');return;}
+            var role=prompt('Wòl: conseiller, secretariat oswa ecole_associee','conseiller');if(!role)return;
+            role=role.toLowerCase().trim();if(['conseiller','secretariat','ecole_associee'].indexOf(role)<0){alert('Wòl pa rekonèt.');return;}
+            var e=ensureEfacapState();e.access=e.access.filter(function(g){return String(g.profil).toLowerCase()!==profil.toLowerCase();});e.access.push({profil:profil,role:role,active:true});saveState();renderEfacapModule();
+        }
+        function efacapToggleAccess(i){if(!efacapIsDirector())return;var e=ensureEfacapState(),g=e.access[i];if(!g)return;g.active=g.active===false;saveState();renderEfacapModule();}
+        function efacapRemoveAccess(i){if(!efacapIsDirector()||!confirm('Retire aksè EFACAP pou pwofil sa a?'))return;ensureEfacapState().access.splice(i,1);saveState();renderEfacapModule();}
+        function efacapExport(){var e=ensureEfacapState(),blob=new Blob([JSON.stringify(e,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EFACAP_SAINTE_SUZANNE_DONNEES.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
+        function renderEfacapModule(){
+            var e=ensureEfacapState(),host=document.getElementById('efacapModuleContent');if(!host)return;
+            var tabs=['dashboard','schools','staff','trainings','visits','resources','infrastructure','projects','reports','documents','information','access'];
+            if(tabs.indexOf(e.activeTab)<0)e.activeTab='dashboard';
+            var specs=efacapSpecs(),t=e.activeTab,body='';
+            if(t==='dashboard')body=efacapRenderDashboard();
+            else if(t==='information')body=efacapRenderInfo();
+            else if(t==='access')body=efacapRenderAccess();
+            else {var sp=specs[t];body=(sp&&efacapCanEdit(t)?'<div class="efacap-toolbar"><button class="btn btn-primary" onclick="efacapAddRecord(\''+t+'\')">＋ '+efacapEscape(sp.add)+'</button><span>'+((e[t]||[]).length)+' dosye</span></div>':'<div class="efacap-toolbar"><span>'+((e[t]||[]).length)+' dosye</span></div>')+(sp?efacapRenderRows(t,sp):'');}
+            host.innerHTML='<header class="efacap-hero"><div><div class="efacap-kicker">MENFP · SIKILÈ C-11:83</div><h2>EFACAP SAINTE-SUZANNE</h2><p>École Fondamentale d’Application – Centre d’Appui Pédagogique</p><b>Coordonnateur : Joseph Mary CHARLES</b></div><div class="efacap-seal">EF<br><small>CAP</small></div></header><nav class="efacap-nav">'+tabs.map(function(x){return '<button class="'+(t===x?'active':'')+'" onclick="efacapSelectTab(\''+x+'\')">'+efacapTabLabel(x)+'</button>';}).join('')+'</nav><div class="efacap-section-title"><h2>'+efacapTabLabel(t)+'</h2><button class="btn" onclick="efacapExport()">⬇ Ekspòte done EFACAP</button></div>'+body;
+        }
+        function efacapSelectTab(t){var e=ensureEfacapState();e.activeTab=t;saveState();renderEfacapModule();}
+
+
         function renderPage(page) {
             switch (page) {
                 case 'accueil':
@@ -5140,6 +5504,9 @@
                     break;
                 case 'direction':
                     renderDirectionPage();
+                    break;
+                case 'efacap':
+                    renderEfacapModule();
                     break;
                 case 'supervision':
                     if (typeof enssSupervisionRender === 'function') enssSupervisionRender();
@@ -5253,7 +5620,7 @@
             if (!menu) return;
             // Akèy rete yon pòt antre senp: modil ki deja andedan Classes/Direction
             // pa repete isit la. Tout fonksyonalite yo rete aksesib depi paj yo.
-            var accueilNav = ['accueil', 'dashboard', 'classes', 'quiz', 'evaluation', 'library', 'direction', 'parametres'];
+            var accueilNav = ['accueil', 'dashboard', 'classes', 'quiz', 'evaluation', 'library', 'direction', 'efacap', 'parametres'];
             if (!isLoggedIn()) accueilNav = ['accueil', 'dashboard', 'classes', 'direction', 'parametres'];
             var pages = getVisiblePages().filter(function(p) { return accueilNav.indexOf(p.id) !== -1; });
             var hidden = getHiddenMenus();
@@ -10664,8 +11031,8 @@
                     '</td><td><input type="number" min="0" step="0.001" id="ration_' + pid +
                     '" value="' + Number(value).toFixed(3) + '" readonly class="cantine-ration-input" style="width:120px;padding:0.15rem;font-size:0.65rem;" /></td>' +
                     '<td><div class="flex gap-1" style="justify-content:center;flex-wrap:wrap;">' +
-                    '<button class="btn" onclick="editCantineRation(\'' + p.replace(/'/g,"\\'") + '\')" style="padding:0.15rem 0.4rem;font-size:0.6rem;">✏️ Modifier</button>' +
-                    '<button class="btn btn-primary" onclick="saveCantineRation(\'' + p.replace(/'/g,"\\'") + '\')" style="padding:0.15rem 0.4rem;font-size:0.6rem;">💾 Enregistrer</button>' +
+                    '<button class="btn" onclick="editCantineRation(\'' + p.replace(/'/g,"\'") + '\')" style="padding:0.15rem 0.4rem;font-size:0.6rem;">✏️ Modifier</button>' +
+                    '<button class="btn btn-primary" onclick="saveCantineRation(\'' + p.replace(/'/g,"\'") + '\')" style="padding:0.15rem 0.4rem;font-size:0.6rem;">💾 Enregistrer</button>' +
                     '</div></td></tr>';
             }).join('');
         }
@@ -13818,7 +14185,7 @@
                 var bg = ['#dcfce7','#ccfbf1','#dbeafe','#fef3c7','#fce7f3','#ede9fe'][idx % 6];
                 return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.35rem;padding:.28rem .4rem;border:1px solid #d1fae5;border-radius:7px;background:' + bg + ';margin-bottom:.22rem;">' +
                     '<span style="font-size:.68rem;font-weight:700;">' + escapeHtml(m.nom) + ' <span class="badge" style="font-size:.52rem;">' + escapeHtml(m.code) + '</span></span>' +
-                    '<button class="btn btn-danger" onclick="removeStandalonePrescolaireMatiere(\'' + String(m.id).replace(/'/g,"\\'") + '\')" style="padding:.05rem .28rem;font-size:.55rem;">🗑️</button>' +
+                    '<button class="btn btn-danger" onclick="removeStandalonePrescolaireMatiere(\'' + String(m.id).replace(/'/g,"\'") + '\')" style="padding:.05rem .28rem;font-size:.55rem;">🗑️</button>' +
                     '</div>';
             }).join('');
         }
@@ -15403,7 +15770,7 @@
         };
         window.renderPreparationSavedList=function(){
             var box=document.getElementById('preparationsSavedList'); if(!box)return; var cl=prepVal('preparationClasseSelect'); var year=STATE.anneeCourante||'2025-2026'; var list=(STATE.lecons||[]).filter(function(x){return !x.year||x.year===year;}).filter(function(x){return !cl||x.classe===cl;}).slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));});
-            box.innerHTML=list.length?'<div class="table-wrap scroll-horizontal"><table><thead><tr><th>Date</th><th>Classe</th><th>Enseignant(e)</th><th>Discipline</th><th>Sujet</th><th>Actions</th></tr></thead><tbody>'+list.map(function(r){return '<tr><td>'+escapeHtml(r.date||'')+'</td><td>'+escapeHtml(r.classe||'')+'</td><td>'+escapeHtml(r.teacher||'')+'</td><td>'+escapeHtml(r.discipline||'')+'</td><td>'+escapeHtml(r.titre||'')+'</td><td><button class="btn btn-primary" onclick="editPreparationCours(\''+String(r.id).replace(/'/g,"\\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">✏️ Modifier</button> <button class="btn btn-success" onclick="printPreparationCours(\''+String(r.id).replace(/'/g,"\\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">🖨️ PDF</button> <button class="btn" onclick="exportPreparationCoursWord(\''+String(r.id).replace(/'/g,"\\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">📄 Word</button> <button class="btn btn-danger" onclick="deletePreparationCours(\''+String(r.id).replace(/'/g,"\\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">🗑️</button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="text-muted" style="font-size:.7rem;">Aucune fiche de préparation enregistrée pour cette sélection.</p>';
+            box.innerHTML=list.length?'<div class="table-wrap scroll-horizontal"><table><thead><tr><th>Date</th><th>Classe</th><th>Enseignant(e)</th><th>Discipline</th><th>Sujet</th><th>Actions</th></tr></thead><tbody>'+list.map(function(r){return '<tr><td>'+escapeHtml(r.date||'')+'</td><td>'+escapeHtml(r.classe||'')+'</td><td>'+escapeHtml(r.teacher||'')+'</td><td>'+escapeHtml(r.discipline||'')+'</td><td>'+escapeHtml(r.titre||'')+'</td><td><button class="btn btn-primary" onclick="editPreparationCours(\''+String(r.id).replace(/'/g,"\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">✏️ Modifier</button> <button class="btn btn-success" onclick="printPreparationCours(\''+String(r.id).replace(/'/g,"\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">🖨️ PDF</button> <button class="btn" onclick="exportPreparationCoursWord(\''+String(r.id).replace(/'/g,"\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">📄 Word</button> <button class="btn btn-danger" onclick="deletePreparationCours(\''+String(r.id).replace(/'/g,"\'")+'\')" style="padding:.12rem .35rem;font-size:.6rem;">🗑️</button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="text-muted" style="font-size:.7rem;">Aucune fiche de préparation enregistrée pour cette sélection.</p>';
         };
         window.renderPreparationPage=function(){
             if(!document.getElementById('prepEcole'))return;
@@ -18590,7 +18957,7 @@
   }
   function reportDoc(title,body,period){return '<html><head><meta charset="UTF-8"><title>'+esc(title)+'</title><style>body{font-family:Arial,sans-serif;padding:18px;font-size:10pt}table{width:100%;border-collapse:collapse;margin:10px 0}th,td{border:1px solid #333;padding:5px;text-align:center}th{background:#1e3a5f;color:#fff}.official-header{text-align:center}</style></head><body>'+(typeof buildOfficialHeaderHtml==='function'?buildOfficialHeaderHtml():'')+'<h2 style="text-align:center">'+esc(title)+'</h2><p style="text-align:center">Peryòd: '+esc(period)+'</p>'+body+(typeof buildSignatureBlockHtml==='function'?buildSignatureBlockHtml('Siyati Direktè'):'')+'</body></html>';}
   window.exportClassPresenceReport=function(classe,format){if(!canPrintOrExport('presences'))return requireLogin('telechaje rapò prezans klas la','presences');var p=(document.getElementById('perPresPeriode')||{}).value||'semaine';var body=classReportHtml(classe,p),doc=reportDoc('Rapò Prezans — '+classe,body,p);if(format==='pdf'){var w=window.open('','_blank');if(!w){alert('Pèmèt pop-up pou rapò a.');return;}w.document.write(doc.replace('</body>','<script>window.onload=function(){window.print();}<\\/script></body>'));w.document.close();return;}var mime=format==='word'?'application/msword':'application/vnd.ms-excel';var ext=format==='word'?'doc':'xls';var blob=new Blob(['\ufeff'+doc],{type:mime+';charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='rapport_presence_'+String(classe).replace(/[^\w-]+/g,'_')+'.'+ext;a.click();setTimeout(function(){URL.revokeObjectURL(u);},1000);};
-  window.addClassPresenceReportButtons=function(classe){var box=document.getElementById('classeDetailActions');if(!box)return;var old=box.querySelector('.class-pres-report-tools');if(old)old.remove();var d=document.createElement('span');d.className='class-pres-report-tools';d.style.cssText='display:inline-flex;gap:.25rem;flex-wrap:wrap;margin-left:.25rem';d.innerHTML='<button class="btn btn-success" style="padding:.2rem .5rem;font-size:.7rem" onclick="exportClassPresenceReport(\''+String(classe).replace(/'/g,"\\'")+'\',\'pdf\')">📊 Rapò PDF</button><button class="btn btn-info" style="padding:.2rem .5rem;font-size:.7rem" onclick="exportClassPresenceReport(\''+String(classe).replace(/'/g,"\\'")+'\',\'word\')">📄 Word</button><button class="btn btn-success" style="padding:.2rem .5rem;font-size:.7rem" onclick="exportClassPresenceReport(\''+String(classe).replace(/'/g,"\\'")+'\',\'excel\')">📊 Excel</button>';box.appendChild(d);};
+  window.addClassPresenceReportButtons=function(classe){var box=document.getElementById('classeDetailActions');if(!box)return;var old=box.querySelector('.class-pres-report-tools');if(old)old.remove();var d=document.createElement('span');d.className='class-pres-report-tools';d.style.cssText='display:inline-flex;gap:.25rem;flex-wrap:wrap;margin-left:.25rem';d.innerHTML='<button class="btn btn-success" style="padding:.2rem .5rem;font-size:.7rem" onclick="exportClassPresenceReport(\''+String(classe).replace(/'/g,"\'")+'\',\'pdf\')">📊 Rapò PDF</button><button class="btn btn-info" style="padding:.2rem .5rem;font-size:.7rem" onclick="exportClassPresenceReport(\''+String(classe).replace(/'/g,"\'")+'\',\'word\')">📄 Word</button><button class="btn btn-success" style="padding:.2rem .5rem;font-size:.7rem" onclick="exportClassPresenceReport(\''+String(classe).replace(/'/g,"\'")+'\',\'excel\')">📊 Excel</button>';box.appendChild(d);};
   var oldShowClasseDetail=window.showClasseDetail; window.showClasseDetail=function(classe){if(typeof oldShowClasseDetail==='function')oldShowClasseDetail.apply(this,arguments);setTimeout(function(){addClassPresenceReportButtons(classe);},0);};
 
   /* Ajoute klas la deja egziste; li rete ak non aktyèl yo epi li resevwa menm fonksyon estriktirèl yo. */
@@ -20182,7 +20549,8 @@ body{ line-height:1.55; }
     var rows=list.map(function(r){return '<tr><td>'+esc(typeLabels[r.type||'observation']||'Dosye pedagojik')+'</td><td>'+esc(r.dateVisite)+'</td><td>'+esc(r.annee)+'</td><td>'+esc(r.classe)+'</td><td>'+esc(r.enseignant)+'</td><td>'+esc(r.matiere)+'</td><td>'+esc(r.visiteur)+'</td><td>'+esc(r.noteGlobale?(r.noteGlobale+'/5'):'—')+'</td><td>'+esc(r.statut)+'</td><td>'+esc(r.objectif)+'</td><td>'+esc(r.pointsForts)+'</td><td>'+esc(r.difficultes)+'</td><td>'+esc(r.preparationDetails)+'</td><td>'+esc(r.evaluationDetails)+'</td><td>'+esc(r.accompagnementDetails)+'</td><td>'+esc(r.recommandations)+'</td><td>'+esc(r.decisions)+'</td><td>'+esc(r.responsable)+'</td><td>'+esc(r.echeance)+'</td><td>'+esc(r.suivi)+'</td><td>'+esc(r.rapportDetails)+'</td></tr>';}).join('');
     var table='<table><thead><tr><th>Type de dossier</th><th>Date</th><th>Année</th><th>Classe</th><th>Enseignant</th><th>Matière</th><th>Observateur</th><th>Note</th><th>Statut</th><th>Objectifs</th><th>Points forts</th><th>Difficultés</th><th>Préparation / programme</th><th>Évaluations / résultats</th><th>Accompagnement / formation</th><th>Recommandations</th><th>Décisions</th><th>Responsable</th><th>Échéance</th><th>Plan de suivi</th><th>Rapport général</th></tr></thead><tbody>'+rows+'</tbody></table>';
     var signatures=(typeof window.buildSignatureBlockHtml==='function')?window.buildSignatureBlockHtml('Visa / BDS Sainte-Suzanne'):'<div style="display:flex;justify-content:space-between;margin-top:28px"><div>Signature du Directeur<br><br>________________________<br>Joseph Mary CHARLES</div><div>Cachet officiel de l’établissement<br><br>________________________</div><div>Visa / BDS Sainte-Suzanne<br><br>________________________</div></div>';
-    return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>@page{size:A4 landscape;margin:10mm}body{font:10pt Arial,sans-serif;color:#1e293b;margin:10mm}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #526579;padding:4px;vertical-align:top;text-align:left;overflow-wrap:anywhere;font-size:8pt}th{background:#eaf2f8;color:#174a73;font-weight:bold}tr{break-inside:avoid;page-break-inside:avoid}.signature{break-inside:avoid;page-break-inside:avoid}img{max-width:100%;object-fit:contain}@media print{body{margin:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>'+officialHeader+meta+table+signatures+'<p style="font-size:8pt;margin-top:12px">Document officiel généré depuis la plateforme ENSS. Les dossiers originaux restent enregistrés dans la plateforme.</p></body></html>';
+    return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>@page{size:A4 landscape;margin:10mm}body{font:10pt Arial,sans-serif;color:#1e293b;margin:10mm}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #526579;padding:4px;vertical-align:top;text-align:left;overflow-wrap:anywhere;font-size:8pt}th{background:#eaf2f8;color:#174a73;font-weight:bold}tr{break-inside:avoid;page-break-inside:avoid}.signature{break-inside:avoid;page-break-inside:avoid}img{max-width:100%;object-fit:contain}@media print{body{margin:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style>
+</head><body>'+officialHeader+meta+table+signatures+'<p style="font-size:8pt;margin-top:12px">Document officiel généré depuis la plateforme ENSS. Les dossiers originaux restent enregistrés dans la plateforme.</p></body></html>';
   }
   function exportOne(id){return stateList().filter(function(r){return String(r.id)===String(id);});}
   window.enssSupervisionWordOne=function(id){
