@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>ENSS V142 — Baz V141 — ENSS — SIJENSS</title>
+    <title>ENSS V143 — Baz V142 — ENSS — SIJENSS</title>
     <style>
         /* ===== RESET & BASE (PA TOUCHE) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -814,6 +814,35 @@ tr.enss-audio-playing,tr.enss-audio-playing td{background:#fef9c3!important;outl
 .enss-i18n-panel{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:1rem}
 .enss-i18n-box{background:#fff;border-radius:16px;padding:1rem;width:min(720px,96vw);max-height:90vh;overflow:auto}.enss-i18n-head{display:flex;justify-content:space-between;align-items:center}
 .enss-i18n-box textarea{width:100%;font-size:.75rem;border:1px solid #cbd5e1;border-radius:10px;padding:.5rem}
+</style>
+<style id="enss-v9-style">
+/* V9 : foto elèv + Dokiman IA */
+.enss-photo-block{display:flex;gap:.9rem;align-items:center;border:1px dashed #94a3b8;border-radius:14px;padding:.7rem;margin:0 0 .8rem;background:#f8fafc}
+.enss-photo-frame{width:110px;height:132px;border-radius:12px;overflow:hidden;background:#e2e8f0;flex:none;position:relative;border:2px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+.enss-photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.enss-photo-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#64748b;font-size:2.2rem;line-height:1}.enss-photo-ph small{font-size:.62rem;margin-top:.25rem}
+.enss-photo-side{display:flex;flex-direction:column;gap:.4rem;min-width:0;flex:1}.enss-photo-side>b{font-size:.82rem;color:#0f172a}
+.enss-photo-actions{display:flex;flex-wrap:wrap;gap:.35rem}.enss-photo-actions .btn{font-size:.72rem;padding:.35rem .6rem}
+.enss-photo-status{font-size:.7rem;color:#475569;min-height:1em}
+.enss-photo-top{margin-top:0}
+.enss-photo-cam{position:fixed;inset:0;background:rgba(2,6,23,.85);z-index:100001;display:flex;align-items:center;justify-content:center;padding:1rem}
+.enss-photo-cam-box{background:#0f172a;border-radius:16px;padding:.8rem;max-width:min(760px,96vw)}.enss-photo-cam-box video{width:100%;max-height:70vh;border-radius:10px;background:#000}.enss-photo-cam-bar{display:flex;gap:.5rem;justify-content:center;margin-top:.6rem}
+@media(max-width:520px){.enss-photo-block{flex-direction:column;align-items:flex-start}.enss-photo-frame{width:96px;height:116px}}
+.enss-ai-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:99990;display:none;align-items:flex-start;justify-content:center;padding:.8rem;overflow:auto}
+.ai-box{background:#fff;border-radius:18px;padding:1rem;width:min(1240px,99vw);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.ai-head{display:flex;justify-content:space-between;align-items:center;gap:.6rem}.ai-head h3{margin:0;font-size:1.05rem}
+.ai-status{border-radius:10px;padding:.45rem .7rem;font-size:.76rem;margin:.5rem 0}.ai-status.on{background:#dcfce7;color:#166534}.ai-status.off{background:#fef3c7;color:#92400e}
+.ai-msg{background:#eff6ff;color:#1e3a8a;border-radius:10px;padding:.45rem .7rem;font-size:.76rem;margin:.4rem 0}
+.ai-note{font-size:.72rem;color:#475569;background:#f8fafc;border-radius:10px;padding:.45rem .7rem;margin:.4rem 0}
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.5rem;margin:.6rem 0}.ai-grid label{font-size:.72rem;font-weight:700;color:#334155;display:flex;flex-direction:column;gap:.2rem}.ai-grid select{padding:.4rem;border-radius:8px;border:1px solid #cbd5e1}
+.ai-files{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.5rem 0}.ai-chip{background:#ede9fe;color:#4c1d95;border-radius:999px;padding:.2rem .6rem;font-size:.72rem}.ai-chip a{color:#7c3aed;text-decoration:none;margin-left:.3rem}
+.ai-actions{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0}
+.ai-scroll{overflow-x:auto;max-height:58vh;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px}
+.ai-tbl{border-collapse:collapse;width:100%;font-size:.72rem}.ai-tbl th{background:#1e293b;color:#fff;padding:.4rem;text-align:left;position:sticky;top:0;white-space:nowrap}.ai-tbl td{padding:.3rem .4rem;border-top:1px solid #e2e8f0;vertical-align:top}
+.ai-tbl select,.ai-in{max-width:180px;padding:.25rem;border:1px solid #cbd5e1;border-radius:6px;font-size:.72rem}.ai-in.ai-s{max-width:80px}
+tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;background:#fffbeb;border-radius:6px;padding:.15rem .3rem;margin:.1rem 0}.ai-ok{color:#166534}.ai-muted{color:#64748b;font-size:.64rem}
+.ai-sum{background:#f1f5f9;border-radius:10px;padding:.45rem .7rem;font-size:.75rem;margin:.5rem 0}.ai-year{display:block;background:#fef3c7;border-radius:10px;padding:.5rem .7rem;font-size:.75rem;margin:.4rem 0}
+.ai-pre{background:#f8fafc;border-radius:8px;padding:.5rem;white-space:pre-wrap;font-size:.72rem}.ai-log{margin-top:.8rem}
 </style>
 </head>
 <body>
@@ -6252,6 +6281,735 @@ if(localYear) merged.anneeCourante=localYear;
             if(!box){ box=document.createElement('div'); box.id='enssLangAuditCard'; box.className='card'; box.style.cssText='padding:.8rem;margin-top:.7rem;border-left:4px solid #0f766e;'; page.appendChild(box); }
             box.innerHTML='<h4 style="margin:0;font-size:.9rem;">🌐 Verifikasyon lang platfòm nan</h4><p style="font-size:.72rem;color:#475569;margin:.35rem 0;">Chwazi yon lang (HT / FR / EN / ES) anlè a, ale sou paj ou vle teste a, epi klike la a pou wè tèks ki poko tradui nan paj sa a.</p><button type="button" class="btn" onclick="enssI18nAuditShow()">🔎 Chèche tèks ki pa tradui</button>';
         }
+        // ===== V9 · FOTO ELÈV (kamera / galri · IndexedDB lokal · Supabase Storage) =====
+        // Foto yo PA nan STATE an base64. STATE.studentPhotos sèlman kenbe {NISU: {path, bucket, updatedAt}}.
+        var ENSS_PHOTO = { maxSide: 800, quality: 0.82, maxBytes: 4 * 1024 * 1024, drafts: {}, urls: {}, syncing: false, dbp: null, mem: { cache: {}, pending: {} }, camStream: null };
+        function enssPhotoKey(n) { return String(n == null ? '' : n).trim(); }
+        function enssPhotoRegistry() {
+            if (!STATE.studentPhotos || typeof STATE.studentPhotos !== 'object' || Array.isArray(STATE.studentPhotos)) STATE.studentPhotos = {};
+            return STATE.studentPhotos;
+        }
+        function enssPhotoDB() {
+            if (ENSS_PHOTO.dbp) return ENSS_PHOTO.dbp;
+            ENSS_PHOTO.dbp = new Promise(function (resolve, reject) {
+                try {
+                    if (typeof indexedDB === 'undefined' || !indexedDB) return reject(new Error('IndexedDB pa disponib'));
+                    var req = indexedDB.open('ENSS_PHOTO_DB', 1);
+                    req.onupgradeneeded = function () {
+                        var db = req.result;
+                        if (!db.objectStoreNames.contains('cache')) db.createObjectStore('cache', { keyPath: 'key' });
+                        if (!db.objectStoreNames.contains('pending')) db.createObjectStore('pending', { keyPath: 'key' });
+                    };
+                    req.onsuccess = function () { resolve(req.result); };
+                    req.onerror = function () { reject(req.error); };
+                } catch (e) { reject(e); }
+            });
+            ENSS_PHOTO.dbp.catch(function () { ENSS_PHOTO.dbp = null; });
+            return ENSS_PHOTO.dbp;
+        }
+        function enssPhotoIdb(store, mode, fn) {
+            return enssPhotoDB().then(function (db) {
+                return new Promise(function (resolve, reject) {
+                    var tx = db.transaction(store, mode), req = fn(tx.objectStore(store));
+                    tx.oncomplete = function () { resolve(req && req.result !== undefined ? req.result : null); };
+                    tx.onerror = function () { reject(tx.error); };
+                    tx.onabort = function () { reject(tx.error || new Error('abort')); };
+                });
+            });
+        }
+        function enssPhotoDbGet(store, key) { return enssPhotoIdb(store, 'readonly', function (s) { return s.get(key); }).catch(function () { return ENSS_PHOTO.mem[store][key] || null; }); }
+        function enssPhotoDbPut(store, rec) { ENSS_PHOTO.mem[store][rec.key] = rec; return enssPhotoIdb(store, 'readwrite', function (s) { return s.put(rec); }).then(function () { return true; }, function () { return false; }); }
+        function enssPhotoDbDel(store, key) { delete ENSS_PHOTO.mem[store][key]; return enssPhotoIdb(store, 'readwrite', function (s) { return s.delete(key); }).then(function () { return true; }, function () { return false; }); }
+        function enssPhotoDbAll(store) {
+            return enssPhotoIdb(store, 'readonly', function (s) { return s.getAll(); }).then(function (r) { return r || []; }).catch(function () { return Object.keys(ENSS_PHOTO.mem[store]).map(function (k) { return ENSS_PHOTO.mem[store][k]; }); });
+        }
+        function enssPhotoCompress(file) {
+            return new Promise(function (resolve, reject) {
+                if (!file || !/^image\//.test(file.type || '')) return reject(new Error('Se sèlman foto (JPG/PNG) ki aksepte.'));
+                var settled = false, timer = setTimeout(function () { fallback(); }, 12000);
+                function fallback() { if (settled) return; settled = true; clearTimeout(timer); if (file.size <= ENSS_PHOTO.maxBytes) resolve(file); else reject(new Error('Foto a two gwo e navigatè a pa t kapab konprese l.')); }
+                function done(b) { if (settled) return; settled = true; clearTimeout(timer); resolve(b); }
+                var url;
+                try {
+                    url = URL.createObjectURL(file);
+                    var img = new Image();
+                    img.onload = function () {
+                        try {
+                            var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+                            if (!w || !h) throw new Error('size');
+                            var sc = Math.min(1, ENSS_PHOTO.maxSide / Math.max(w, h)), cw = Math.max(1, Math.round(w * sc)), ch = Math.max(1, Math.round(h * sc));
+                            var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+                            var ctx = cv.getContext && cv.getContext('2d'); if (!ctx) throw new Error('canvas');
+                            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); ctx.drawImage(img, 0, 0, cw, ch);
+                            cv.toBlob(function (b) { URL.revokeObjectURL(url); if (b && b.size) done(b); else fallback(); }, 'image/jpeg', ENSS_PHOTO.quality);
+                        } catch (e) { try { URL.revokeObjectURL(url); } catch (_) {} fallback(); }
+                    };
+                    img.onerror = function () { try { URL.revokeObjectURL(url); } catch (_) {} if (settled) return; settled = true; clearTimeout(timer); reject(new Error('Foto a pa ka li. Eseye yon lòt.')); };
+                    img.src = url;
+                } catch (e) { fallback(); }
+            });
+        }
+        function enssPhotoClient() { try { return ensureCentralClient(); } catch (e) { return null; } }
+        function enssPhotoSession() { return (typeof centralRefreshSession === 'function') ? Promise.resolve(centralRefreshSession()).catch(function () { return null; }) : Promise.resolve(null); }
+        function enssPhotoUrl(key) {
+            key = enssPhotoKey(key); if (!key) return Promise.resolve(null);
+            var reg = enssPhotoRegistry()[key];
+            return enssPhotoDbGet('cache', key).then(function (rec) {
+                if (rec && rec.blob && (rec.local || !reg || !reg.path || rec.path === reg.path)) {
+                    if (!ENSS_PHOTO.urls[key]) ENSS_PHOTO.urls[key] = URL.createObjectURL(rec.blob);
+                    return ENSS_PHOTO.urls[key];
+                }
+                if (!reg || !reg.path) return null;
+                var client = enssPhotoClient();
+                if (!client || (typeof navigator !== 'undefined' && navigator.onLine === false)) return null;
+                return enssPhotoSession().then(function (sess) {
+                    if (!sess) return null;
+                    return client.storage.from(reg.bucket || ENSS_LIBRARY_STORAGE_BUCKET).download(reg.path).then(function (r) {
+                        if (!r || r.error || !r.data) return null;
+                        return enssPhotoDbPut('cache', { key: key, blob: r.data, path: reg.path, local: false, updatedAt: reg.updatedAt }).then(function () {
+                            if (ENSS_PHOTO.urls[key]) { try { URL.revokeObjectURL(ENSS_PHOTO.urls[key]); } catch (_) {} }
+                            ENSS_PHOTO.urls[key] = URL.createObjectURL(r.data); return ENSS_PHOTO.urls[key];
+                        });
+                    });
+                });
+            }).catch(function () { return null; });
+        }
+        function enssPhotoStatusOf(key) {
+            key = enssPhotoKey(key);
+            return enssPhotoDbGet('pending', key).then(function (p) {
+                if (p) return { state: 'pending', text: '⏳ Foto sove sou aparèy sa a — ap tann senkronizasyon ak depo santral la.' + (p.lastError ? ' (' + p.lastError + ')' : '') };
+                var reg = enssPhotoRegistry()[key]; if (reg && reg.path) return { state: 'synced', text: '✅ Foto sove nan depo santral la.' };
+                return enssPhotoDbGet('cache', key).then(function (c) { return c && c.blob ? { state: 'local', text: '📁 Foto sove sou aparèy sa a sèlman.' } : { state: 'none', text: '' }; });
+            });
+        }
+        function enssPhotoRefreshViews(key) {
+            key = enssPhotoKey(key);
+            [].forEach.call(document.querySelectorAll('img[data-photo-key]'), function (img) {
+                if (img.getAttribute('data-photo-key') !== key) return;
+                enssPhotoLoadInto(img, key);
+            });
+            [].forEach.call(document.querySelectorAll('.enss-photo-block'), function (b) { if (b.getAttribute('data-nisu') === key) enssPhotoUpdateStatus(b.getAttribute('data-ctx')); });
+        }
+        function enssPhotoLoadInto(img, key) {
+            key = enssPhotoKey(key); img.setAttribute('data-photo-key', key);
+            var ph = img.parentNode && img.parentNode.querySelector('.enss-photo-ph');
+            return enssPhotoUrl(key).then(function (u) {
+                if (img.getAttribute('data-photo-key') !== key) return;
+                if (u) { img.src = u; img.style.display = 'block'; if (ph) ph.style.display = 'none'; }
+                else { img.removeAttribute('src'); img.style.display = 'none'; if (ph) ph.style.display = 'flex'; }
+            });
+        }
+        // --- enregistrement : cache + file d'attente locale d'abord, puis envoi (jamais de perte, jamais de doublon) ---
+        function enssPhotoCommit(nisu, blob) {
+            var key = enssPhotoKey(nisu);
+            if (!key) return Promise.reject(new Error('NISU manke: pa ka asosye foto a ak yon elèv.'));
+            if (!blob) return Promise.reject(new Error('Pa gen foto pou anrejistre.'));
+            return enssPhotoDbPut('cache', { key: key, blob: blob, path: null, local: true, updatedAt: Date.now() })
+                .then(function () { return enssPhotoDbPut('pending', { key: key, blob: blob, createdAt: Date.now(), attempts: 0 }); })
+                .then(function () {
+                    if (ENSS_PHOTO.urls[key]) { try { URL.revokeObjectURL(ENSS_PHOTO.urls[key]); } catch (_) {} delete ENSS_PHOTO.urls[key]; }
+                    enssPhotoRefreshViews(key);
+                    return enssPhotoSyncKey(key);
+                });
+        }
+        function enssPhotoSyncKey(key) {
+            return enssPhotoDbGet('pending', key).then(function (p) {
+                if (!p) return { status: 'synced' };
+                var client = enssPhotoClient();
+                if (!client || (typeof navigator !== 'undefined' && navigator.onLine === false)) return { status: 'pending', reason: 'offline' };
+                return enssPhotoSession().then(function (sess) {
+                    if (!sess) return { status: 'pending', reason: 'session' };
+                    var cfg = (typeof getCentralConfig === 'function') ? getCentralConfig() : {}, schoolId = (cfg && cfg.schoolId) || 'ENSS-SCHOOL-1';
+                    var safe = key.replace(/[^a-zA-Z0-9_-]+/g, '_'), path = schoolId + '/student-photos/' + safe + '_' + Date.now() + '.jpg';
+                    var old = enssPhotoRegistry()[key], oldPath = old && old.path, oldBucket = old && old.bucket;
+                    return client.storage.from(ENSS_LIBRARY_STORAGE_BUCKET).upload(path, p.blob, { contentType: 'image/jpeg', upsert: false }).then(function (r) {
+                        if (!r || r.error) {
+                            p.attempts = (p.attempts || 0) + 1; p.lastError = String((r && r.error && r.error.message) || 'echèk depo');
+                            return enssPhotoDbPut('pending', p).then(function () { enssPhotoRefreshViews(key); return { status: 'pending', reason: 'storage', error: p.lastError }; });
+                        }
+                        enssPhotoRegistry()[key] = { path: path, bucket: ENSS_LIBRARY_STORAGE_BUCKET, updatedAt: Date.now() };
+                        saveState();
+                        return enssPhotoDbDel('pending', key).then(function () { return enssPhotoDbPut('cache', { key: key, blob: p.blob, path: path, local: false, updatedAt: Date.now() }); }).then(function () {
+                            if (oldPath && oldPath !== path) { try { client.storage.from(oldBucket || ENSS_LIBRARY_STORAGE_BUCKET).remove([oldPath]).catch(function () {}); } catch (_) {} }
+                            enssPhotoRefreshViews(key); return { status: 'synced', path: path };
+                        });
+                    });
+                });
+            }).catch(function (e) { return { status: 'pending', reason: 'error', error: String(e && e.message || e) }; });
+        }
+        function enssPhotoSyncPending() {
+            if (ENSS_PHOTO.syncing) return Promise.resolve();
+            ENSS_PHOTO.syncing = true;
+            return enssPhotoDbAll('pending').then(function (list) {
+                var chain = Promise.resolve();
+                (list || []).forEach(function (p) { chain = chain.then(function () { return enssPhotoSyncKey(p.key); }); });
+                return chain;
+            }).catch(function () {}).then(function () { ENSS_PHOTO.syncing = false; });
+        }
+        function enssPhotoRemoveSaved(nisu) {
+            var key = enssPhotoKey(nisu), reg = enssPhotoRegistry()[key];
+            delete enssPhotoRegistry()[key]; saveState();
+            if (ENSS_PHOTO.urls[key]) { try { URL.revokeObjectURL(ENSS_PHOTO.urls[key]); } catch (_) {} delete ENSS_PHOTO.urls[key]; }
+            return enssPhotoDbDel('pending', key).then(function () { return enssPhotoDbDel('cache', key); }).then(function () {
+                if (reg && reg.path) { try { var c = enssPhotoClient(); if (c) c.storage.from(reg.bucket || ENSS_LIBRARY_STORAGE_BUCKET).remove([reg.path]).catch(function () {}); } catch (_) {} }
+                enssPhotoRefreshViews(key);
+            });
+        }
+        // NISU modifié dans le formulaire : la photo suit l'élève (copie, les autres années gardent l'ancien NISU)
+        function enssPhotoCopyKey(fromKey, toKey) {
+            fromKey = enssPhotoKey(fromKey); toKey = enssPhotoKey(toKey);
+            if (!fromKey || !toKey || fromKey === toKey) return Promise.resolve();
+            var reg = enssPhotoRegistry();
+            if (reg[fromKey] && !reg[toKey]) { reg[toKey] = JSON.parse(JSON.stringify(reg[fromKey])); saveState(); }
+            return enssPhotoDbGet('cache', fromKey).then(function (c) { return c && c.blob && !(reg[toKey] && reg[toKey].path === c.path) ? enssPhotoDbPut('cache', { key: toKey, blob: c.blob, path: c.path, local: c.local, updatedAt: c.updatedAt }) : null; })
+                .then(function () { return enssPhotoDbGet('pending', fromKey); }).then(function (p) { if (p) return enssPhotoDbPut('pending', { key: toKey, blob: p.blob, createdAt: p.createdAt, attempts: 0 }); });
+        }
+        // ---------- interface ----------
+        function enssPhotoCanEdit(ctx) { try { return isLoggedIn() && (ctx === 'inscription' ? canModifyData('inscription') : canEditStudentRecord()); } catch (e) { return false; } }
+        function enssPhotoBlockHtml(ctx, nisu, editable) {
+            var e = editable;
+            return '<div class="enss-photo-block" id="enssPhotoBlock-' + ctx + '" data-ctx="' + ctx + '" data-nisu="' + enssPhotoEsc(nisu) + '">' +
+                '<div class="enss-photo-frame"><img id="enssPhotoImg-' + ctx + '" alt="Foto elèv" style="display:none"><div class="enss-photo-ph" id="enssPhotoPh-' + ctx + '"><span>👤</span><small>Pa gen foto</small></div></div>' +
+                '<div class="enss-photo-side"><b>📸 Foto elèv la</b>' +
+                (e ? '<div class="enss-photo-actions"><button type="button" class="btn" onclick="enssPhotoOpenCamera(\'' + ctx + '\')">📷 Kamera</button>' +
+                    '<button type="button" class="btn" onclick="document.getElementById(\'enssPhotoFile-' + ctx + '\').click()">🖼️ Chwazi foto nan aparèy</button>' +
+                    '<button type="button" class="btn" id="enssPhotoUndo-' + ctx + '" style="display:none" onclick="enssPhotoUndo(\'' + ctx + '\')">↩️ Anile foto a</button>' +
+                    '<button type="button" class="btn" id="enssPhotoDel-' + ctx + '" style="display:none" onclick="enssPhotoDelete(\'' + ctx + '\')">🗑️ Retire foto a</button>' +
+                    (ctx !== 'inscription' ? '<button type="button" class="btn btn-primary" id="enssPhotoSave-' + ctx + '" style="display:none" onclick="enssPhotoSaveOnly(\'' + ctx + '\')">💾 Anrejistre foto a sèlman</button>' : '') + '</div>' +
+                    '<input type="file" accept="image/*" capture="environment" id="enssPhotoCam-' + ctx + '" hidden onchange="enssPhotoOnFile(\'' + ctx + '\',this)">' +
+                    '<input type="file" accept="image/jpeg,image/png,image/*" id="enssPhotoFile-' + ctx + '" hidden onchange="enssPhotoOnFile(\'' + ctx + '\',this)">' : '') +
+                '<div class="enss-photo-status" id="enssPhotoSt-' + ctx + '"></div></div></div>';
+        }
+        function enssPhotoEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+        function enssPhotoBlock(ctx) { return document.getElementById('enssPhotoBlock-' + ctx); }
+        function enssPhotoSetNisu(ctx, nisu) { var b = enssPhotoBlock(ctx); if (b) b.setAttribute('data-nisu', enssPhotoKey(nisu)); }
+        function enssPhotoUpdateStatus(ctx) {
+            var b = enssPhotoBlock(ctx); if (!b) return Promise.resolve();
+            var key = b.getAttribute('data-nisu'), st = document.getElementById('enssPhotoSt-' + ctx), draft = ENSS_PHOTO.drafts[ctx];
+            var show = function (id, on) { var el = document.getElementById(id); if (el) el.style.display = on ? '' : 'none'; };
+            if (draft) {
+                if (st) st.innerHTML = '🆕 Nouvo foto pare (poko anrejistre).';
+                show('enssPhotoUndo-' + ctx, true); show('enssPhotoSave-' + ctx, !!key && ctx !== 'inscription'); show('enssPhotoDel-' + ctx, false);
+                return Promise.resolve();
+            }
+            show('enssPhotoUndo-' + ctx, false); show('enssPhotoSave-' + ctx, false);
+            if (!key) { if (st) st.textContent = ''; show('enssPhotoDel-' + ctx, false); return Promise.resolve(); }
+            return enssPhotoStatusOf(key).then(function (s) { if (st) st.textContent = s.text; show('enssPhotoDel-' + ctx, s.state !== 'none'); });
+        }
+        function enssPhotoShowPreview(ctx, url) {
+            var img = document.getElementById('enssPhotoImg-' + ctx), ph = document.getElementById('enssPhotoPh-' + ctx);
+            if (!img) return; img.removeAttribute('data-photo-key');
+            if (url) { img.src = url; img.style.display = 'block'; if (ph) ph.style.display = 'none'; }
+        }
+        function enssPhotoOnFile(ctx, input) {
+            var f = input && input.files && input.files[0]; if (!f) return;
+            return enssPhotoCompress(f).then(function (blob) { enssPhotoSetDraft(ctx, blob); }).catch(function (e) { alert((e && e.message) || 'Foto a pa t kapab chaje.'); }).then(function () { try { input.value = ''; } catch (_) {} });
+        }
+        function enssPhotoSetDraft(ctx, blob) {
+            var old = ENSS_PHOTO.drafts[ctx]; if (old && old.url) { try { URL.revokeObjectURL(old.url); } catch (_) {} }
+            var url = URL.createObjectURL(blob); ENSS_PHOTO.drafts[ctx] = { blob: blob, url: url };
+            enssPhotoShowPreview(ctx, url); return enssPhotoUpdateStatus(ctx);
+        }
+        function enssPhotoUndo(ctx) {
+            var d = ENSS_PHOTO.drafts[ctx]; if (d && d.url) { try { URL.revokeObjectURL(d.url); } catch (_) {} } delete ENSS_PHOTO.drafts[ctx];
+            var b = enssPhotoBlock(ctx), img = document.getElementById('enssPhotoImg-' + ctx);
+            if (img && b) { var k = b.getAttribute('data-nisu'); if (k) enssPhotoLoadInto(img, k); else { img.removeAttribute('src'); img.style.display = 'none'; var ph = document.getElementById('enssPhotoPh-' + ctx); if (ph) ph.style.display = 'flex'; } }
+            return enssPhotoUpdateStatus(ctx);
+        }
+        function enssPhotoDelete(ctx) {
+            var b = enssPhotoBlock(ctx); if (!b) return; var key = b.getAttribute('data-nisu'); if (!key) return;
+            if (!confirm('Retire foto elèv sa a? Sa pa efase dosye elèv la.')) return;
+            return enssPhotoRemoveSaved(key).then(function () { enssPhotoUpdateStatus(ctx); });
+        }
+        function enssPhotoSaveOnly(ctx) {
+            var b = enssPhotoBlock(ctx), d = ENSS_PHOTO.drafts[ctx]; if (!b || !d) return;
+            var key = b.getAttribute('data-nisu'); if (!key) { alert('Elèv sa a pa gen NISU.'); return; }
+            if (!enssPhotoCanEdit(ctx)) { alert('🔒 Ou pa gen dwa pou modifye foto a.'); return; }
+            var st = document.getElementById('enssPhotoSt-' + ctx); if (st) st.textContent = '⏳ Ap anrejistre...';
+            return enssPhotoCommit(key, d.blob).then(function (r) {
+                try { URL.revokeObjectURL(d.url); } catch (_) {} delete ENSS_PHOTO.drafts[ctx];
+                var img = document.getElementById('enssPhotoImg-' + ctx); if (img) enssPhotoLoadInto(img, key);
+                enssPhotoUpdateStatus(ctx);
+                if (typeof renderStudents === 'function') { try { /* la liste n'affiche pas de photo : aucun rafraîchissement nécessaire */ } catch (_) {} }
+            }).catch(function (e) { if (st) st.textContent = '⚠️ ' + (e && e.message || 'Echèk.'); });
+        }
+        function enssPhotoIsMobile() { return /Android|iPhone|iPad|iPod|Mobile/i.test((typeof navigator !== 'undefined' && navigator.userAgent) || '') || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1 && /Mac|Linux/.test(navigator.platform || '') && window.innerWidth < 1100); }
+        function enssPhotoOpenCamera(ctx) {
+            var cam = document.getElementById('enssPhotoCam-' + ctx);
+            var canLive = typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && !enssPhotoIsMobile();
+            if (!canLive) { if (cam) cam.click(); return; }
+            enssPhotoLiveCamera(ctx, function () { if (cam) cam.click(); });
+        }
+        function enssPhotoLiveCamera(ctx, onFail) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false }).then(function (stream) {
+                ENSS_PHOTO.camStream = stream;
+                var ov = document.createElement('div'); ov.id = 'enssPhotoCamOverlay'; ov.className = 'enss-photo-cam';
+                ov.innerHTML = '<div class="enss-photo-cam-box"><video autoplay playsinline muted></video><div class="enss-photo-cam-bar"><button type="button" class="btn btn-primary" id="enssPhotoSnap">📸 Pran foto</button><button type="button" class="btn" id="enssPhotoCamClose">✖ Fèmen</button></div></div>';
+                document.body.appendChild(ov);
+                var v = ov.querySelector('video'); v.srcObject = stream;
+                var stop = function () { try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (_) {} ENSS_PHOTO.camStream = null; ov.remove(); };
+                ov.querySelector('#enssPhotoCamClose').onclick = stop;
+                ov.querySelector('#enssPhotoSnap').onclick = function () {
+                    var cv = document.createElement('canvas'); cv.width = v.videoWidth || 640; cv.height = v.videoHeight || 480;
+                    cv.getContext('2d').drawImage(v, 0, 0, cv.width, cv.height);
+                    cv.toBlob(function (b) { stop(); if (!b) return; var f = new File([b], 'kamera.jpg', { type: 'image/jpeg' }); enssPhotoCompress(f).then(function (bl) { enssPhotoSetDraft(ctx, bl); }).catch(function (e) { alert(e.message); }); }, 'image/jpeg', 0.92);
+                };
+            }).catch(function () { if (onFail) onFail(); });
+        }
+        function enssPhotoBind(ctx, nisu) {
+            enssPhotoSetNisu(ctx, nisu);
+            var img = document.getElementById('enssPhotoImg-' + ctx);
+            if (img && nisu) enssPhotoLoadInto(img, nisu);
+            return enssPhotoUpdateStatus(ctx);
+        }
+        // --- Enskripsyon ---
+        function enssPhotoMountInscription() {
+            var page = document.getElementById('page-inscription'); if (!page || document.getElementById('enssPhotoBlock-inscription')) return;
+            var card = page.querySelector('.card'); if (!card) return;
+            var holder = document.createElement('div'); holder.innerHTML = enssPhotoBlockHtml('inscription', '', true);
+            card.insertBefore(holder.firstChild, card.firstChild);
+        }
+        // --- Modifye / Ajoute elèv (modal) ---
+        function enssPhotoMountModal(student) {
+            var body = document.getElementById('modalGenericBody'); if (!body || !student || body.querySelector('#enssPhotoBlock-modal')) return;
+            var holder = document.createElement('div'); holder.innerHTML = enssPhotoBlockHtml('modal', student ? student.nisu : '', enssPhotoCanEdit('modal'));
+            body.insertBefore(holder.firstChild, body.firstChild);
+            enssPhotoBind('modal', student ? student.nisu : '');
+        }
+        // --- Dosye konplè ---
+        function enssPhotoInjectDossier(nisu) {
+            var hdr = document.querySelector('#modalGenericBody .dossier-header'); if (!hdr || hdr.querySelector('#enssPhotoBlock-dossier')) return;
+            var holder = document.createElement('div'); holder.innerHTML = enssPhotoBlockHtml('dossier', nisu, enssPhotoCanEdit('dossier'));
+            holder.firstChild.className += ' enss-photo-top';
+            hdr.insertBefore(holder.firstChild, hdr.firstChild);
+            enssPhotoBind('dossier', nisu);
+        }
+        (function enssPhotoInstallHooks() {
+            var origSubmit = submitInscription;
+            submitInscription = function () {
+                var before = (STATE.students || []).length, draft = ENSS_PHOTO.drafts.inscription || null;
+                var r = origSubmit.apply(this, arguments);
+                try {
+                    if ((STATE.students || []).length > before) {
+                        var st = STATE.students[STATE.students.length - 1];
+                        if (draft && draft.blob && st && st.nisu) {
+                            enssPhotoCommit(st.nisu, draft.blob).then(function (res) {
+                                var el = document.getElementById('inscriptionMsg');
+                                if (el) el.innerHTML += '<br>📸 Foto: ' + (res.status === 'synced' ? 'sove nan depo santral la.' : 'sove sou aparèy la, ap senkronize pita.');
+                            });
+                        }
+                        if (draft) { try { URL.revokeObjectURL(draft.url); } catch (_) {} delete ENSS_PHOTO.drafts.inscription; }
+                        var img = document.getElementById('enssPhotoImg-inscription'), ph = document.getElementById('enssPhotoPh-inscription');
+                        if (img) { img.removeAttribute('src'); img.style.display = 'none'; } if (ph) ph.style.display = 'flex';
+                        enssPhotoUpdateStatus('inscription');
+                    }
+                } catch (e) { console.warn('foto inscription', e); }
+                return r;
+            };
+            var origModal = openStudentModal;
+            openStudentModal = function (student) {
+                var r = origModal.apply(this, arguments);
+                try {
+                    if (student && document.getElementById('modalGeneric') && document.getElementById('modalGeneric').classList.contains('open')) {
+                        delete ENSS_PHOTO.drafts.modal; enssPhotoMountModal(student);
+                        var btn = document.getElementById('modalSaveBtn');
+                        if (btn && btn.onclick) {
+                            var orig = btn.onclick, prev = enssPhotoKey(student.nisu);
+                            btn.onclick = function () {
+                                var typed = enssPhotoKey((document.getElementById('fNisu') || {}).value), draft = ENSS_PHOTO.drafts.modal || null;
+                                orig.apply(this, arguments);
+                                var closed = !document.getElementById('modalGeneric').classList.contains('open');
+                                if (closed && typed) {
+                                    var p = (prev && prev !== typed) ? enssPhotoCopyKey(prev, typed) : Promise.resolve();
+                                    p.then(function () { if (draft && draft.blob) return enssPhotoCommit(typed, draft.blob); }).catch(function (e) { console.warn('foto modal', e); });
+                                    if (draft) { try { URL.revokeObjectURL(draft.url); } catch (_) {} delete ENSS_PHOTO.drafts.modal; }
+                                }
+                            };
+                        }
+                    }
+                } catch (e) { console.warn('foto modal', e); }
+                return r;
+            };
+            var origDossier = openStudentDossier;
+            openStudentDossier = function (nisu) {
+                delete ENSS_PHOTO.drafts.dossier;
+                var r = origDossier.apply(this, arguments);
+                try { enssPhotoInjectDossier(nisu); } catch (e) { console.warn('foto dossier', e); }
+                return r;
+            };
+            if (typeof window !== 'undefined') {
+                window.addEventListener('online', function () { enssPhotoSyncPending(); });
+                setInterval(function () { enssPhotoSyncPending(); }, 90000);
+                setTimeout(function () { enssPhotoSyncPending(); }, 9000);
+                if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enssPhotoMountInscription); else enssPhotoMountInscription();
+            }
+        })();
+
+        // ===== V9 · DOKIMAN IA (OCR/HTR) — lekti, validasyon, apre sa sèlman anrejistreman =====
+        // Sèvè a (Supabase Edge Function « enss-doc-ai ») li dokiman an. Li pa ekri anyen. Platfòm nan montre rezilta yo
+        // nan yon tablo, itilizatè a valide, epi se sèlman apre sa nòt yo antre nan dosye elèv yo.
+        var ENSS_DOCAI = {
+            fn: 'enss-doc-ai', maxFiles: 6, maxPdfMB: 8, maxImgSide: 1800, files: [], rows: [], result: null, busy: false,
+            ctx: { year: '', classe: '', matiere: '', periode: '', docType: 'grade_sheet' }, yearConfirmed: false, serverMsg: '', detectedYear: '', seq: 0,
+            DOC_TYPES: [['grade_sheet', 'Fèy nòt / bilten (nòt pa elèv)'], ['student_list', 'Lis elèv'], ['attendance_sheet', 'Fèy prezans'], ['staff_document', 'Dokiman pèsonèl'], ['school_report', 'Rapò lekòl'], ['financial_document', 'Dokiman finansye']]
+        };
+        // ---------- utilitaires de normalisation ----------
+        function enssNorm(s) { return String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim(); }
+        function enssLev(a, b) {
+            if (a === b) return 0; if (!a.length) return b.length; if (!b.length) return a.length;
+            var prev = [], i, j; for (j = 0; j <= b.length; j++) prev[j] = j;
+            for (i = 1; i <= a.length; i++) {
+                var cur = [i]; for (j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+                prev = cur;
+            }
+            return prev[b.length];
+        }
+        function enssRatio(a, b) { var m = Math.max(a.length, b.length); return m ? 1 - enssLev(a, b) / m : 1; }
+        function enssNameScore(a, b) {
+            var A = enssNorm(a), B = enssNorm(b); if (!A || !B) return 0; if (A === B) return 1;
+            var ta = A.split(' ').sort(), tb = B.split(' ').sort(), sa = ta.join(' '), sb = tb.join(' ');
+            if (sa === sb) return 0.98;
+            var lev = enssRatio(sa, sb), used = {}, hit = 0;
+            ta.forEach(function (x) {
+                var best = -1, bs = 0; tb.forEach(function (y, i) { if (used[i]) return; var r = enssRatio(x, y); if (r > bs) { bs = r; best = i; } });
+                if (best >= 0 && bs >= 0.8) { used[best] = 1; hit += bs; }
+            });
+            var tok = hit / Math.max(ta.length, tb.length);
+            return Math.max(lev, 0.5 * lev + 0.5 * tok);
+        }
+        function enssNormYear(y) { var m = /(\d{4})\s*[-–—/]\s*(\d{4})/.exec(String(y || '')); return m ? m[1] + '-' + m[2] : ''; }
+        function enssNormPeriod(p) { var m = /([1-4])/.exec(String(p == null ? '' : p)); return m ? m[1] : ''; }
+        function enssNormClass(c) {
+            var raw = String(c || ''), n = enssNorm(raw); if (!n) return '';
+            var list = (typeof ALL_CLASSES !== 'undefined' && ALL_CLASSES) || [];
+            for (var i = 0; i < list.length; i++) if (enssNorm(list[i]) === n) return list[i];
+            var d = /(\d)/.exec(n);
+            if (/presc|prescol/.test(n)) { var pd = d ? d[1] : ''; var pc = list.filter(function (x) { return /presc/i.test(x) && (!pd || x.indexOf(pd) !== -1); }); return pc[0] || ''; }
+            if (d) { var cand = list.filter(function (x) { return !/presc/i.test(x) && new RegExp('^' + d[1] + '(?!\\d)').test(String(x).replace(/^\D+/, '')) || (!/presc/i.test(x) && String(x).indexOf(d[1]) === 0); }); if (cand.length) return cand[0]; }
+            return '';
+        }
+        function enssSubjectsFor(classe) { try { return getMatieresForClasse(classe) || []; } catch (e) { return []; } }
+        function enssMapSubject(label, classe) {
+            var n = enssNorm(label); if (!n) return '';
+            var subs = enssSubjectsFor(classe), compact = n.replace(/\s/g, '');
+            for (var i = 0; i < subs.length; i++) { var m = subs[i]; if (enssNorm(m.code).replace(/\s/g, '') === compact || enssNorm(m.nom) === n) return m.code; }
+            var best = '', bs = 0;
+            subs.forEach(function (m) { var r = Math.max(enssRatio(enssNorm(m.nom), n), enssRatio(enssNorm(m.code).replace(/\s/g, ''), compact)); if (r > bs) { bs = r; best = m.code; } });
+            return bs >= 0.78 ? best : '';
+        }
+        function enssAIYears() {
+            var set = {}; (STATE.students || []).forEach(function (s) { if (s && s._YEAR) set[s._YEAR] = 1; });
+            ((STATE.parametres && STATE.parametres.schoolYears) || []).forEach(function (y) { set[y] = 1; }); if (STATE.anneeCourante) set[STATE.anneeCourante] = 1;
+            return Object.keys(set).sort().reverse();
+        }
+        function enssAIStudentsOfYear(year, classe) {
+            return (STATE.students || []).filter(function (s) { return s && s._YEAR === year && (!classe || s.classe === classe); });
+        }
+        function enssAIStudentLabel(s) { return (s.nom || '') + ' ' + (s.prenom || ''); }
+        // ---------- appariement des élèves (jamais de décision en cas de doute) ----------
+        function enssAIMatch(row) {
+            row.candidates = []; row.matchState = 'none'; row.studentNisu = '';
+            var year = ENSS_DOCAI.ctx.year, pool = enssAIStudentsOfYear(year, ENSS_DOCAI.ctx.classe || '');
+            var nisu = enssNorm(row.nisu).replace(/\s/g, '');
+            if (nisu) {
+                var ex = pool.filter(function (s) { return enssNorm(s.nisu).replace(/\s/g, '') === nisu; });
+                if (!ex.length && ENSS_DOCAI.ctx.classe) ex = enssAIStudentsOfYear(year, '').filter(function (s) { return enssNorm(s.nisu).replace(/\s/g, '') === nisu; });
+                if (ex.length === 1) {
+                    var sc = row.name ? enssNameScore(row.name, enssAIStudentLabel(ex[0])) : 1;
+                    row.candidates = [{ nisu: ex[0].nisu, label: enssAIStudentLabel(ex[0]), score: sc }];
+                    if (!row.name || sc >= 0.6) { row.matchState = 'exact'; row.studentNisu = ex[0].nisu; return row; }
+                    row.matchState = 'ambiguous'; return row;   // NISU lu ≠ nom lu : l'utilisateur tranche
+                }
+            }
+            if (!row.name) return row;
+            var scored = pool.map(function (s) { return { nisu: s.nisu, label: enssAIStudentLabel(s), score: Math.max(enssNameScore(row.name, enssAIStudentLabel(s)), enssNameScore(row.name, (s.prenom || '') + ' ' + (s.nom || ''))) }; })
+                .sort(function (a, b) { return b.score - a.score; });
+            row.candidates = scored.slice(0, 6).filter(function (c) { return c.score >= 0.5; });
+            var s1 = scored[0] ? scored[0].score : 0, s2 = scored[1] ? scored[1].score : 0;
+            if (s1 >= 0.93 && (s1 - s2) >= 0.07) { row.matchState = 'auto'; row.studentNisu = scored[0].nisu; }
+            else if (s1 >= 0.6) row.matchState = 'ambiguous';
+            return row;
+        }
+        function enssAIFindStudent(row) {
+            if (!row.studentNisu) return null;
+            return (STATE.students || []).filter(function (s) { return s && s._YEAR === ENSS_DOCAI.ctx.year && String(s.nisu) === String(row.studentNisu); })[0] || null;
+        }
+        function enssAITeacherAllowed(student, code) {
+            try {
+                if (isAdminUser()) return true;
+                var u = getCurrentUserObj && getCurrentUserObj(); if (!u) return false;
+                if (u.accessClasses && u.accessClasses.length && u.accessClasses.indexOf(student.classe) === -1) return false;
+                if (/7|8|9/.test(String(student.classe)) && u.accessMatieres && u.accessMatieres.length && u.accessMatieres.indexOf(code) === -1) return false;
+                return true;
+            } catch (e) { return false; }
+        }
+        // ---------- validation d'une ligne ----------
+        function enssAIValidateRow(row) {
+            var errors = [], warnings = [], st = enssAIFindStudent(row), conflict = null;
+            if (!row.studentNisu || !st) errors.push('Chwazi elèv la (pa idantifye nan ane ' + (ENSS_DOCAI.ctx.year || '?') + ').');
+            if (st) {
+                if (ENSS_DOCAI.ctx.classe && st.classe !== ENSS_DOCAI.ctx.classe) errors.push('Elèv sa a nan ' + st.classe + ', pa nan ' + ENSS_DOCAI.ctx.classe + '.');
+                if (/presc/i.test(String(st.classe))) errors.push('Preskolè = nòt kalitatif (TB/B/AB): pa sipòte nan lekti otomatik la.');
+                if (st.legacyArchive || st.legacy) errors.push('Ane achiv: estrikti diferan, pa ka antre otomatikman.');
+            }
+            var subs = st ? enssSubjectsFor(st.classe) : enssSubjectsFor(ENSS_DOCAI.ctx.classe), mat = subs.filter(function (m) { return m.code === row.subject; })[0];
+            if (!row.subject || !mat) errors.push('Matyè a pa rekonèt pou klas sa a.');
+            if (!/^[1-4]$/.test(String(row.period || ''))) errors.push('Peryòd/kontwòl dwe 1, 2, 3 oswa 4.');
+            var num = parseFloat(String(row.value).replace(',', '.'));
+            if (row.value === '' || row.value == null || isNaN(num)) errors.push('Nòt la pa valid.');
+            else if (num < 0) errors.push('Nòt la pa ka negatif.');
+            else if (mat && num > mat.maxPoints) errors.push('Nòt la (' + num + ') depase maksimòm nan (' + mat.maxPoints + ').');
+            if (st && mat && !errors.length && !enssAITeacherAllowed(st, mat.code)) errors.push('🔒 Ou pa gen dwa pou antre nòt sa a (klas/matyè).');
+            if (st && mat && /^[1-4]$/.test(String(row.period)) && !isNaN(num)) {
+                var cur = st.controles && st.controles[row.period] ? st.controles[row.period][mat.code] : undefined;
+                if (cur !== undefined && cur !== null && cur !== '') { if (Number(cur) === num) warnings.push('Menm nòt la deja anrejistre (pa gen chanjman).'); else conflict = cur; }
+            }
+            if (row.conf != null && row.conf < 0.7) warnings.push('Lekti pa sèten (' + Math.round(row.conf * 100) + '%) — verifye.');
+            if (row.matchState === 'auto') warnings.push('Elèv idantifye otomatikman — verifye.');
+            return { errors: errors, warnings: warnings, conflict: conflict, same: !!(warnings.join('').indexOf('deja anrejistre') !== -1) };
+        }
+        // ---------- extraction → lignes ----------
+        function enssAIResultToRows(res) {
+            var ctx = ENSS_DOCAI.ctx, rows = [];
+            var docClass = enssNormClass(res.classe), docPeriod = enssNormPeriod(res.period);
+            ENSS_DOCAI.detectedYear = enssNormYear(res.year);
+            if (!ctx.classe && docClass) ctx.classe = docClass;
+            (res.students || []).forEach(function (st) {
+                (st.grades || []).forEach(function (g) {
+                    var row = { id: 'r' + (++ENSS_DOCAI.seq), name: String(st.name || '').trim(), nisu: String(st.nisu || '').trim(), subjectRaw: String(g.subject || ''), subject: '', period: '', value: g.value == null ? '' : String(g.value), raw: String(g.raw || ''), conf: null, keep: true, replace: false };
+                    var cs = [g.confidence, st.confidence].filter(function (x) { return typeof x === 'number'; }); row.conf = cs.length ? Math.min.apply(null, cs) : null;
+                    row.subject = (ctx.matiere || enssMapSubject(g.subject, ctx.classe)) || '';
+                    row.period = (ctx.periode || enssNormPeriod(g.period) || docPeriod || '');
+                    rows.push(enssAIMatch(row));
+                });
+            });
+            return rows;
+        }
+        // ---------- appel du service ----------
+        function enssAIStatus() {
+            var cfg = (typeof getCentralConfig === 'function') ? getCentralConfig() : {}, sess = (typeof ENSS_CENTRAL !== 'undefined' && ENSS_CENTRAL.session) || null;
+            if (!cfg || !cfg.url || !cfg.key) return { ok: false, text: 'IA poko konfigire: baz santral Supabase la pa konfigire.' };
+            if (!sess || !sess.access_token) return { ok: false, text: 'IA pa disponib kounye a: konekte ak kont administratè Supabase la (Paramèt → Baz santral).' };
+            return { ok: true, text: 'Sèvè IA a prè pou eseye (fonksyon « enss-doc-ai »). Si li pa deplwaye oswa pa konfigire, w ap resevwa yon mesaj klè.' };
+        }
+        function enssAICall(payload) {
+            var st = enssAIStatus(); if (!st.ok) return Promise.reject({ code: 'not_ready', message: st.text });
+            var cfg = getCentralConfig(), sess = ENSS_CENTRAL.session;
+            return fetch(cfg.url.replace(/\/$/, '') + '/functions/v1/' + ENSS_DOCAI.fn, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', apikey: cfg.key, Authorization: 'Bearer ' + sess.access_token }, body: JSON.stringify(payload), cache: 'no-store'
+            }).then(function (r) {
+                return r.json().catch(function () { return null; }).then(function (j) {
+                    if (r.status === 404) throw { code: 'not_deployed', message: 'Fonksyon sèvè « ' + ENSS_DOCAI.fn + ' » poko deplwaye (gade LIRE_MWEN.md).' };
+                    if (r.status === 401) throw { code: 'unauthorized', message: 'Sesyon an ekspire. Konekte ankò.' };
+                    if (r.status === 403) throw { code: 'forbidden', message: 'Kont sa a pa otorize pou IA ENSS.' };
+                    if (r.status === 503 || (j && j.code === 'not_configured')) throw { code: 'not_configured', message: 'Sèvis IA a poko konfigire sou sèvè a (kle IA manke).' };
+                    if (!r.ok || !j || !j.ok) throw { code: (j && j.code) || 'error', message: (j && j.error) || ('Erè sèvè (' + r.status + ').') };
+                    return j;
+                });
+            }, function () { throw { code: 'offline', message: 'Pa gen koneksyon entènèt. Eseye ankò lè koneksyon an tounen.' }; });
+        }
+        // ---------- fichiers ----------
+        function enssAIReadB64(blob) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(',')[1] || ''); }; fr.onerror = function () { rej(fr.error); }; fr.readAsDataURL(blob); }); }
+        function enssAIShrink(file) {
+            return new Promise(function (resolve, reject) {
+                if (!/^image\//.test(file.type || '')) return reject(new Error('format'));
+                var url; try { url = URL.createObjectURL(file); } catch (e) { return resolve(file); }
+                var img = new Image();
+                img.onload = function () {
+                    try {
+                        var w = img.naturalWidth, h = img.naturalHeight, sc = Math.min(1, ENSS_DOCAI.maxImgSide / Math.max(w, h)), cv = document.createElement('canvas');
+                        cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); var c = cv.getContext && cv.getContext('2d'); if (!c) throw 0;
+                        c.fillStyle = '#fff'; c.fillRect(0, 0, cv.width, cv.height); c.drawImage(img, 0, 0, cv.width, cv.height);
+                        cv.toBlob(function (b) { URL.revokeObjectURL(url); resolve(b && b.size ? b : file); }, 'image/jpeg', 0.88);
+                    } catch (e) { URL.revokeObjectURL(url); resolve(file); }
+                };
+                img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Foto a pa ka li.')); };
+                img.src = url;
+            });
+        }
+        function enssAIAddFiles(fileList) {
+            var list = [].slice.call(fileList || []), errs = [], chain = Promise.resolve();
+            list.forEach(function (f) {
+                chain = chain.then(function () {
+                    if (ENSS_DOCAI.files.length >= ENSS_DOCAI.maxFiles) { errs.push('Maksimòm ' + ENSS_DOCAI.maxFiles + ' fichye.'); return; }
+                    var t = String(f.type || '').toLowerCase();
+                    if (t === 'application/pdf') {
+                        if (f.size > ENSS_DOCAI.maxPdfMB * 1048576) { errs.push(f.name + ': PDF twò gwo (maks ' + ENSS_DOCAI.maxPdfMB + ' Mo).'); return; }
+                        ENSS_DOCAI.files.push({ name: f.name, mime: 'application/pdf', blob: f }); return;
+                    }
+                    if (t === 'image/jpeg' || t === 'image/png') return enssAIShrink(f).then(function (b) { ENSS_DOCAI.files.push({ name: f.name || 'foto.jpg', mime: (b.type === 'image/jpeg' || b.type === 'image/png') ? b.type : t, blob: b }); }).catch(function () { errs.push(f.name + ': foto pa ka li.'); });
+                    errs.push((f.name || 'fichye') + ': fòma pa aksepte (JPG, PNG, PDF sèlman).');
+                });
+            });
+            return chain.then(function () { if (errs.length) alert(errs.join('\n')); enssAIRender(); });
+        }
+        // ---------- analyse ----------
+        function enssAIAnalyze() {
+            var d = ENSS_DOCAI; if (d.busy) return;
+            if (!d.files.length) { alert('Ajoute omwen yon foto oswa yon PDF.'); return; }
+            if (!d.ctx.year) { alert('Chwazi ane eskolè a anvan.'); return; }
+            var st = enssAIStatus(); if (!st.ok) { d.serverMsg = '⚠️ ' + st.text; enssAIRender(); return; }
+            d.busy = true; d.serverMsg = '⏳ Ap analize dokiman an...'; enssAIRender();
+            var subs = d.ctx.classe ? enssSubjectsFor(d.ctx.classe).map(function (m) { return { code: m.code, nom: m.nom, max: m.maxPoints }; }) : [];
+            Promise.all(d.files.map(function (f) { return enssAIReadB64(f.blob).then(function (b64) { return { name: f.name, mime: f.mime, data: b64 }; }); })).then(function (files) {
+                return enssAICall({ docType: d.ctx.docType, files: files, hints: { year: d.ctx.year, classe: d.ctx.classe || null, matiere: d.ctx.matiere || null, periode: d.ctx.periode || null, subjects: subs } });
+            }).then(function (res) { d.busy = false; enssAIApplyResult(res.result); d.serverMsg = '✅ Analiz fini. Verifye tout tablo a anvan ou anrejistre.'; enssAIRender(); })
+                .catch(function (e) { d.busy = false; d.serverMsg = '⚠️ ' + ((e && e.message) || 'Erè enkoni.'); enssAIRender(); });
+        }
+        function enssAIApplyResult(result) {
+            var d = ENSS_DOCAI; d.result = result || null; d.rows = []; d.yearConfirmed = false;
+            if (result && result.documentType === 'grade_sheet') d.rows = enssAIResultToRows(result);
+            else if (result) d.detectedYear = enssNormYear(result.year);
+        }
+        function enssAIManual() {
+            var d = ENSS_DOCAI; d.result = { documentType: 'grade_sheet', manual: true, students: [] }; d.ctx.docType = 'grade_sheet'; d.detectedYear = ''; d.yearConfirmed = true;
+            d.rows = []; enssAIAddRow(); d.serverMsg = '✍️ Antre manyèl: tout règ validasyon yo aplike menm jan.';
+        }
+        function enssAIAddRow() {
+            var d = ENSS_DOCAI; d.rows.push({ id: 'r' + (++d.seq), name: '', nisu: '', subjectRaw: '', subject: d.ctx.matiere || '', period: d.ctx.periode || '', value: '', raw: '', conf: null, keep: true, replace: false, candidates: [], matchState: 'none', studentNisu: '' });
+            enssAIRender();
+        }
+        // ---------- enregistrement (seulement après validation) ----------
+        function enssAISummary() {
+            var d = ENSS_DOCAI, out = { total: 0, ok: 0, blocked: 0, conflicts: 0, replace: 0, same: 0, skipped: 0 };
+            d.rows.forEach(function (r) {
+                if (!r.keep) { out.skipped++; return; } out.total++;
+                var v = enssAIValidateRow(r); r._v = v;
+                if (v.errors.length) out.blocked++; else if (v.same) out.same++; else if (v.conflict !== null) { out.conflicts++; if (r.replace) out.replace++; } else out.ok++;
+            });
+            out.needYear = !d.detectedYear || d.detectedYear !== d.ctx.year;
+            out.yearOk = !out.needYear || d.yearConfirmed;
+            return out;
+        }
+        function enssAISave() {
+            var d = ENSS_DOCAI, sm = enssAISummary();
+            if (d.ctx.docType !== 'grade_sheet') { alert('Sèlman fèy nòt yo ka anrejistre nan dosye yo. Lòt dokiman yo se lekti sèlman.'); return; }
+            if (!isLoggedIn() || !canModifyData('resultats')) { alert('🔒 Ou pa gen dwa pou modifye rezilta yo.'); return; }
+            if (sm.blocked) { alert('Gen ' + sm.blocked + ' liy ak erè. Korije yo oswa retire yo anvan ou anrejistre.'); return; }
+            if (!sm.yearOk) { alert('Konfime ane eskolè a (' + d.ctx.year + ') anvan ou anrejistre.'); return; }
+            var toSave = d.rows.filter(function (r) { return r.keep && r._v && !r._v.errors.length && !r._v.same && (r._v.conflict === null || r.replace); });
+            if (!toSave.length) { alert('Pa gen okenn nòt nouvo pou anrejistre.'); return; }
+            if (!confirm('Anrejistre ' + toSave.length + ' nòt pou ane ' + d.ctx.year + (sm.replace ? ' (' + sm.replace + ' ranplasman nòt ki egziste)' : '') + '?\n\nSa ap modifye dosye elèv yo.')) return;
+            var changes = [];
+            toSave.forEach(function (r) {
+                var st = enssAIFindStudent(r); if (!st) return;
+                st.controles = st.controles || {}; st.controles[r.period] = st.controles[r.period] || {};
+                var old = st.controles[r.period][r.subject], val = parseFloat(String(r.value).replace(',', '.'));
+                st.controles[r.period][r.subject] = val;
+                changes.push({ nisu: st.nisu, classe: st.classe, subject: r.subject, period: r.period, old: old === undefined ? null : old, new: val });
+                try { if (typeof recalcStudentDecision === 'function') recalcStudentDecision(st); } catch (e) {}
+            });
+            STATE.docAILog = Array.isArray(STATE.docAILog) ? STATE.docAILog : [];
+            STATE.docAILog.push({ id: 'ai-' + Date.now(), ts: new Date().toISOString(), user: STATE.utilisateur || '', docType: d.ctx.docType, files: d.files.map(function (f) { return f.name; }), year: d.ctx.year, classe: d.ctx.classe || '', extracted: d.rows.length, saved: changes.length, replaced: changes.filter(function (c) { return c.old !== null; }).length, skipped: d.rows.length - changes.length, changes: changes.slice(0, 600) });
+            if (STATE.docAILog.length > 100) STATE.docAILog = STATE.docAILog.slice(-100);
+            saveState();
+            ['refreshResults', 'renderResumeMatieres', 'renderResultats', 'renderDashboard'].forEach(function (fn) { try { if (typeof window[fn] === 'function') window[fn](); } catch (e) {} });
+            d.serverMsg = '✅ ' + changes.length + ' nòt anrejistre. ' + (d.rows.length - changes.length) + ' liy pa anrejistre.';
+            d.rows = d.rows.filter(function (r) { return toSave.indexOf(r) === -1; }); enssAIRender();
+            return changes;
+        }
+        // ---------- interface ----------
+        function enssAIEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function enssAIOpen() {
+            if (!isLoggedIn() || !canModifyData('resultats')) { alert('🔒 Ou pa gen dwa pou itilize modil sa a.'); return; }
+            var d = ENSS_DOCAI; if (!d.ctx.year) d.ctx.year = STATE.anneeCourante || '';
+            var ov = document.getElementById('enssDocAIPanel');
+            if (!ov) { ov = document.createElement('div'); ov.id = 'enssDocAIPanel'; ov.className = 'enss-ai-overlay'; document.body.appendChild(ov); }
+            ov.style.display = 'flex'; enssAIRender();
+        }
+        function enssAIClose() { var ov = document.getElementById('enssDocAIPanel'); if (ov) ov.style.display = 'none'; }
+        function enssAISet(k, v) { ENSS_DOCAI.ctx[k] = v; if (k === 'year' || k === 'classe') { ENSS_DOCAI.rows.forEach(function (r) { r.studentNisu = ''; enssAIMatch(r); }); ENSS_DOCAI.yearConfirmed = false; } enssAIRender(); }
+        function enssAIRow(id) { return ENSS_DOCAI.rows.filter(function (r) { return r.id === id; })[0]; }
+        function enssAISetRow(id, f, v) {
+            var r = enssAIRow(id); if (!r) return;
+            if (f === 'keep' || f === 'replace') r[f] = !!v; else r[f] = v;
+            if (f === 'nisu') { r.studentNisu = ''; enssAIMatch(r); }
+            if (f === 'studentNisu') { r.matchState = v ? 'manual' : 'none'; }
+            if (f === 'subject' || f === 'period' || f === 'value' || f === 'keep' || f === 'replace' || f === 'studentNisu' || f === 'nisu') enssAIRefreshStatus();
+        }
+        function enssAIRemoveRow(id) { ENSS_DOCAI.rows = ENSS_DOCAI.rows.filter(function (r) { return r.id !== id; }); enssAIRender(); }
+        function enssAIRemoveFile(i) { ENSS_DOCAI.files.splice(i, 1); enssAIRender(); }
+        function enssAIRefreshStatus() {
+            var sm = enssAISummary(), box = document.getElementById('enssAISummary'); if (box) box.innerHTML = enssAISummaryHtml(sm);
+            ENSS_DOCAI.rows.forEach(function (r) { var c = document.getElementById('aiSt-' + r.id); if (c) c.innerHTML = enssAIRowStatusHtml(r); var tr = document.getElementById('aiRow-' + r.id); if (tr) tr.className = (r._v && r._v.errors.length && r.keep) ? 'ai-bad' : ''; });
+        }
+        function enssAIRowStatusHtml(r) {
+            var v = enssAIValidateRow(r), h = ''; r._v = v;
+            v.errors.forEach(function (e) { h += '<div class="ai-err">⛔ ' + enssAIEsc(e) + '</div>'; });
+            v.warnings.forEach(function (w) { h += '<div class="ai-warn">⚠️ ' + enssAIEsc(w) + '</div>'; });
+            if (v.conflict !== null) h += '<div class="ai-warn">⚠️ Nòt ki egziste deja: <b>' + enssAIEsc(v.conflict) + '</b> <label><input type="checkbox" ' + (r.replace ? 'checked' : '') + ' onchange="enssAISetRow(\'' + r.id + '\',\'replace\',this.checked)"> Ranplase li</label></div>';
+            if (!h) h = '<div class="ai-ok">✅ Pare</div>';
+            return h;
+        }
+        function enssAISummaryHtml(sm) {
+            var d = ENSS_DOCAI, h = '<div class="ai-sum"><b>Rezime validasyon:</b> ' + sm.total + ' liy · ✅ ' + sm.ok + ' pare · ⛔ ' + sm.blocked + ' ak erè · ⚠️ ' + sm.conflicts + ' konfli (' + sm.replace + ' pou ranplase) · = ' + sm.same + ' menm nòt · ✖ ' + sm.skipped + ' retire</div>';
+            if (sm.needYear && d.rows.length) h += '<label class="ai-year"><input type="checkbox" ' + (d.yearConfirmed ? 'checked' : '') + ' onchange="ENSS_DOCAI.yearConfirmed=this.checked;enssAIRefreshStatus()"> ' + (d.detectedYear ? 'Dokiman an sanble di <b>' + d.detectedYear + '</b>, men ou chwazi <b>' + d.ctx.year + '</b>.' : 'IA a pa t kapab detekte ane a.') + ' <b>Mwen konfime ke nòt yo se pou ane ' + d.ctx.year + '.</b></label>';
+            return h;
+        }
+        function enssAIGenericHtml(res) {
+            var h = '<h4>📄 Rezilta lekti (lekti sèlman — pa anrejistre otomatikman)</h4>';
+            if (res.fields && res.fields.length) h += '<table class="ai-tbl"><tbody>' + res.fields.map(function (f) { return '<tr><th>' + enssAIEsc(f.label) + '</th><td>' + enssAIEsc(f.value) + '</td></tr>'; }).join('') + '</tbody></table>';
+            (res.tables || []).forEach(function (t) { h += '<h5>' + enssAIEsc(t.title || '') + '</h5><div class="ai-scroll"><table class="ai-tbl"><thead><tr>' + (t.headers || []).map(function (x) { return '<th>' + enssAIEsc(x) + '</th>'; }).join('') + '</tr></thead><tbody>' + (t.rows || []).map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + enssAIEsc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>'; });
+            if (res.text) h += '<pre class="ai-pre">' + enssAIEsc(res.text) + '</pre>';
+            if (res.documentType === 'student_list' && res.tables && res.tables[0]) {
+                var rows = res.tables[0].rows || [], hd = (res.tables[0].headers || []).map(enssNorm), iN = hd.findIndex(function (x) { return /nom/.test(x) && !/pre/.test(x); }), iP = hd.findIndex(function (x) { return /pre/.test(x); }), iI = hd.findIndex(function (x) { return /nisu/.test(x); });
+                var found = 0, miss = []; rows.forEach(function (r) { var nm = (iN >= 0 ? r[iN] : '') + ' ' + (iP >= 0 ? r[iP] : ''), best = 0; enssAIStudentsOfYear(ENSS_DOCAI.ctx.year, '').forEach(function (s) { best = Math.max(best, enssNameScore(nm, enssAIStudentLabel(s)), enssNameScore(nm, (s.prenom || '') + ' ' + (s.nom || ''))); }); if (best >= 0.9) found++; else miss.push(nm.trim()); });
+                h += '<div class="ai-sum">Konparezon ak elèv ane ' + enssAIEsc(ENSS_DOCAI.ctx.year) + ': ' + found + ' jwenn · ' + miss.length + ' pa jwenn' + (miss.length ? ' (' + enssAIEsc(miss.slice(0, 12).join(', ')) + (miss.length > 12 ? '…' : '') + ')' : '') + '. <i>Okenn elèv pa kreye otomatikman.</i></div>';
+            }
+            h += '<div class="ai-actions"><button class="btn" onclick="enssAIExportJson()">⬇ JSON</button></div>';
+            return h;
+        }
+        function enssAIExportJson() { var b = new Blob([JSON.stringify(ENSS_DOCAI.result, null, 2)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'dokiman_ia.json'; document.body.appendChild(a); a.click(); a.remove(); }
+        function enssAILogHtml() {
+            var log = (STATE.docAILog || []).slice().reverse().slice(0, 15);
+            if (!log.length) return '<div class="ai-muted">Poko gen anrejistreman IA.</div>';
+            return '<table class="ai-tbl"><thead><tr><th>Dat</th><th>Itilizatè</th><th>Ane</th><th>Klas</th><th>Fichye</th><th>Anrejistre</th><th>Ranplase</th></tr></thead><tbody>' + log.map(function (l) { return '<tr><td>' + enssAIEsc((l.ts || '').replace('T', ' ').slice(0, 16)) + '</td><td>' + enssAIEsc(l.user) + '</td><td>' + enssAIEsc(l.year) + '</td><td>' + enssAIEsc(l.classe) + '</td><td>' + enssAIEsc((l.files || []).join(', ')) + '</td><td>' + l.saved + '</td><td>' + l.replaced + '</td></tr>'; }).join('') + '</tbody></table>';
+        }
+        function enssAIRowHtml(r, i) {
+            r._v = enssAIValidateRow(r);
+            var subs = enssSubjectsFor(ENSS_DOCAI.ctx.classe || (enssAIFindStudent(r) || {}).classe), cands = (r.candidates || []).slice();
+            var sel = '<select onchange="enssAISetRow(\'' + r.id + '\',\'studentNisu\',this.value);enssAIRefreshStatus()"><option value="">— chwazi —</option>' + cands.map(function (c) { return '<option value="' + enssAIEsc(c.nisu) + '"' + (c.nisu === r.studentNisu ? ' selected' : '') + '>' + enssAIEsc(c.label) + ' (' + Math.round(c.score * 100) + '%)</option>'; }).join('') + (r.studentNisu && !cands.some(function (c) { return c.nisu === r.studentNisu; }) ? '<option value="' + enssAIEsc(r.studentNisu) + '" selected>' + enssAIEsc(r.studentNisu) + '</option>' : '') + '</select>';
+            return '<tr id="aiRow-' + r.id + '" class="' + ((r._v.errors.length && r.keep) ? 'ai-bad' : '') + '"><td><input type="checkbox" ' + (r.keep ? 'checked' : '') + ' onchange="enssAISetRow(\'' + r.id + '\',\'keep\',this.checked)"></td><td>' + (i + 1) + '</td>' +
+                '<td><input class="ai-in" value="' + enssAIEsc(r.name) + '" onchange="enssAISetRow(\'' + r.id + '\',\'name\',this.value);enssAIMatch(enssAIRow(\'' + r.id + '\'));enssAIRender()"></td>' +
+                '<td><input class="ai-in ai-s" value="' + enssAIEsc(r.nisu) + '" onchange="enssAISetRow(\'' + r.id + '\',\'nisu\',this.value);enssAIRender()"></td><td>' + sel + '</td>' +
+                '<td><select onchange="enssAISetRow(\'' + r.id + '\',\'subject\',this.value)"><option value="">— matyè —</option>' + subs.map(function (m) { return '<option value="' + enssAIEsc(m.code) + '"' + (m.code === r.subject ? ' selected' : '') + '>' + enssAIEsc(m.nom) + ' (/' + m.maxPoints + ')</option>'; }).join('') + '</select>' + (r.subjectRaw ? '<div class="ai-muted">lu: ' + enssAIEsc(r.subjectRaw) + '</div>' : '') + '</td>' +
+                '<td><select onchange="enssAISetRow(\'' + r.id + '\',\'period\',this.value)"><option value="">—</option>' + ['1', '2', '3', '4'].map(function (p) { return '<option value="' + p + '"' + (p === String(r.period) ? ' selected' : '') + '>C' + p + '</option>'; }).join('') + '</select></td>' +
+                '<td><input class="ai-in ai-s" value="' + enssAIEsc(r.value) + '" onchange="enssAISetRow(\'' + r.id + '\',\'value\',this.value)">' + (r.raw ? '<div class="ai-muted">lu: ' + enssAIEsc(r.raw) + '</div>' : '') + '</td>' +
+                '<td>' + (r.conf == null ? '—' : Math.round(r.conf * 100) + '%') + '</td><td id="aiSt-' + r.id + '">' + enssAIRowStatusHtml(r) + '</td><td><button class="btn" onclick="enssAIRemoveRow(\'' + r.id + '\')">🗑</button></td></tr>';
+        }
+        function enssAIRender() {
+            var ov = document.getElementById('enssDocAIPanel'); if (!ov) return;
+            var d = ENSS_DOCAI, st = enssAIStatus(), years = enssAIYears(), classes = ((typeof ALL_CLASSES !== 'undefined' && ALL_CLASSES) || []).filter(function (c) { return !/presc/i.test(c); });
+            var subs = d.ctx.classe ? enssSubjectsFor(d.ctx.classe) : [];
+            var opt = function (arr, cur, blank) { return (blank ? '<option value="">' + blank + '</option>' : '') + arr.map(function (x) { var v = Array.isArray(x) ? x[0] : x, l = Array.isArray(x) ? x[1] : x; return '<option value="' + enssAIEsc(v) + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + enssAIEsc(l) + '</option>'; }).join(''); };
+            var h = '<div class="ai-box"><div class="ai-head"><h3>🤖 Dokiman IA — lekti fèy nòt ak dokiman</h3><button class="btn" onclick="enssAIClose()">✖ Fèmen</button></div>' +
+                '<div class="ai-status ' + (st.ok ? 'on' : 'off') + '">' + enssAIEsc(st.text) + '</div>' + (d.serverMsg ? '<div class="ai-msg">' + enssAIEsc(d.serverMsg) + '</div>' : '') +
+                '<div class="ai-note">ℹ️ IA a li, men <b>se ou ki valide</b>. Anyen pa anrejistre san ou pa konfime. Okenn elèv pa kreye otomatikman. Dokiman yo voye bay yon founisè IA nan sèvè a (done yo kite Supabase).</div>' +
+                '<div class="ai-grid"><label>Tip dokiman<select onchange="enssAISet(\'docType\',this.value)">' + opt(d.DOC_TYPES, d.ctx.docType) + '</select></label>' +
+                '<label>Ane eskolè *<select onchange="enssAISet(\'year\',this.value)">' + opt(years, d.ctx.year, '— chwazi —') + '</select></label>' +
+                '<label>Klas<select onchange="enssAISet(\'classe\',this.value)">' + opt(classes, d.ctx.classe, '— (IA ap detekte) —') + '</select></label>' +
+                '<label>Matyè (si yon sèl)<select onchange="enssAISet(\'matiere\',this.value)">' + opt(subs.map(function (m) { return [m.code, m.nom]; }), d.ctx.matiere, '— tout —') + '</select></label>' +
+                '<label>Peryòd<select onchange="enssAISet(\'periode\',this.value)">' + opt([['1', 'C1'], ['2', 'C2'], ['3', 'C3'], ['4', 'C4']], d.ctx.periode, '— (IA ap detekte) —') + '</select></label></div>' +
+                '<div class="ai-files"><button class="btn btn-primary" onclick="document.getElementById(\'aiCam\').click()">📷 Kamera</button><button class="btn" onclick="document.getElementById(\'aiFile\').click()">📁 Foto / PDF</button>' +
+                '<input id="aiCam" type="file" accept="image/*" capture="environment" hidden onchange="enssAIAddFiles(this.files);this.value=\'\'"><input id="aiFile" type="file" accept="image/jpeg,image/png,application/pdf" multiple hidden onchange="enssAIAddFiles(this.files);this.value=\'\'">' +
+                d.files.map(function (f, i) { return '<span class="ai-chip">' + (f.mime === 'application/pdf' ? '📄' : '🖼️') + ' ' + enssAIEsc(f.name) + ' <a href="#" onclick="enssAIRemoveFile(' + i + ');return false">✖</a></span>'; }).join('') + '</div>' +
+                '<div class="ai-actions"><button class="btn btn-primary" ' + (d.busy ? 'disabled' : '') + ' onclick="enssAIAnalyze()">🔍 Analize ak IA</button>' + (d.ctx.docType === 'grade_sheet' ? '<button class="btn" onclick="enssAIManual()">✍️ Antre manyèlman</button>' : '') + '</div>';
+            if (d.result && d.result.documentType !== 'grade_sheet') h += enssAIGenericHtml(d.result);
+            if (d.result && d.result.documentType === 'grade_sheet') {
+                if (d.result.warnings && d.result.warnings.length) h += '<div class="ai-warn">⚠️ IA di: ' + d.result.warnings.map(enssAIEsc).join(' · ') + '</div>';
+                h += '<div id="enssAISummary">' + enssAISummaryHtml(enssAISummary()) + '</div><div class="ai-scroll"><table class="ai-tbl"><thead><tr><th></th><th>#</th><th>Non (lu)</th><th>NISU (lu)</th><th>Elèv nan sistèm nan</th><th>Matyè → kolòn</th><th>Kontwòl</th><th>Nòt</th><th>Konfyans</th><th>Estati</th><th></th></tr></thead><tbody>' + d.rows.map(enssAIRowHtml).join('') + '</tbody></table></div>' +
+                    '<div class="ai-actions"><button class="btn" onclick="enssAIAddRow()">➕ Ajoute yon liy</button><button class="btn btn-primary" onclick="enssAISave()">✅ Konfime ak anrejistre nòt valide yo</button></div>';
+            }
+            h += '<details class="ai-log"><summary>📜 Istorik anrejistreman IA</summary>' + enssAILogHtml() + '</details></div>';
+            ov.innerHTML = h;
+        }
+        function enssAIInstallLauncher() {
+            var page = document.getElementById('page-direction'); if (!page || document.getElementById('enssAILauncher')) return;
+            var box = document.createElement('div'); box.id = 'enssAILauncher'; box.className = 'card'; box.style.cssText = 'padding:.8rem;margin-bottom:.7rem;border-left:4px solid #7c3aed;';
+            box.innerHTML = '<h4 style="margin:0;font-size:.9rem;">🤖 Dokiman IA</h4><p style="font-size:.72rem;color:#475569;margin:.35rem 0;">Pran yon foto oswa chaje yon PDF (fèy nòt, lis elèv, rapò...). IA a li li, ou verifye, epi sèlman apre sa nòt yo antre nan dosye yo.</p><button type="button" class="btn btn-primary" onclick="enssAIOpen()">🤖 Louvri Dokiman IA</button>';
+            page.insertBefore(box, page.firstChild);
+        }
+
         function renderPage(page) {
             switch (page) {
                 case 'accueil':
@@ -15724,9 +16482,10 @@ if(localYear) merged.anneeCourante=localYear;
             }
         }
         bootENSS();
+        try{ enssAIInstallLauncher(); enssPhotoMountInscription(); }catch(_e){}
 
         var _enssRenderPageOrig = renderPage;
-        renderPage = function(page){ var r = _enssRenderPageOrig.apply(this, arguments); try{ if(page==='parametres') enssRenderLangAuditCard(); if(page==='quiz'||page==='evaluation') { enssAudioHostsInit(); enssAudioBarRefresh(); } }catch(_e){} return r; };
+        renderPage = function(page){ var r = _enssRenderPageOrig.apply(this, arguments); try{ if(page==='parametres') enssRenderLangAuditCard(); if(page==='direction') enssAIInstallLauncher(); if(page==='inscription') enssPhotoMountInscription(); if(page==='quiz'||page==='evaluation') { enssAudioHostsInit(); enssAudioBarRefresh(); } }catch(_e){} return r; };
 
 
         // --- === EKSPOZE FONKSYON === ---
