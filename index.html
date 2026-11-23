@@ -9341,7 +9341,7 @@ if(localYear) merged.anneeCourante=localYear;
             if(!sameStudent.length) return;
             var yearOf=function(st){return String(st._YEAR||st.annee||st.anneeScolaire||STATE.anneeCourante||'');};
             var years=Array.from(new Set(sameStudent.map(yearOf).filter(Boolean))).sort();
-            var requestedYear=ENSS_STUDENT_DOSSIER_YEAR[String(nisu)]||String(STATE.anneeCourante||'all');
+            var requestedYear=ENSS_STUDENT_DOSSIER_YEAR[String(nisu)]||'all';
             var s=requestedYear==='all'?(sameStudent.find(function(st){return yearOf(st)===String(STATE.anneeCourante||'');})||sameStudent[0]):(sameStudent.find(function(st){return yearOf(st)===requestedYear;})||sameStudent[0]);
             if (!s) return;
             if (getRole() === 'eleve') {
@@ -22474,6 +22474,105 @@ window.importBuiltInHistoricalArchives = function(selectedYear) {
   if(typeof prev==='function' && !prev.__v136){ var w=function(){ var r=prev.apply(this,arguments); setTimeout(fill,150); return r; }; w.__v136=true; window.importBuiltInHistoricalArchives=w; }
   var sig=''; setInterval(function(){ var s=((window.STATE&&STATE.students)||[]).length; if(String(s)!==sig){ sig=String(s); fill(); } },1700);
   window.__ENSS_V136_TEST__={fill:fill};
+})();
+</script>
+
+
+<script id="enss-v144-student-identity-history">
+/* ENSS V144 — Koreksyon idantite atravè ane yo + istwa tout ane nan dosye elèv.
+   Konsève ane, klas, nòt, rezilta ak achiv chak ansyen dosye; sèlman enfòmasyon idantite/kontak ki pi resan yo monte. */
+(function(){
+  'use strict';
+  if(window.__ENSS_V144_STUDENT_IDENTITY_HISTORY__) return;
+  window.__ENSS_V144_STUDENT_IDENTITY_HISTORY__=true;
+
+  function norm(v){
+    return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .toUpperCase().replace(/[^A-Z0-9]/g,'').trim();
+  }
+  function yearOf(st){return String(st&& (st._YEAR||st.annee||st.anneeScolaire||st.schoolYear||'')||'');}
+  function nisuOf(st){return String(st&&(st.nisu||st.NISU||st.studentNisu||st.student_nisu)||'').trim();}
+  function isModernNisu(v){return !!v && !/^ENSS0*\d+$/i.test(v);}
+  function identityKey(st){return norm(st&&st.prenom)+'|'+norm(st&&st.nom);}
+  function aliasMatch(st,source){
+    var a=identityKey(st),b=identityKey(source);
+    /* Alias nominatif confirmé par egzanp ki nan achiv ENSS la. */
+    return (a==='CARLHENRY|ALAINDOR' && b==='CARLHENRY|ALOUIDOR') ||
+           (a==='CARLHENRY|ALOUIDOR' && b==='CARLHENRY|ALAINDOR');
+  }
+  function profileCopy(target,source){
+    var fields=['nom','prenom','sexe','dateNaissance','lieuNaissance','prenomMere',
+      'responsable','telephone','telPersResponsable','deficience','gratuite'];
+    var changed=false;
+    fields.forEach(function(k){
+      var v=source[k];
+      if(v!==undefined && v!==null && String(v).trim()!==''){
+        if(String(target[k]==null?'':target[k])!==String(v)){target[k]=v;changed=true;}
+      }
+    });
+    var latestNisu=nisuOf(source), oldNisu=nisuOf(target);
+    if(isModernNisu(latestNisu) && oldNisu!==latestNisu){
+      if(oldNisu && !target.nisuAnterior) target.nisuAnterior=oldNisu;
+      target.nisu=latestNisu;
+      changed=true;
+    }
+    target.identityUpdatedFromYear=yearOf(source);
+    return changed;
+  }
+  function reconcile(){
+    try{
+      if(!window.STATE || !Array.isArray(STATE.students)) return 0;
+      var list=STATE.students, latestByKey={}, latestRecords=list.filter(function(st){
+        return st && isModernNisu(nisuOf(st)) && yearOf(st);
+      }).sort(function(a,b){return yearOf(b).localeCompare(yearOf(a));});
+      /* Pran premye dosye ki gen NISU aktyèl pou chak idantite; li soti nan ane ki pi resan. */
+      latestRecords.forEach(function(st){
+        var k=identityKey(st);
+        if(k!=='|' && !latestByKey[k]) latestByKey[k]=st;
+      });
+      var sources=Object.keys(latestByKey).map(function(k){return latestByKey[k];});
+      var changed=0, updates=0;
+      list.forEach(function(old){
+        if(!old || !yearOf(old)) return;
+        var oldNisu=nisuOf(old);
+        if(isModernNisu(oldNisu)) return;
+        var exact=latestByKey[identityKey(old)], matches=[];
+        if(exact) matches=[exact];
+        else matches=sources.filter(function(src){return aliasMatch(old,src);});
+        if(matches.length!==1) return; /* Pa janm fè chwa si gen plizyè kandida. */
+        var src=matches[0];
+        if(yearOf(src)===yearOf(old)) return;
+        if(profileCopy(old,src)){changed++;updates++;}
+      });
+      if(changed){
+        try{ if(typeof saveState==='function') saveState(); }catch(e){}
+        try{ if(typeof renderStudents==='function') renderStudents(); }catch(e){}
+        try{ if(typeof renderDashboard==='function') renderDashboard(); }catch(e){}
+      }
+      window.__ENSS_V144_LAST_RECONCILE__={updated:updates,total:list.length};
+      return changed;
+    }catch(e){try{console.warn('ENSS V144 identity merge',e);}catch(_){} return 0;}
+  }
+  window.enssReconcileStudentIdentities=reconcile;
+
+  function wrap(name,delay){
+    var prev=window[name];
+    if(typeof prev!=='function' || prev.__enssV144) return;
+    var wrapped=function(){
+      var result=prev.apply(this,arguments);
+      setTimeout(reconcile,delay||120);
+      return result;
+    };
+    wrapped.__enssV144=true;
+    window[name]=wrapped;
+  }
+  wrap('importBuiltInHistoricalArchives',180);
+  wrap('importAdvancedStudents',220);
+  wrap('importENSSRealData',180);
+  wrap('reimportENSSRealData',220);
+
+  /* Apre chajman done lokal/santral la, ranje sèlman idantite ki gen yon sous resan san anbigwite. */
+  setTimeout(reconcile,1800);
 })();
 </script>
 
