@@ -1309,6 +1309,7 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                             <option value="ADMIS ET REMEDIATION">ADMIS ET REMEDIATION</option>
                             <option value="ADMISE ET REMEDIATION">ADMISE ET REMEDIATION</option>
                         </select>
+                        <span id="enssResSelBtns" style="display:inline-flex;gap:.25rem;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onclick="printResultsSelection()" title="Lis nèt swivan seleksyon w la" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨 Imprimer</button><button type="button" class="btn btn-success" onclick="pdfResultsSelection()" title="Lis nèt swivan seleksyon w la" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📄 Télécharger PDF / Imprimer</button></span>
                         <button class="btn btn-primary" onclick="printResults()" data-enss-always-export="1" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨️📄 Enprime / Telechaje Tout Lis Rezilta a</button>
                     </div>
                 </div>
@@ -22482,129 +22483,477 @@ window.importBuiltInHistoricalArchives = function(selectedYear) {
 </script>
 
 
-<script id="enss-v144-student-identity-history">
-/* ENSS V144 — Koreksyon idantite atravè ane yo + istwa tout ane nan dosye elèv.
-   Konsève ane, klas, nòt, rezilta ak achiv chak ansyen dosye; sèlman enfòmasyon idantite/kontak ki pi resan yo monte. */
-(function(){
-  'use strict';
-  if(window.__ENSS_V144_STUDENT_IDENTITY_HISTORY__) return;
-  window.__ENSS_V144_STUDENT_IDENTITY_HISTORY__=true;
+<script id="enss-v148-unify-students">
+/* ENSS V148 — Yon sèl NISU + menm done elèv sou tout ane yo (ranplase V144/V147) ; lis rezilta nèt swivan seleksyon */
+/* ENSS V148 — IDANTITE ELÈV UNIK SOU TOUT ANE YO (NISU, foto, done pèsonèl) */
+(function(root){
+'use strict';
+var PROFILE=['nom','prenom','sexe','dateNaissance','lieuNaissance','responsable','telephone','deficience'];
+var VERSION='v148';
 
-  function norm(v){
-    return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .toUpperCase().replace(/[^A-Z0-9]/g,'').trim();
+function txt(v){return String(v==null?'':v).trim();}
+function strip(v){return txt(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function tokens(v){return strip(v).toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim().split(' ').filter(Boolean);}
+function joined(v){return tokens(v).join('');}
+function lev(a,b){
+  if(a===b)return 0; if(!a.length)return b.length; if(!b.length)return a.length;
+  var prev=[],cur=[],i,j;
+  for(j=0;j<=b.length;j++)prev[j]=j;
+  for(i=1;i<=a.length;i++){
+    cur=[i];
+    for(j=1;j<=b.length;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));
+    prev=cur;
   }
-  function yearOf(st){return String(st&& (st._YEAR||st.annee||st.anneeScolaire||st.schoolYear||'')||'');}
-  function nisuOf(st){return String(st&&(st.nisu||st.NISU||st.studentNisu||st.student_nisu)||'').trim();}
-  function isModernNisu(v){return !!v && !/^ENSS0*\d+$/i.test(v);}
-  function identityKey(st){return norm(st&&st.prenom)+'|'+norm(st&&st.nom);}
-  function aliasMatch(st,source){
-    var a=identityKey(st),b=identityKey(source);
-    /* Alias nominatif confirmé par egzanp ki nan achiv ENSS la. */
-    return (a==='CARLHENRY|ALAINDOR' && b==='CARLHENRY|ALOUIDOR') ||
-           (a==='CARLHENRY|ALOUIDOR' && b==='CARLHENRY|ALAINDOR');
+  return prev[b.length];
+}
+function ratio(a,b){
+  if(!a&&!b)return 1; if(!a||!b)return 0;
+  return 1-lev(a,b)/Math.max(a.length,b.length);
+}
+/* resanblans de de non (ordre mo pa enpòtan, "SAINT-HILLAIRE" = "SAINTHILLAIRE") */
+function prep(v){var t=tokens(v);return {j:t.join(''),s:t.slice().sort().join(''),n:t.length};}
+function simP(a,b){
+  if(!a.n||!b.n)return 0;
+  if(a.j===b.j)return 1;
+  return Math.max(ratio(a.s,b.s),ratio(a.j,b.j));
+}
+function nameSim(a,b){return simP(prep(a),prep(b));}
+function P(r){
+  if(r.__p)return r.__p;
+  var o={nom:prep(r.nom),pre:prep(r.prenom),full:prep(txt(r.nom)+' '+txt(r.prenom))};
+  Object.defineProperty(r,'__p',{value:o,enumerable:false,configurable:true,writable:true});
+  return o;
+}
+function yearNum(y){var m=txt(y).match(/^(\d{4})/);return m?parseInt(m[1],10):0;}
+function yearOf(r){return txt(r&&(r._YEAR||r.annee||r.anneeScolaire));}
+
+/* nivo klas : PRESCOLAIRE 1..3 → -2..0 ; 1ere..9eme AF → 1..9 */
+function levelOf(c){
+  var n=strip(c).toLowerCase().replace(/classe/g,' ').replace(/[._-]/g,' ').replace(/\s+/g,' ').trim();
+  if(!n)return null;
+  var m=n.match(/^pre\s?scolaire\s*(iii|ii|i|3|2|1)\b/);
+  if(m){var k=m[1];var v=(k==='iii'||k==='3')?3:(k==='ii'||k==='2')?2:1;return v-3;}
+  if(/^pre\s?scolaire/.test(n))return -2;
+  m=n.match(/^(\d)\s*(?:ere|er|re|eme|em|e)?\b/);
+  if(m){var g=parseInt(m[1],10);if(g>=1&&g<=9)return g;}
+  return null;
+}
+/* dat : retounen {y,m,d} oswa null */
+function parseDob(v){
+  v=txt(v);if(!v)return null;var m;
+  if((m=v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/)))return {y:+m[3],m:+m[2],d:+m[1]};
+  if((m=v.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/)))return {y:+m[1],m:+m[2],d:+m[3]};
+  return null;
+}
+function isPlatformNisu(n){return /^(ENSS|NISU)\s*0*\d+$/i.test(txt(n));}
+function isOfficialNisu(n){n=txt(n);return !!n&&!isPlatformNisu(n)&&/^[A-Za-z]{2,6}\d{5,}[A-Za-z0-9]*$/.test(n.replace(/\s+/g,''));}
+function validPhone(v){return (txt(v).match(/\d/g)||[]).length>=6;}
+function validDef(v){v=txt(v);return !!v&&!/\d{2,}/.test(v);}
+
+/* ---- konparezon de dosye (later = ane pi resan, earlier = ane pi ansyen) ---- */
+function compare(L,E){
+  var sl=txt(L.sexe).toUpperCase(),se=txt(E.sexe).toUpperCase();
+  if(sl&&se&&sl!==se)return null;
+  var pl=P(L),pe=P(E);
+  var nom=simP(pl.nom,pe.nom),pre=simP(pl.pre,pe.pre);
+  var nom2=simP(pl.nom,pe.pre),pre2=simP(pl.pre,pe.nom);
+  if(nom2+pre2>nom+pre+0.3){nom=nom2;pre=pre2;}
+  var full=simP(pl.full,pe.full);
+  var dl=parseDob(L.dateNaissance),de=parseDob(E.dateNaissance),dob='unk';
+  if(dl&&de){
+    if(dl.y===de.y&&dl.m===de.m&&dl.d===de.d)dob='eq';
+    else if(dl.y===de.y&&((dl.m===de.d&&dl.d===de.m)||(dl.m===de.m&&Math.abs(dl.d-de.d)<=1)))dob='near';
+    else if(dl.y===de.y)dob='year';
+    else if(Math.abs(dl.y-de.y)===1)dob='off1';
+    else dob='bad';
   }
-  function profileCopy(target,source){
-    var fields=['nom','prenom','sexe','dateNaissance','lieuNaissance','prenomMere',
-      'responsable','telephone','telPersResponsable','deficience','gratuite'];
-    var changed=false;
-    fields.forEach(function(k){
-      var v=source[k];
-      if(v!==undefined && v!==null && String(v).trim()!==''){
-        if(String(target[k]==null?'':target[k])!==String(v)){target[k]=v;changed=true;}
+  var dy=yearNum(yearOf(L))-yearNum(yearOf(E)),ll=levelOf(L.classe),le=levelOf(E.classe),prog='unk';
+  if(ll!==null&&le!==null){
+    var diff=ll-le;
+    if(diff===dy)prog='perfect';else if(diff>=0&&diff<dy)prog='repeat';else if(diff===dy+1)prog='plus1';else prog='bad';
+  }
+  return {nom:nom,pre:pre,full:full,dob:dob,prog:prog};
+}
+/* nivo konfyans : 3 = tre bon, 2 = bon, 1 = aksepte (non trè diferan men tout lòt endis dakò), 0 = refize */
+function tier(c){
+  if(!c)return 0;
+  if(c.dob==='bad'||c.prog==='bad')return 0;
+  var okDob=(c.dob==='eq'||c.dob==='near'||c.dob==='year'||c.dob==='unk');
+  if(c.dob==='eq'&&((c.nom>=0.6&&c.pre>=0.75)||(c.nom>=0.75&&c.pre>=0.6)||c.full>=0.8))return 3;
+  if(c.nom>=0.85&&c.pre>=0.85&&c.dob!=='off1')return c.dob==='eq'||c.prog==='perfect'?3:2;
+  if(c.full>=0.9&&c.dob!=='off1')return 2;
+  if(okDob&&c.pre>=0.88&&c.nom>=0.55&&c.prog==='perfect')return 1;
+  if((c.dob==='eq'||c.dob==='near'||c.dob==='unk')&&c.nom>=0.88&&c.pre>=0.7&&c.prog==='perfect')return 1;
+  return 0;
+}
+function pairScore(c){if(!c)return 0;return tier(c)*10+c.nom+c.pre+(c.prog==='perfect'?0.5:0)+(c.dob==='eq'?0.5:0);}
+
+/* ---- gwoupman pa moun ---- */
+function link(students){
+  var recs=students.filter(function(s){return s&&yearOf(s);});
+  var clusters=[],byPid={},byNisu={};
+  function newCluster(r){var c={recs:[r],years:{}};c.years[yearOf(r)]=1;clusters.push(c);return c;}
+  function add(c,r){c.recs.push(r);c.years[yearOf(r)]=1;}
+
+  /* 1) lyen ki deja egziste (enssPersonId) */
+  recs.forEach(function(r){
+    var pid=txt(r.enssPersonId);if(!pid)return;
+    var c=byPid[pid];
+    if(c&&c.years[yearOf(r)])return; /* menm ane de fwa: pa melanje */
+    if(!c){c=newCluster(r);byPid[pid]=c;}else add(c,r);
+    r.__linked=1;
+  });
+  /* 2) menm NISU ofisyèl (MENFP) = menm moun */
+  recs.forEach(function(r){
+    if(r.__linked)return;
+    var n=txt(r.nisu);if(!isOfficialNisu(n))return;
+    var c=byNisu[n];
+    if(c&&!c.years[yearOf(r)]){
+      var any=c.recs[0],cp=compare(yearNum(yearOf(r))>=yearNum(yearOf(any))?r:any,yearNum(yearOf(r))>=yearNum(yearOf(any))?any:r);
+      if(cp&&(cp.dob!=='bad')&&(cp.nom>=0.45||cp.pre>=0.45)){add(c,r);r.__linked=1;return;}
+    }
+    if(!c){c=newCluster(r);byNisu[n]=c;r.__linked=1;}
+  });
+  /* melanje kluster ki gen menm moun (enssPersonId ak NISU ofisyèl) – pa fè anyen: reyini pa pèsonId sèlman */
+  /* 3) rès la : matching flou, ane pi resan → pi ansyen */
+  var years={};recs.forEach(function(r){if(!r.__linked){var y=yearOf(r);(years[y]=years[y]||[]).push(r);}});
+  /* kluster ki egziste yo anrichi ak dosye ki poko lye pi resan yo */
+  var idx={};
+  function keysOf(r){var p=P(r),k={};[p.nom.j,p.pre.j].forEach(function(j){if(j)k[j.slice(0,2)]=1;});return Object.keys(k);}
+  function reg(ci,r){keysOf(r).forEach(function(k){(idx[k]=idx[k]||{})[ci]=1;});}
+  clusters.forEach(function(c,ci){c.recs.forEach(function(r){reg(ci,r);});});
+  var yearList=Object.keys(years).sort(function(a,b){return yearNum(b)-yearNum(a);});
+  yearList.forEach(function(y){
+    var pend=years[y],cands=[];
+    pend.forEach(function(r,i){
+      var sc=[],cand={};
+      keysOf(r).forEach(function(k){var m=idx[k];if(m)for(var q in m)cand[q]=1;});
+      Object.keys(cand).forEach(function(q){
+        var ci=+q,c=clusters[ci];
+        if(c.years[y])return;
+        var best=null;
+        c.recs.forEach(function(x){
+          var later=yearNum(yearOf(x))>yearNum(y)?x:r,earlier=later===x?r:x;
+          if(yearNum(yearOf(later))===yearNum(yearOf(earlier)))return;
+          var cp=compare(later,earlier);if(!cp)return;var s=pairScore(cp);
+          if(tier(cp)>0&&(!best||s>best.s))best={s:s,t:tier(cp),cp:cp};
+        });
+        if(best)sc.push({s:best.s,t:best.t,ci:ci,cp:best.cp});
+      });
+      sc.sort(function(a,b){return b.s-a.s;});
+      if(sc.length){
+        var margin=sc.length>1?sc[0].s-sc[1].s:99;
+        /* anbigwite : pa fè chwa si de moun rete pre */
+        if(margin>=0.35||(sc[0].t>sc[1].t))cands.push({s:sc[0].s,t:sc[0].t,i:i,ci:sc[0].ci,cp:sc[0].cp});
       }
     });
-    var latestNisu=nisuOf(source), oldNisu=nisuOf(target);
-    if(isModernNisu(latestNisu) && oldNisu!==latestNisu){
-      if(oldNisu && !target.nisuAnterior) target.nisuAnterior=oldNisu;
-      target.nisu=latestNisu;
-      changed=true;
-    }
-    target.identityUpdatedFromYear=yearOf(source);
-    return changed;
-  }
-  function reconcile(){
-    try{
-      if(!window.STATE || !Array.isArray(STATE.students)) return 0;
-      var list=STATE.students, latestByKey={}, latestRecords=list.filter(function(st){
-        return st && isModernNisu(nisuOf(st)) && yearOf(st);
-      }).sort(function(a,b){return yearOf(b).localeCompare(yearOf(a));});
-      /* Pran premye dosye ki gen NISU aktyèl pou chak idantite; li soti nan ane ki pi resan. */
-      latestRecords.forEach(function(st){
-        var k=identityKey(st);
-        if(k!=='|' && !latestByKey[k]) latestByKey[k]=st;
-      });
-      var sources=Object.keys(latestByKey).map(function(k){return latestByKey[k];});
-      var changed=0, updates=0;
-      list.forEach(function(old){
-        if(!old || !yearOf(old)) return;
-        var oldNisu=nisuOf(old);
-        if(isModernNisu(oldNisu)) return;
-        var exact=latestByKey[identityKey(old)], matches=[];
-        if(exact) matches=[exact];
-        else matches=sources.filter(function(src){return aliasMatch(old,src);});
-        if(matches.length!==1) return; /* Pa janm fè chwa si gen plizyè kandida. */
-        var src=matches[0];
-        if(yearOf(src)===yearOf(old)) return;
-        if(profileCopy(old,src)){changed++;updates++;}
-      });
-      if(changed){
-        try{ if(typeof saveState==='function') saveState(); }catch(e){}
-        try{ if(typeof renderStudents==='function') renderStudents(); }catch(e){}
-        try{ if(typeof renderDashboard==='function') renderDashboard(); }catch(e){}
+    cands.sort(function(a,b){return b.s-a.s;});
+    var usedC={},usedR={};
+    cands.forEach(function(k){
+      if(usedC[k.ci]||usedR[k.i])return;
+      var r=pend[k.i];add(clusters[k.ci],r);reg(k.ci,r);r.__tier=k.t;r.__pair=k.cp;usedC[k.ci]=1;usedR[k.i]=1;r.__linked=1;
+    });
+    pend.forEach(function(r,i){if(!usedR[i]){newCluster(r);reg(clusters.length-1,r);}});
+  });
+  return clusters;
+}
+
+/* ---- chwazi NISU kanonik la ---- */
+function chooseNisu(sorted){
+  var i,r;
+  for(i=0;i<sorted.length;i++){r=sorted[i];if(isOfficialNisu(r.nisu))return txt(r.nisu);}
+  for(i=0;i<sorted.length;i++){r=sorted[i];if(txt(r.nisu))return txt(r.nisu);}
+  return '';
+}
+
+function snapshot(r){
+  var o={nisu:r.nisu};PROFILE.forEach(function(f){o[f]=r[f];});o.prenomMere=r.prenomMere;o.telPersResponsable=r.telPersResponsable;return o;
+}
+
+/* ---- fonksyon prensipal : ini tout dosye yon moun ---- */
+function unify(students){
+  var clusters=link(students),report={persons:clusters.length,multi:0,nisuChanged:0,fieldsChanged:0,records:[],ambiguous:0,nisuMap:{}};
+  clusters.forEach(function(c){
+    var sorted=c.recs.slice().sort(function(a,b){return yearNum(yearOf(b))-yearNum(yearOf(a));});
+    var nisu=chooseNisu(sorted);
+    var pid=txt(sorted.map(function(r){return r.enssPersonId;}).filter(Boolean)[0])||nisu||('P'+Math.random().toString(36).slice(2,10));
+    var src={};
+    PROFILE.forEach(function(f){
+      for(var i=0;i<sorted.length;i++){
+        var v=sorted[i][f];
+        if(f==='telephone'){v=txt(sorted[i].telephone)||txt(sorted[i].telPersResponsable);if(!validPhone(v))continue;}
+        else if(f==='deficience'){if(!validDef(v))continue;}
+        else if(!txt(v))continue;
+        src[f]=txt(v);break;
       }
-      window.__ENSS_V144_LAST_RECONCILE__={updated:updates,total:list.length};
-      return changed;
-    }catch(e){try{console.warn('ENSS V144 identity merge',e);}catch(_){} return 0;}
-  }
-  window.enssReconcileStudentIdentities=reconcile;
+    });
+    if(c.recs.length<2){
+      /* yon sèl dosye : sèlman make idantite a (pa chanje anyen) */
+      c.recs.forEach(function(r){if(!r.enssPersonId){r.enssPersonId=pid;}});
+      return;
+    }
+    report.multi++;
+    c.recs.forEach(function(r){
+      var before=snapshot(r),changed=false,oldNisu=txt(r.nisu);
+      if(nisu&&oldNisu!==nisu){
+        if(oldNisu){r.nisuAnterior=Array.isArray(r.nisuAnterior)?r.nisuAnterior:[];if(r.nisuAnterior.indexOf(oldNisu)<0)r.nisuAnterior.push(oldNisu);
+          (report.nisuMap[oldNisu]=report.nisuMap[oldNisu]||{})[nisu]=1;}
+        r.nisu=nisu;changed=true;report.nisuChanged++;
+      }
+      PROFILE.forEach(function(f){
+        if(src[f]===undefined)return;
+        var cur=f==='telephone'?txt(r.telephone):txt(r[f]);
+        if(cur!==src[f]){r[f]=src[f];changed=true;report.fieldsChanged++;}
+      });
+      if(src.responsable!==undefined&&(r.prenomMere!==undefined||r.legacyArchive)&&txt(r.prenomMere)!==src.responsable){r.prenomMere=src.responsable;changed=true;}
+      if(src.telephone!==undefined&&txt(r.telPersResponsable)!==src.telephone&&(r.telPersResponsable!==undefined||changed)){r.telPersResponsable=src.telephone;changed=true;}
+      if(changed&&!r.identityBefore)r.identityBefore=before;
+      if(r.enssPersonId!==pid)r.enssPersonId=pid;
+      if(changed){r.identityUnified=VERSION;}
+      if(changed)report.records.push({year:yearOf(r),classe:r.classe,nisuAvant:oldNisu,nisu:nisu,nom:r.nom,prenom:r.prenom,tier:r.__tier||0});
+    });
+  });
+  students.forEach(function(r){if(r){delete r.__linked;delete r.__tier;delete r.__pair;}});
+  return report;
+}
 
-  function wrap(name,delay){
-    var prev=window[name];
-    if(typeof prev!=='function' || prev.__enssV144) return;
-    var wrapped=function(){
-      var result=prev.apply(this,arguments);
-      setTimeout(reconcile,delay||120);
-      return result;
-    };
-    wrapped.__enssV144=true;
-    window[name]=wrapped;
-  }
-  wrap('importBuiltInHistoricalArchives',180);
-  wrap('importAdvancedStudents',220);
-  wrap('importENSSRealData',180);
-  wrap('reimportENSSRealData',220);
+var API={unify:unify,link:link,compare:compare,tier:tier,levelOf:levelOf,parseDob:parseDob,nameSim:nameSim,isOfficialNisu:isOfficialNisu,isPlatformNisu:isPlatformNisu,VERSION:VERSION};
+if(typeof module!=='undefined'&&module.exports)module.exports=API;
+root.ENSS_UNIFY_CORE=API;
+})(typeof window!=='undefined'?window:globalThis);
 
-  /* Apre chajman done lokal/santral la, ranje sèlman idantite ki gen yon sous resan san anbigwite. */
-  setTimeout(reconcile,1800);
-})();
-</script>
-
-
-<script id="enss-v147-harmonize-student-identity">
-/* ENSS V147 — Harmonize idantite elèv yo nan tout ane achiv yo. */
+/* ===================== GLUE NAVIGATÈ ===================== */
 (function(){
 'use strict';
-if(window.__ENSS_V147_HARMONIZE_STUDENT_IDENTITY__)return;
-window.__ENSS_V147_HARMONIZE_STUDENT_IDENTITY__=true;
-var FIELDS=['nisu','nom','prenom','sexe','dateNaissance','lieuNaissance','prenomMere','responsable','telephone','telPersResponsable','deficience'];
+if(window.__ENSS_V148_GLUE__)return;window.__ENSS_V148_GLUE__=true;
+var C=window.ENSS_UNIFY_CORE;if(!C)return;
+var running=false,lastReport=null,timer=null;
 function txt(v){return String(v==null?'':v).trim();}
-function norm(v){return txt(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
-function yearOf(r){return txt(r&&(r._YEAR||r.annee||r.anneeScolaire||r.schoolYear||r.school_year));}
-function nisuOf(r){return txt(r&&(r.nisu||r.NISU||r.studentNisu||r.student_nisu));}
-function isModernNisu(v){return !!v&&!/^ENSS0*\d+$/i.test(v);}
-function dateKey(v){v=txt(v);if(!v)return '';var m=v.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);if(m)return m[3]+String(m[2]).padStart(2,'0')+String(m[1]).padStart(2,'0');m=v.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);if(m)return m[1]+String(m[2]).padStart(2,'0')+String(m[3]).padStart(2,'0');return norm(v);}
-function sameSex(a,b){a=txt(a).toUpperCase();b=txt(b).toUpperCase();return !a||!b||a===b;}
-function personKey(r){return norm(r&&r.nom)+'|'+norm(r&&r.prenom)+'|'+dateKey(r&&r.dateNaissance);}
-function nameKey(r){return norm(r&&r.nom)+'|'+norm(r&&r.prenom);}
-function collectRecords(){var out=[];if(window.STATE&&Array.isArray(STATE.students)){STATE.students.forEach(function(r){if(r)out.push(r);});}var packs=window.ENSS_ARCHIVE_IMPORT_DATA||{};Object.keys(packs).forEach(function(y){var recs=(packs[y]&&packs[y].records)||[];recs.forEach(function(r){if(r)out.push(r);});});return out;}
-function buildGroups(records){var groups=[],byKey={},byName={};records.forEach(function(r){var k=personKey(r);if(k!=='|||'&&byKey[k]){byKey[k].push(r);return;}var g={records:[r]};groups.push(g);if(k!=='|||')byKey[k]=g;var nk=nameKey(r);if(nk!=='|'){(byName[nk]=byName[nk]||[]).push(g);}});records.forEach(function(r){if(txt(r&&r.dateNaissance))return;var nk=nameKey(r);if(nk==='|')return;var cands=(byName[nk]||[]).filter(function(g){return g.records.some(function(x){return sameSex(x.sexe,r.sexe);});});if(cands.length===1){var g=cands[0];if(g.records.indexOf(r)<0)g.records.push(r);}});return groups;}
-function chooseCanonicalNisu(g){var recs=g.records.slice().sort(function(a,b){var ya=yearOf(a),yb=yearOf(b);if(ya!==yb)return yb.localeCompare(ya);return (isModernNisu(nisuOf(b))?1:0)-(isModernNisu(nisuOf(a))?1:0);});var recent=recs.filter(function(r){return yearOf(r)>='2023-2024';});var pool=recent.length?recent:recs;var modern=pool.find(function(r){return isModernNisu(nisuOf(r));});if(modern)return nisuOf(modern);var any=pool.find(function(r){return nisuOf(r);});return any?nisuOf(any):'';}
-function reconcile(){try{var records=collectRecords();if(!records.length)return 0;var groups=buildGroups(records);var changed=0,unified=0;groups.forEach(function(g){if(g.records.length<2)return;var canonicalNisu=chooseCanonicalNisu(g);var profile={};g.records.slice().sort(function(a,b){return yearOf(b).localeCompare(yearOf(a));}).forEach(function(r){FIELDS.forEach(function(f){if(f==='nisu')return;if(!txt(profile[f])&&txt(r[f]))profile[f]=r[f];});});g.records.forEach(function(r){if(canonicalNisu){var old=nisuOf(r);if(old!==canonicalNisu){if(old&&r.nisu!==undefined){if(!Array.isArray(r.nisuAnterior))r.nisuAnterior=[];if(r.nisuAnterior.indexOf(old)<0)r.nisuAnterior.push(old);}r.nisu=canonicalNisu;changed++;unified++;}}FIELDS.forEach(function(f){if(f==='nisu')return;var v=txt(profile[f]);if(v&&txt(r[f])!==v){r[f]=v;changed++;}});r.identityHarmonized=true;});});if(changed&&window.STATE&&Array.isArray(STATE.students)){try{if(typeof saveState==='function')saveState();}catch(e){}['renderStudents','renderDashboard','renderClasses','renderAccueil'].forEach(function(f){try{if(typeof window[f]==='function')window[f]();}catch(e){}});}window.__ENSS_V147_LAST_RUN__={changed:changed,nisuUnified:unified,records:records.length,groups:groups.length};return changed;}catch(e){try{console.warn('ENSS V147 harmonize',e);}catch(_){}return 0;}}
-window.enssHarmonizeStudentIdentities=reconcile;window.enssReconcileStudentIdentities=reconcile;
-function wrap(name,delay){var prev=window[name];if(typeof prev!=='function'||prev.__enssV147)return;var wrapped=function(){var r=prev.apply(this,arguments);setTimeout(reconcile,delay||250);return r;};wrapped.__enssV147=true;window[name]=wrapped;}
-['importBuiltInHistoricalArchives','importAdvancedStudents','importENSSRealData','reimportENSSRealData','loadState','initState'].forEach(function(n){wrap(n,300);});
-var lastCount='';var timer=setInterval(function(){var n=((window.STATE&&STATE.students)||[]).length;if(String(n)!==lastCount){lastCount=String(n);setTimeout(reconcile,300);}},1500);setTimeout(reconcile,1000);setTimeout(reconcile,3000);
+
+/* Ranplase ansyen NISU nan lòt estrikti (prezans, kle konpoze, estatistik...) */
+function remapElsewhere(map){
+  var olds=Object.keys(map);if(!olds.length)return 0;
+  var still={};(STATE.students||[]).forEach(function(s){still[txt(s.nisu)]=1;});
+  var m={};olds.forEach(function(o){var t=Object.keys(map[o]);if(t.length===1&&!still[o])m[o]=t[0];});
+  if(!Object.keys(m).length)return 0;
+  var n=0,seen=[];
+  function fixKey(k){
+    if(m[k])return m[k];
+    var mm=k.match(/^(.*)_sove$/);if(mm&&m[mm[1]])return m[mm[1]]+'_sove';
+    if(k.indexOf('|')>=0){var parts=k.split('|'),ch=false;parts=parts.map(function(p){if(m[p]){ch=true;return m[p];}return p;});if(ch)return parts.join('|');}
+    return k;
+  }
+  function walk(o,depth){
+    if(!o||typeof o!=='object'||depth>7||seen.indexOf(o)>=0)return;seen.push(o);
+    if(Array.isArray(o)){o.forEach(function(x){walk(x,depth+1);});return;}
+    Object.keys(o).forEach(function(k){
+      var v=o[k],nk=fixKey(k);
+      if(nk!==k&&!Object.prototype.hasOwnProperty.call(o,nk)){o[nk]=v;delete o[k];n++;}
+      if(typeof v==='string'&&/nisu/i.test(nk)&&m[v]){o[nk]=m[v];n++;}
+      else if(v&&typeof v==='object')walk(v,depth+1);
+    });
+  }
+  Object.keys(STATE).forEach(function(k){if(k==='students'||k==='efacap'||k==='evalResults')return;walk(STATE[k],0);});
+  return n;
+}
+function copyPhotos(map){
+  if(typeof enssPhotoCopyKey!=='function')return;
+  Object.keys(map).forEach(function(o){Object.keys(map[o]).forEach(function(nw){try{enssPhotoCopyKey(o,nw);}catch(e){}});});
+}
+function refreshUI(){
+  ['renderStudents','renderClasses','renderDashboard','renderAccueil'].forEach(function(f){try{if(typeof window[f]==='function')window[f]();}catch(e){}});
+  try{if(typeof currentPage!=='undefined'&&currentPage==='resultats'&&typeof refreshResults==='function')refreshResults();}catch(e){}
+}
+function run(force){
+  if(running)return null;
+  if(!window.STATE||!Array.isArray(STATE.students)||!STATE.students.length)return null;
+  running=true;
+  try{
+    var rep=C.unify(STATE.students);
+    lastReport=rep;
+    var changed=rep.records.length>0;
+    var moved=0;
+    if(changed){
+      moved=remapElsewhere(rep.nisuMap);
+      copyPhotos(rep.nisuMap);
+      STATE.enssIdentityUnify={version:C.VERSION,at:new Date().toISOString(),persons:rep.persons,multiYear:rep.multi,nisuChanged:rep.nisuChanged,fieldsChanged:rep.fieldsChanged};
+      try{saveState();}catch(e){}
+      refreshUI();
+    }else{
+      var needMark=STATE.students.some(function(s){return s&&!s.enssPersonId;});
+      if(needMark){try{saveState();}catch(e){}}
+    }
+    rep.moved=moved;
+    window.__ENSS_V148_LAST__={persons:rep.persons,multi:rep.multi,nisuChanged:rep.nisuChanged,fieldsChanged:rep.fieldsChanged,moved:moved};
+    return rep;
+  }catch(e){try{console.warn('ENSS V148',e);}catch(_){}return null;}
+  finally{running=false;}
+}
+function schedule(ms){clearTimeout(timer);timer=setTimeout(function(){run();},ms||900);}
+
+/* rapò CSV */
+function csvCell(v){v=String(v==null?'':v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function downloadReport(){
+  var rows=[['Année','Classe','NISU avant','NISU unique','Nom','Prénom','Sexe','Date naiss.','Lieu naiss.','Mère/Responsable','Tél. Resp.','Déficience','Confiance (3=forte,1=à vérifier)']];
+  (STATE.students||[]).forEach(function(s){
+    if(!s||!s.identityBefore)return;
+    var b=s.identityBefore;
+    rows.push([s._YEAR,s.classe,b.nisu,s.nisu,s.nom,s.prenom,s.sexe,s.dateNaissance,s.lieuNaissance,s.responsable,s.telephone,s.deficience,'']);
+  });
+  rows.sort(function(a,b){return String(a[3]).localeCompare(String(b[3]))||String(a[0]).localeCompare(String(b[0]));});
+  var csv='\ufeff'+rows.map(function(r){return r.map(csvCell).join(';');}).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='ENSS_dosye_elev_inifye.csv';document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+}
+window.enssUnifyStudents=function(){
+  var rep=run(true);
+  if(!rep){alert('Pa gen elèv pou ini oswa operasyon an deja ap travay.');return;}
+  var multi=rep.multi,u=STATE.enssIdentityUnify||{};
+  alert('✅ Dosye elèv yo ini.\n\nMoun diferan: '+rep.persons+'\nMoun ki gen plizyè ane: '+multi+'\nNISU ki chanje kounye a: '+rep.nisuChanged+'\nChan ki mete ajou kounye a: '+rep.fieldsChanged+'\n\nChak elèv gen yon sèl NISU ak menm done sou tout ane yo (sèl klas la ka diferan). Ou ka telechaje rapò a ak bouton « Rapò ».');
+};
+window.enssUnifyReport=downloadReport;
+window.enssReconcileStudentIdentities=function(){var r=run(true);return r?r.records.length:0;};
+window.enssHarmonizeStudentIdentities=window.enssReconcileStudentIdentities;
+
+/* ----- kwochè : chak sove / enpòtasyon ----- */
+function wrap(name,delay){
+  var prev=window[name];if(typeof prev!=='function'||prev.__v148)return;
+  var w=function(){var r=prev.apply(this,arguments);schedule(delay||900);return r;};w.__v148=true;
+  try{window[name]=w;}catch(e){}
+}
+['saveState'].forEach(function(n){wrap(n,1400);});
+['importBuiltInHistoricalArchives','importAdvancedStudents','importENSSRealData','reimportENSSRealData','importNewStudents2026_2027','loadState','initState'].forEach(function(n){wrap(n,600);});
+var lastSig='';
+setInterval(function(){
+  var st=window.STATE,n=st&&Array.isArray(st.students)?st.students.length:0;
+  var unlinked=n&&st.students.some(function(s){return s&&!s.enssPersonId;});
+  var sig=n+'|'+(unlinked?1:0);
+  if(sig!==lastSig){lastSig=sig;if(unlinked||n)schedule(300);}
+},2000);
+setTimeout(function(){run();},1500);setTimeout(function(){run();},5000);
+
+/* ----- bouton nan paj elèv yo ----- */
+function mountButtons(){
+  var box=document.getElementById('enssHistoricalYearImports');
+  if(!box||document.getElementById('enssUnifyBox'))return;
+  var d=document.createElement('div');d.id='enssUnifyBox';
+  d.style.cssText='margin-top:.6rem;padding:.55rem;border:1px dashed #16a34a;border-radius:8px;background:#f0fdf4;';
+  d.innerHTML='<div style="font-weight:700;font-size:.78rem;margin-bottom:.25rem;">🔗 Yon sèl NISU ak menm done pou chak elèv (tout ane yo)</div>'+
+   '<div style="font-size:.68rem;color:#334155;margin-bottom:.4rem;">NISU ofisyèl MENFP la ranplase NISU pwovizwa yo sou tout ane yo; non, sèks, dat/kote nesans, manman/responsab, telefòn, defisyans pran dènye done ki pi resan an. Se sèl klas la ki rete diferan chak ane. Foto a swiv NISU a.</div>'+
+   '<div style="display:flex;gap:.4rem;flex-wrap:wrap;"><button type="button" class="btn btn-success" onclick="enssUnifyStudents()" style="padding:.35rem .6rem;font-size:.73rem;">🔗 Ini dosye elèv yo kounye a</button>'+
+   '<button type="button" class="btn" onclick="enssUnifyReport()" style="padding:.35rem .6rem;font-size:.73rem;">⬇ Rapò chanjman (CSV)</button></div>';
+  box.appendChild(d);
+}
+setInterval(mountButtons,2500);
+})();
+
+/* ===================== BOUTON REZILTA : LIS NÈT SWIVAN SELEKSYON ===================== */
+(function(){
+'use strict';
+if(window.__ENSS_V148_RESULTS__)return;window.__ENSS_V148_RESULTS__=true;
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function sel(id){var e=document.getElementById(id);return e?e.value:'';}
+function chk(id){var e=document.getElementById(id);return !e||e.checked;}
+function currentSelection(){
+  var role=getRole(),students=getStudents();
+  if(role==='enseignant'||role==='Enseignant'||role==='enseignant(e)'){
+    var u=STATE.securite.users.find(function(x){return x.profil===STATE.utilisateur;});
+    if(u&&u.accessClasses)students=students.filter(function(s){return u.accessClasses.indexOf(s.classe)>=0;});
+  }else if(role==='eleve'){
+    var su=getCurrentUserObj(),ss=su&&su.studentNisu?getStudentByNISU(su.studentNisu):null;
+    students=ss&&isResultUnlocked(ss.nisu)?students.filter(function(s){return s.nisu===ss.nisu;}):[];
+  }
+  var q=sel('resSearch').toLowerCase(),classe=sel('resClasseFilter'),dec=sel('resDecisionFilter');
+  if(q)students=students.filter(function(s){return (s.nom||'').toLowerCase().indexOf(q)>=0||(s.prenom||'').toLowerCase().indexOf(q)>=0||(s.nisu||'').toLowerCase().indexOf(q)>=0;});
+  if(classe)students=students.filter(function(s){return s.classe===classe;});
+  if(dec)students=students.filter(function(s){return s.decision===dec;});
+  return {students:students,classe:classe,dec:dec,q:q};
+}
+function numFmt(v,hide){if(hide)return '***';if(v===undefined||v===null||v===''||v===0)return '-';var n=Number(v);return isFinite(n)?(Math.round(n*100)/100):esc(v);}
+function buildList(mode){
+  try{
+    if(typeof canPrintOrExport==='function'&&!canPrintOrExport('resultats')){requireLogin('enprime/telechaje dokiman sa a','resultats');return;}
+    if(typeof recalcAllDecisions==='function')recalcAllDecisions();
+    var S=currentSelection(),list=S.students;
+    if(!list.length){alert('Pa gen rezilta pou enprime ak seleksyon sa a.');return;}
+    var hide=STATE.parametres.hideNotes&&getRole()!=='admin';
+    var show=[chk('resC1'),chk('resC2'),chk('resC3'),chk('resC4')];
+    list=list.slice().sort(function(a,b){return String(a.classe).localeCompare(String(b.classe))||String(a.nom).localeCompare(String(b.nom))||String(a.prenom).localeCompare(String(b.prenom));});
+    var head='<tr><th>N°</th><th>NISU</th><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Classe</th>';
+    for(var i=0;i<4;i++)if(show[i])head+='<th>C'+(i+1)+'</th>';
+    head+='<th>Moy. finale</th><th>Décision</th></tr>';
+    var body='',n=0,adm=0;
+    list.forEach(function(s){
+      var m=getStudentMoyennes(s)||{};n++;
+      var dec=m.decision||s.decision||'';if(/^admis/i.test(dec))adm++;
+      body+='<tr><td>'+n+'</td><td>'+esc(s.nisu)+'</td><td>'+esc(s.nom)+'</td><td>'+esc(s.prenom)+'</td><td>'+esc(s.sexe)+'</td><td>'+esc(s.classe)+'</td>';
+      var keys=['c1','c2','c3','c4'];
+      for(var j=0;j<4;j++)if(show[j])body+='<td>'+numFmt(m[keys[j]],hide)+'</td>';
+      body+='<td><b>'+numFmt(m.finale,hide)+'</b></td><td>'+esc(dec||'-')+'</td></tr>';
+    });
+    var parts=['Année : '+esc(STATE.anneeCourante)];
+    parts.push('Classe : '+esc(S.classe||'Toutes les classes'));
+    parts.push('Décision : '+esc(S.dec||'Toutes'));
+    if(S.q)parts.push('Recherche : « '+esc(S.q)+' »');
+    var title='LISTE DES RÉSULTATS — '+(S.classe||'Toutes les classes')+' — '+STATE.anneeCourante+(S.dec?' — '+S.dec:'');
+    var fileTitle=('Resultats_'+(S.classe||'Toutes classes')+'_'+STATE.anneeCourante+(S.dec?'_'+S.dec:'')).replace(/[^\w\-À-ÿ ]+/g,'_');
+    var header='';try{header=getDocumentHeader('LISTE DES RÉSULTATS');}catch(e){}
+    var sign='';try{sign='<div class="signature"><div><img src="'+IMG_SIG+'" style="height:50px"><br><strong>CHARLES Joseph Mary</strong><br>Directeur</div><div><img src="'+IMG_SEAL+'" style="height:60px"><br>Sceau de l\'école</div></div>';}catch(e){}
+    var win=window.open('','_blank');
+    if(!win){alert('Navigatè a bloke fenèt la. Otorize pop-up pou sit sa a.');return;}
+    win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(fileTitle)+'</title><style>'+
+      '@page{size:A4 portrait;margin:12mm}body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#111;margin:0;padding:8px}'+
+      '.header{text-align:center;border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:8px}.header h1,.header h2{margin:2px 0}'+
+      'h3{text-align:center;margin:8px 0 4px;font-size:14px}.sel{text-align:center;font-size:11px;margin-bottom:8px;color:#333}'+
+      'table{width:100%;border-collapse:collapse}th,td{border:1px solid #444;padding:3px 5px;text-align:center}th{background:#e8edf5}td:nth-child(3),td:nth-child(4){text-align:left}'+
+      'tr{page-break-inside:avoid}thead{display:table-header-group}.sum{margin:8px 0;font-weight:700}.signature{display:flex;justify-content:space-around;margin-top:24px;text-align:center}.foot{margin-top:10px;font-size:10px;color:#555}'+
+      '.hint{background:#fffbe6;border:1px solid #f0d36b;padding:6px;margin-bottom:8px;font-size:11px}@media print{.hint{display:none}}'+
+      '</style></head><body>'+
+      (mode==='pdf'?'<div class="hint">📄 Pou telechaje PDF : nan fenèt enprime a, chwazi « Enregistrer au format PDF » kòm enprimant.</div>':'')+
+      header+'<h3>'+esc(title)+'</h3><div class="sel">'+parts.join(' &nbsp;|&nbsp; ')+'</div>'+
+      '<table><thead>'+head+'</thead><tbody>'+body+'</tbody></table>'+
+      '<div class="sum">Total : '+n+' élève(s) &nbsp;|&nbsp; Admis : '+adm+'</div>'+sign+
+      '<div class="foot">Imprimé le '+new Date().toLocaleDateString()+'</div>'+
+      '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>');
+    win.document.close();
+  }catch(e){console.error('ENSS V148 liste résultats',e);alert('Erè pandan preparasyon lis la: '+e.message);}
+}
+window.printResultsSelection=function(){buildList('print');};
+window.pdfResultsSelection=function(){buildList('pdf');};
+function mount(){
+  var f=document.getElementById('resDecisionFilter');
+  if(!f||document.getElementById('enssResSelBtns'))return;
+  var w=document.createElement('span');w.id='enssResSelBtns';w.style.cssText='display:inline-flex;gap:.25rem;flex-wrap:wrap;';
+  w.innerHTML='<button type="button" class="btn btn-primary" onclick="printResultsSelection()" title="Lis nèt swivan seleksyon w la" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨 Imprimer</button>'+
+              '<button type="button" class="btn btn-success" onclick="pdfResultsSelection()" title="Lis nèt swivan seleksyon w la" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📄 Télécharger PDF / Imprimer</button>';
+  f.parentNode.insertBefore(w,f.nextSibling);
+}
+mount();document.addEventListener('DOMContentLoaded',mount);setInterval(mount,2000);
+})();
+
+
+/* ===================== FOTO NAN DOSYE REZILTA ===================== */
+(function(){
+'use strict';
+if(window.__ENSS_V148_RES_PHOTO__)return;window.__ENSS_V148_RES_PHOTO__=true;
+function inject(nisu){
+  try{
+    var body=document.getElementById('modalGenericBody');if(!body)return;
+    var box=body.querySelector('.resultat-dossier');if(!box||box.querySelector('#enssPhotoBlock-resultat'))return;
+    if(typeof enssPhotoBlockHtml!=='function')return;
+    var h=document.createElement('div');h.innerHTML=enssPhotoBlockHtml('resultat',nisu,enssPhotoCanEdit('dossier'));
+    h.firstChild.className+=' enss-photo-top';
+    var hdr=box.querySelector('.header');
+    if(hdr)hdr.parentNode.insertBefore(h.firstChild,hdr.nextSibling);else box.insertBefore(h.firstChild,box.firstChild);
+    enssPhotoBind('resultat',nisu);
+  }catch(e){try{console.warn('foto rezilta',e);}catch(_){}}
+}
+function wrap(){
+  var prev=window.openResultatDossier;if(typeof prev!=='function'||prev.__v148p)return;
+  var w=function(nisu){var r=prev.apply(this,arguments);inject(nisu);return r;};w.__v148p=true;window.openResultatDossier=w;
+}
+wrap();setTimeout(wrap,1500);setTimeout(wrap,5000);
 })();
 </script>
 
