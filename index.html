@@ -22955,6 +22955,92 @@ function wrap(){
 }
 wrap();setTimeout(wrap,1500);setTimeout(wrap,5000);
 })();
+
+/* ===================== FOTO + ANTÈT PWOP NAN ENPRESYON / WORD DOSYE YO ===================== */
+(function(){
+'use strict';
+if(window.__ENSS_V148_PRINT_PHOTO__)return;window.__ENSS_V148_PRINT_PHOTO__=true;
+var busy=false;
+var MINI=/<div class=["']header["']>\s*<h1[^>]*>[^<]*<\/h1>\s*<p[^>]*>\s*Adresse:[\s\S]*?<\/p>\s*<\/div>/i;
+function shrink(src,cb){
+  var done=false,fin=function(v){if(!done){done=true;cb(v);}};
+  setTimeout(function(){fin(src);},1500);
+  try{
+    var im=new Image();
+    im.onload=function(){try{var h=Math.min(260,im.height||260),w=Math.round((im.width||200)*h/(im.height||260));var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);fin(c.toDataURL('image/jpeg',0.85));}catch(e){fin(src);}};
+    im.onerror=function(){fin(src);};im.src=src;
+  }catch(e){fin(src);}
+}
+function photoDataUrl(nisu){
+  return new Promise(function(res0){
+    var fin0=false,res=function(v){if(!fin0){fin0=true;res0(v);}};
+    setTimeout(function(){res('');},8000);
+    try{
+      if(typeof enssPhotoUrl!=='function'||!nisu)return res('');
+      enssPhotoUrl(nisu).then(function(u){
+        if(!u)return res('');
+        fetch(u).then(function(r){return r.blob();}).then(function(b){
+          var fr=new FileReader();fr.onload=function(){shrink(fr.result,res);};fr.onerror=function(){res('');};fr.readAsDataURL(b);
+        }).catch(function(){res('');});
+      }).catch(function(){res('');});
+    }catch(e){res('');}
+  });
+}
+function transform(html,du){
+  if(typeof html!=='string'||!/<body[\s>]/i.test(html))return html;
+  html=html.replace(MINI,'');
+  if(du){
+    var block='<div style="text-align:right;margin:4px 0 6px"><img src="'+du+'" alt="Foto" style="width:85px;height:105px;object-fit:cover;border:1px solid #333"></div>';
+    var m=html.search(/<div[^>]*class=["']info["']/i);if(m<0)m=html.search(/<table/i);
+    if(m>=0)html=html.slice(0,m)+block+html.slice(m);else html=html.replace(/(<body[^>]*>)/i,'$1'+block);
+  }
+  return html;
+}
+function patchDoc(w,du){
+  try{
+    if(!w||!w.document||w.__enssPhotoPatched)return;
+    var d=w.document,nw=d.write.bind(d);
+    d.write=function(){var a=Array.prototype.slice.call(arguments);if(a.length===1)a[0]=transform(a[0],du);return nw.apply(d,a);};
+    w.__enssPhotoPatched=true;
+  }catch(e){}
+}
+function wrapFn(name,isWord){
+  var prev=window[name];if(typeof prev!=='function'||prev.__v148ph)return;
+  var w=function(nisu){
+    var self=this,args=arguments;
+    if(busy)return prev.apply(self,args);
+    busy=true;
+    var origOpen=window.open,pre=null,used=false;
+    if(!isWord){try{pre=origOpen.call(window,'','_blank');}catch(e){pre=null;}}
+    photoDataUrl(nisu).then(function(du){
+      var NB=window.Blob;
+      try{
+        if(pre){window.open=function(){used=true;patchDoc(pre,du);return pre;};}
+        else if(!isWord){window.open=function(){var w2=origOpen.apply(window,arguments);patchDoc(w2,du);return w2;};}
+        if(isWord){
+          window.Blob=function(parts,opt){
+            try{
+              var t=String(opt&&opt.type||'').toLowerCase();
+              if(t.indexOf('msword')>=0&&Array.isArray(parts)){var j=parts.map(function(x){return typeof x==='string'?x:'';}).join('');if(/<body[\s>]/i.test(j))parts=[transform(j,du)];}
+            }catch(e){}
+            return new NB(parts,opt);
+          };
+          window.Blob.prototype=NB.prototype;
+        }
+        prev.apply(self,args);
+      }catch(e){try{console.warn('ENSS foto enprime',e);}catch(_){}}
+      finally{window.open=origOpen;window.Blob=NB;if(pre&&!used){try{pre.close();}catch(_){}}busy=false;}
+    });
+  };
+  w.__v148ph=true;window[name]=w;
+}
+function install(){
+  ['printResultatDossierPDF','printControlePDF','printStudentControle','printPrescolaireStudentPDF'].forEach(function(n){wrapFn(n,false);});
+  ['exportResultatDossierWord','exportControleWord'].forEach(function(n){wrapFn(n,true);});
+}
+install();setTimeout(install,1500);setTimeout(install,5000);
+window.__ENSS_V148_PRINT_TEST__={transform:transform,photoDataUrl:photoDataUrl};
+})();
 </script>
 
 </body>
