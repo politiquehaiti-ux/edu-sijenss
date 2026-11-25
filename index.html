@@ -1250,8 +1250,6 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                         <button class="btn btn-primary" onclick="openAddStudent()" data-t="add">+ Ajouter</button>
                         <button class="btn btn-success" onclick="exportStudentsCSV()" data-t="exportCSV">⬇ Exporter CSV</button>
                         <button class="btn" onclick="printStudents()" data-t="print">🖨 Imprimer</button>
-                        <button class="btn btn-success" onclick="downloadStudentsPDF()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📄 Télécharger PDF</button>
-                        <button class="btn btn-success" onclick="downloadStudentsWord()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📝 Télécharger Word</button>
                         <button class="btn btn-danger" onclick="deleteSelectedStudents()" data-t="deleteSelected">🗑 Supprimer sélectionnés</button>
                         <button class="btn" onclick="toggleSelectAllStudents()" data-t="selectAll">☑ Tout sélectionner</button>
                     </div>
@@ -1279,9 +1277,7 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                     <div class="flex gap-1">
                         <button class="btn" onclick="refreshResults()" data-t="update" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🔄 Mettre à jour</button>
                             <button class="btn btn-success" onclick="export9AF2025CSV()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">⬇ CSV 9e AF 2025-2026 corrigé</button>
-                        <button class="btn" onclick="printResults()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨 Imprimer</button>
                         <button class="btn btn-success" onclick="printResults()" data-t="downloadPDF" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📄 Télécharger PDF / Imprimer</button>
-                        <button class="btn btn-success" onclick="downloadResultsWord()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📝 Télécharger Word</button>
                     </div>
                 </div>
                 <div class="toolbar">
@@ -1313,6 +1309,7 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                             <option value="ADMIS ET REMEDIATION">ADMIS ET REMEDIATION</option>
                             <option value="ADMISE ET REMEDIATION">ADMISE ET REMEDIATION</option>
                         </select>
+                        <button class="btn btn-primary" onclick="printResults()" data-enss-always-export="1" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨️📄 Enprime / Telechaje Tout Lis Rezilta a</button>
                     </div>
                 </div>
                 <div class="table-wrap scroll-horizontal scroll-vertical" id="resultsTableWrap">
@@ -4769,6 +4766,8 @@ if(localYear) merged.anneeCourante=localYear;
         }
 
         function hasAccess(page) {
+            var __studyProfile=String((window.STATE&&STATE.utilisateur)||'').trim().toLowerCase();
+            if((__studyProfile==='nisu'||__studyProfile==='ecole')&&(page==='quiz'||page==='library'))return true;
             var role = getRole();
             if (page === 'efacap') {
                 if (role === 'admin') return true;
@@ -12790,7 +12789,7 @@ if(localYear) merged.anneeCourante=localYear;
             win.document.write("<html><head><title>R\xE9sum\xE9 Cantine " + date +
                 "</title>\n            <style>\n                body{font-family:sans-serif;padding:1.5rem;font-size:0.7rem;}\n                table{width:100%;border-collapse:collapse;margin:0.3rem 0;}\n                th,td{border:1px solid #333;padding:0.15rem;}\n                .header{text-align:center;border-bottom:2px solid #333;margin-bottom:0.5rem;}\n                .header h1{font-size:1.2rem;}\n                .header p{font-size:0.7rem;color:#555;}\n                .signature{display:flex;justify-content:space-between;margin-top:1rem;border-top:1px solid #333;padding-top:0.5rem;}\n                .signature img{height:40px;}\n            </style>\n            </head><body>\n            <div class=\"header\">\n                <h1>R\xC9PUBLIQUE D'HAITI</h1>\n                <h2>MINISTERE DE L'EDUCATION NATIONALE ET DE LA FORMATION PROFESSIONNELLE (MENFP)</h2>\n                <p><strong>Direction D\xE9partementale d'\xC9ducation du Nord'Est (DDNE)</strong> | District de Sainte-Suzanne | Zone : 1 | Ann\xE9e acad\xE9mique : " +
                 getYear() +
-                "</p>\n                <p><strong>ECOLE : NATIONALE DE SAINTE-SUZANNE</strong> | Code : 043 290 100 808 | Adresse : Cit\xE9 Richard, centre ville, Sainte-Suzanne</p>\n                <p><strong>Directeur : CHARLES Joseph Mary</strong> | Tel : 42825377 / 4615240 | Email : ecolenationalesaintesuzanne@gmail.com</p>\n                <h3>R\xE9sum\xE9 Cantine - " +
+                "</p>\n                <p><strong>ECOLE : NATIONALE DE SAINTE-SUZANNE</strong> | Code : 043 290 100 808 | Adresse : Cit\xE9 Richard, centre ville, Sainte-Suzanne</p>\n                <h3>R\xE9sum\xE9 Cantine - " +
                 date +
                 "</h3>\n            </div>\n            <table><thead><tr><th>Date</th><th>Filles</th><th>Gar\xE7ons</th><th>Total</th>");
             CANTINE_PRODUITS.forEach(function(p) {
@@ -14568,40 +14567,6 @@ if(localYear) merged.anneeCourante=localYear;
             a.href=url; a.download='ENSS_9AF_2025-2026_CORRIGE.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
         }
 
-        function downloadTableWord(tableId, title, filePrefix) {
-            if (!canPrintOrExport(tableId === 'results' ? 'resultats' : 'eleves')) return requireLogin('telechaje dokiman sa a', tableId === 'results' ? 'resultats' : 'eleves');
-            var headHtml = document.getElementById(tableId + 'Head').innerHTML;
-            var bodyHtml = document.getElementById(tableId + 'Body').innerHTML;
-            if (!bodyHtml || bodyHtml.indexOf('Aucun') !== -1) {
-                alert('Pa gen done pou ekspòte.');
-                return;
-            }
-            var html = '<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>' + title + '</title>' +
-                '<style>body{font-family:Arial,sans-serif;font-size:10pt;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #333;padding:4px;text-align:center;font-size:8pt;}th{background:#1e3a5f;color:#fff;}</style>' +
-                '</head><body>' + getDocumentHeader(title) +
-                '<table><thead>' + headHtml + '</thead><tbody>' + bodyHtml + '</tbody></table>' +
-                '<div style="margin-top:10px;font-size:9pt;">Imprimé le ' + new Date().toLocaleDateString() + '</div>' +
-                '</body></html>';
-            var blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = filePrefix + '_' + getYear() + '.doc';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-            spawnHearts();
-        }
-        function downloadResultsWord() {
-            downloadTableWord('results', 'RÉSULTATS & BULLETINS', 'resultats');
-        }
-        function downloadStudentsWord() {
-            downloadTableWord('eleves', 'LIS ELÈV', 'eleves');
-        }
-        function downloadStudentsPDF() {
-            printStudents();
-        }
         function exportStudentsCSV() {
             if (!canPrintOrExport('eleves')) return requireLogin('enprime/telechaje dokiman sa a', 'eleves');
             var students = getStudents();
@@ -19509,7 +19474,7 @@ if(localYear) merged.anneeCourante=localYear;
       var tx=norm((el.textContent||el.value||'')+' '+(el.getAttribute('title')||''));
       var sensitive=/ajoute|add|csv|imprim|print|telech|download|export|selection|sélection|afect|affect|enseign|matiere|supprim|delete/.test(tx);
       if(r==='eleve' && sensitive){el.style.display='none';return;}
-      if(isT() && sensitive && !grant('studentEdit') && !grant('exportDocuments')){el.style.display='none';}
+      if(isT() && sensitive && !grant('studentEdit') && !grant('exportDocuments') && !el.hasAttribute('data-enss-always-export')){el.style.display='none';}
     });
     if(r==='eleve'){
       p.querySelectorAll('input[type="checkbox"]').forEach(function(el){el.style.display='none';});
@@ -19840,6 +19805,7 @@ if(localYear) merged.anneeCourante=localYear;
   function hideUnauthorizedExports(){
     var ok=grant('exportDocuments');
     if(ok)return;
+    document.querySelectorAll('[data-enss-always-export="1"]').forEach(function(el){el.style.display='';if('disabled' in el)el.disabled=false;});
     document.querySelectorAll('button,a,input[type="button"],input[type="submit"]').forEach(function(el){
       var tx=norm((el.textContent||el.value||'')+' '+(el.getAttribute('title')||''));
       if(/\\bcsv\\b|pdf|word|imprim|print|telech|download|export/.test(tx)){
@@ -22611,6 +22577,34 @@ window.importBuiltInHistoricalArchives = function(selectedYear) {
 
   /* Apre chajman done lokal/santral la, ranje sèlman idantite ki gen yon sous resan san anbigwite. */
   setTimeout(reconcile,1800);
+})();
+</script>
+
+
+<script id="enss-v147-harmonize-student-identity">
+/* ENSS V147 — Harmonize idantite elèv yo nan tout ane achiv yo. */
+(function(){
+'use strict';
+if(window.__ENSS_V147_HARMONIZE_STUDENT_IDENTITY__)return;
+window.__ENSS_V147_HARMONIZE_STUDENT_IDENTITY__=true;
+var FIELDS=['nisu','nom','prenom','sexe','dateNaissance','lieuNaissance','prenomMere','responsable','telephone','telPersResponsable','deficience'];
+function txt(v){return String(v==null?'':v).trim();}
+function norm(v){return txt(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+function yearOf(r){return txt(r&&(r._YEAR||r.annee||r.anneeScolaire||r.schoolYear||r.school_year));}
+function nisuOf(r){return txt(r&&(r.nisu||r.NISU||r.studentNisu||r.student_nisu));}
+function isModernNisu(v){return !!v&&!/^ENSS0*\d+$/i.test(v);}
+function dateKey(v){v=txt(v);if(!v)return '';var m=v.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);if(m)return m[3]+String(m[2]).padStart(2,'0')+String(m[1]).padStart(2,'0');m=v.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);if(m)return m[1]+String(m[2]).padStart(2,'0')+String(m[3]).padStart(2,'0');return norm(v);}
+function sameSex(a,b){a=txt(a).toUpperCase();b=txt(b).toUpperCase();return !a||!b||a===b;}
+function personKey(r){return norm(r&&r.nom)+'|'+norm(r&&r.prenom)+'|'+dateKey(r&&r.dateNaissance);}
+function nameKey(r){return norm(r&&r.nom)+'|'+norm(r&&r.prenom);}
+function collectRecords(){var out=[];if(window.STATE&&Array.isArray(STATE.students)){STATE.students.forEach(function(r){if(r)out.push(r);});}var packs=window.ENSS_ARCHIVE_IMPORT_DATA||{};Object.keys(packs).forEach(function(y){var recs=(packs[y]&&packs[y].records)||[];recs.forEach(function(r){if(r)out.push(r);});});return out;}
+function buildGroups(records){var groups=[],byKey={},byName={};records.forEach(function(r){var k=personKey(r);if(k!=='|||'&&byKey[k]){byKey[k].push(r);return;}var g={records:[r]};groups.push(g);if(k!=='|||')byKey[k]=g;var nk=nameKey(r);if(nk!=='|'){(byName[nk]=byName[nk]||[]).push(g);}});records.forEach(function(r){if(txt(r&&r.dateNaissance))return;var nk=nameKey(r);if(nk==='|')return;var cands=(byName[nk]||[]).filter(function(g){return g.records.some(function(x){return sameSex(x.sexe,r.sexe);});});if(cands.length===1){var g=cands[0];if(g.records.indexOf(r)<0)g.records.push(r);}});return groups;}
+function chooseCanonicalNisu(g){var recs=g.records.slice().sort(function(a,b){var ya=yearOf(a),yb=yearOf(b);if(ya!==yb)return yb.localeCompare(ya);return (isModernNisu(nisuOf(b))?1:0)-(isModernNisu(nisuOf(a))?1:0);});var recent=recs.filter(function(r){return yearOf(r)>='2023-2024';});var pool=recent.length?recent:recs;var modern=pool.find(function(r){return isModernNisu(nisuOf(r));});if(modern)return nisuOf(modern);var any=pool.find(function(r){return nisuOf(r);});return any?nisuOf(any):'';}
+function reconcile(){try{var records=collectRecords();if(!records.length)return 0;var groups=buildGroups(records);var changed=0,unified=0;groups.forEach(function(g){if(g.records.length<2)return;var canonicalNisu=chooseCanonicalNisu(g);var profile={};g.records.slice().sort(function(a,b){return yearOf(b).localeCompare(yearOf(a));}).forEach(function(r){FIELDS.forEach(function(f){if(f==='nisu')return;if(!txt(profile[f])&&txt(r[f]))profile[f]=r[f];});});g.records.forEach(function(r){if(canonicalNisu){var old=nisuOf(r);if(old!==canonicalNisu){if(old&&r.nisu!==undefined){if(!Array.isArray(r.nisuAnterior))r.nisuAnterior=[];if(r.nisuAnterior.indexOf(old)<0)r.nisuAnterior.push(old);}r.nisu=canonicalNisu;changed++;unified++;}}FIELDS.forEach(function(f){if(f==='nisu')return;var v=txt(profile[f]);if(v&&txt(r[f])!==v){r[f]=v;changed++;}});r.identityHarmonized=true;});});if(changed&&window.STATE&&Array.isArray(STATE.students)){try{if(typeof saveState==='function')saveState();}catch(e){}['renderStudents','renderDashboard','renderClasses','renderAccueil'].forEach(function(f){try{if(typeof window[f]==='function')window[f]();}catch(e){}});}window.__ENSS_V147_LAST_RUN__={changed:changed,nisuUnified:unified,records:records.length,groups:groups.length};return changed;}catch(e){try{console.warn('ENSS V147 harmonize',e);}catch(_){}return 0;}}
+window.enssHarmonizeStudentIdentities=reconcile;window.enssReconcileStudentIdentities=reconcile;
+function wrap(name,delay){var prev=window[name];if(typeof prev!=='function'||prev.__enssV147)return;var wrapped=function(){var r=prev.apply(this,arguments);setTimeout(reconcile,delay||250);return r;};wrapped.__enssV147=true;window[name]=wrapped;}
+['importBuiltInHistoricalArchives','importAdvancedStudents','importENSSRealData','reimportENSSRealData','loadState','initState'].forEach(function(n){wrap(n,300);});
+var lastCount='';var timer=setInterval(function(){var n=((window.STATE&&STATE.students)||[]).length;if(String(n)!==lastCount){lastCount=String(n);setTimeout(reconcile,300);}},1500);setTimeout(reconcile,1000);setTimeout(reconcile,3000);
 })();
 </script>
 
