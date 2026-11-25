@@ -1250,6 +1250,8 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                         <button class="btn btn-primary" onclick="openAddStudent()" data-t="add">+ Ajouter</button>
                         <button class="btn btn-success" onclick="exportStudentsCSV()" data-t="exportCSV">⬇ Exporter CSV</button>
                         <button class="btn" onclick="printStudents()" data-t="print">🖨 Imprimer</button>
+                        <button class="btn btn-success" onclick="downloadStudentsPDF()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📄 Télécharger PDF</button>
+                        <button class="btn btn-success" onclick="downloadStudentsWord()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📝 Télécharger Word</button>
                         <button class="btn btn-danger" onclick="deleteSelectedStudents()" data-t="deleteSelected">🗑 Supprimer sélectionnés</button>
                         <button class="btn" onclick="toggleSelectAllStudents()" data-t="selectAll">☑ Tout sélectionner</button>
                     </div>
@@ -1277,7 +1279,9 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                     <div class="flex gap-1">
                         <button class="btn" onclick="refreshResults()" data-t="update" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🔄 Mettre à jour</button>
                             <button class="btn btn-success" onclick="export9AF2025CSV()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">⬇ CSV 9e AF 2025-2026 corrigé</button>
+                        <button class="btn" onclick="printResults()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">🖨 Imprimer</button>
                         <button class="btn btn-success" onclick="printResults()" data-t="downloadPDF" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📄 Télécharger PDF / Imprimer</button>
+                        <button class="btn btn-success" onclick="downloadResultsWord()" style="padding:0.2rem 0.6rem;font-size:0.75rem;">📝 Télécharger Word</button>
                     </div>
                 </div>
                 <div class="toolbar">
@@ -4765,8 +4769,6 @@ if(localYear) merged.anneeCourante=localYear;
         }
 
         function hasAccess(page) {
-            var __studyProfile=String((window.STATE&&STATE.utilisateur)||'').trim().toLowerCase();
-            if((__studyProfile==='nisu'||__studyProfile==='ecole')&&(page==='quiz'||page==='library'))return true;
             var role = getRole();
             if (page === 'efacap') {
                 if (role === 'admin') return true;
@@ -14566,6 +14568,40 @@ if(localYear) merged.anneeCourante=localYear;
             a.href=url; a.download='ENSS_9AF_2025-2026_CORRIGE.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
         }
 
+        function downloadTableWord(tableId, title, filePrefix) {
+            if (!canPrintOrExport(tableId === 'results' ? 'resultats' : 'eleves')) return requireLogin('telechaje dokiman sa a', tableId === 'results' ? 'resultats' : 'eleves');
+            var headHtml = document.getElementById(tableId + 'Head').innerHTML;
+            var bodyHtml = document.getElementById(tableId + 'Body').innerHTML;
+            if (!bodyHtml || bodyHtml.indexOf('Aucun') !== -1) {
+                alert('Pa gen done pou ekspòte.');
+                return;
+            }
+            var html = '<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>' + title + '</title>' +
+                '<style>body{font-family:Arial,sans-serif;font-size:10pt;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #333;padding:4px;text-align:center;font-size:8pt;}th{background:#1e3a5f;color:#fff;}</style>' +
+                '</head><body>' + getDocumentHeader(title) +
+                '<table><thead>' + headHtml + '</thead><tbody>' + bodyHtml + '</tbody></table>' +
+                '<div style="margin-top:10px;font-size:9pt;">Imprimé le ' + new Date().toLocaleDateString() + '</div>' +
+                '</body></html>';
+            var blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filePrefix + '_' + getYear() + '.doc';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+            spawnHearts();
+        }
+        function downloadResultsWord() {
+            downloadTableWord('results', 'RÉSULTATS & BULLETINS', 'resultats');
+        }
+        function downloadStudentsWord() {
+            downloadTableWord('eleves', 'LIS ELÈV', 'eleves');
+        }
+        function downloadStudentsPDF() {
+            printStudents();
+        }
         function exportStudentsCSV() {
             if (!canPrintOrExport('eleves')) return requireLogin('enprime/telechaje dokiman sa a', 'eleves');
             var students = getStudents();
@@ -22575,171 +22611,6 @@ window.importBuiltInHistoricalArchives = function(selectedYear) {
 
   /* Apre chajman done lokal/santral la, ranje sèlman idantite ki gen yon sous resan san anbigwite. */
   setTimeout(reconcile,1800);
-})();
-</script>
-
-
-<script id="enss-v147-harmonize-student-identity">
-/* ENSS V147 — Harmonize idantite elèv yo nan tout ane achiv yo.
-   Kriteri: Non + Prenon + Date nesans. Yon sèl NISU definitif pou chak elèv.
-   Li kòmanse ak NISU rive nan Déficience; li pa manyen klas, nòt, rezilta ni achiv ane a. */
-(function(){
-'use strict';
-if(window.__ENSS_V147_HARMONIZE_STUDENT_IDENTITY__)return;
-window.__ENSS_V147_HARMONIZE_STUDENT_IDENTITY__=true;
-
-var FIELDS=['nisu','nom','prenom','sexe','dateNaissance','lieuNaissance','prenomMere','responsable','telephone','telPersResponsable','deficience'];
-
-function txt(v){return String(v==null?'':v).trim();}
-function norm(v){return txt(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
-function yearOf(r){return txt(r&&(r._YEAR||r.annee||r.anneeScolaire||r.schoolYear||r.school_year));}
-function nisuOf(r){return txt(r&&(r.nisu||r.NISU||r.studentNisu||r.student_nisu));}
-function isModernNisu(v){return !!v&&!/^ENSS0*\d+$/i.test(v);}
-function dateKey(v){
-  v=txt(v);
-  if(!v)return '';
-  var m=v.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);
-  if(m)return m[3]+String(m[2]).padStart(2,'0')+String(m[1]).padStart(2,'0');
-  m=v.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
-  if(m)return m[1]+String(m[2]).padStart(2,'0')+String(m[3]).padStart(2,'0');
-  return norm(v);
-}
-function sameSex(a,b){a=txt(a).toUpperCase();b=txt(b).toUpperCase();return !a||!b||a===b;}
-function personKey(r){
-  var n=norm(r&&r.nom),p=norm(r&&r.prenom),d=dateKey(r&&r.dateNaissance);
-  return n+'|'+p+'|'+d;
-}
-function nameKey(r){return norm(r&&r.nom)+'|'+norm(r&&r.prenom);}
-
-function collectRecords(){
-  var out=[];
-  if(window.STATE&&Array.isArray(STATE.students)){
-    STATE.students.forEach(function(r){if(r)out.push(r);});
-  }
-  var packs=window.ENSS_ARCHIVE_IMPORT_DATA||{};
-  Object.keys(packs).forEach(function(y){
-    var recs=(packs[y]&&packs[y].records)||[];
-    recs.forEach(function(r){if(r)out.push(r);});
-  });
-  return out;
-}
-
-function buildGroups(records){
-  var groups=[],byKey={},byName={};
-  records.forEach(function(r){
-    var k=personKey(r);
-    if(k!=='|||'&&byKey[k]){byKey[k].push(r);return;}
-    var g={records:[r],date:personKey(r).split('|')[2]};
-    groups.push(g);
-    if(k!=='|||')byKey[k]=g;
-    var nk=nameKey(r);
-    if(nk!=='|'){(byName[nk]=byName[nk]||[]).push(g);}
-  });
-  /* Elèv ki pa gen dat nesans: mare l sèlman si gen yon sèl gwoup ki gen menm non/prenon. */
-  records.forEach(function(r){
-    if(txt(r&&r.dateNaissance))return;
-    var nk=nameKey(r);
-    if(nk==='|')return;
-    var cands=(byName[nk]||[]).filter(function(g){
-      return g.records.some(function(x){return sameSex(x.sexe,r.sexe);});
-    });
-    if(cands.length===1){
-      var g=cands[0];
-      if(g.records.indexOf(r)<0)g.records.push(r);
-    }
-  });
-  return groups;
-}
-
-function chooseCanonicalNisu(g){
-  var recs=g.records.slice().sort(function(a,b){
-    var ya=yearOf(a),yb=yearOf(b);
-    if(ya!==yb)return yb.localeCompare(ya);
-    return (isModernNisu(nisuOf(b))?1:0)-(isModernNisu(nisuOf(a))?1:0);
-  });
-  var recent=recs.filter(function(r){
-    var y=yearOf(r);
-    return y>='2023-2024';
-  });
-  var pool=recent.length?recent:recs;
-  var modern=pool.find(function(r){return isModernNisu(nisuOf(r));});
-  if(modern)return nisuOf(modern);
-  var any=pool.find(function(r){return nisuOf(r);});
-  return any?nisuOf(any):'';
-}
-
-function reconcile(){
-  try{
-    var records=collectRecords();
-    if(!records.length)return 0;
-    var groups=buildGroups(records);
-    var changed=0,unified=0;
-    groups.forEach(function(g){
-      if(g.records.length<2)return;
-      var canonicalNisu=chooseCanonicalNisu(g);
-      var profile={};
-      g.records.slice().sort(function(a,b){
-        var ya=yearOf(a),yb=yearOf(b);
-        return yb.localeCompare(ya);
-      }).forEach(function(r){
-        FIELDS.forEach(function(f){
-          if(f==='nisu')return;
-          if(!txt(profile[f])&&txt(r[f]))profile[f]=r[f];
-        });
-      });
-      g.records.forEach(function(r){
-        if(canonicalNisu){
-          var old=nisuOf(r);
-          if(old!==canonicalNisu){
-            if(old&&r.nisu!==undefined){
-              if(!Array.isArray(r.nisuAnterior))r.nisuAnterior=[];
-              if(r.nisuAnterior.indexOf(old)<0)r.nisuAnterior.push(old);
-            }
-            r.nisu=canonicalNisu;
-            changed++;unified++;
-          }
-        }
-        FIELDS.forEach(function(f){
-          if(f==='nisu')return;
-          var v=txt(profile[f]);
-          if(v&&txt(r[f])!==v){r[f]=v;changed++;}
-        });
-        r.identityHarmonized=true;
-      });
-    });
-    if(changed&&window.STATE&&Array.isArray(STATE.students)){
-      try{if(typeof saveState==='function')saveState();}catch(e){}
-      ['renderStudents','renderDashboard','renderClasses','renderAccueil'].forEach(function(f){
-        try{if(typeof window[f]==='function')window[f]();}catch(e){}
-      });
-    }
-    window.__ENSS_V147_LAST_RUN__={changed:changed,nisuUnified:unified,records:records.length,groups:groups.length};
-    return changed;
-  }catch(e){try{console.warn('ENSS V147 harmonize',e);}catch(_){}return 0;}
-}
-
-window.enssHarmonizeStudentIdentities=reconcile;
-window.enssReconcileStudentIdentities=reconcile;
-
-function wrap(name,delay){
-  var prev=window[name];
-  if(typeof prev!=='function'||prev.__enssV147)return;
-  var wrapped=function(){
-    var r=prev.apply(this,arguments);
-    setTimeout(reconcile,delay||250);
-    return r;
-  };
-  wrapped.__enssV147=true;window[name]=wrapped;
-}
-['importBuiltInHistoricalArchives','importAdvancedStudents','importENSSRealData','reimportENSSRealData','loadState','initState'].forEach(function(n){wrap(n,300);});
-
-var lastCount='';
-var timer=setInterval(function(){
-  var n=((window.STATE&&STATE.students)||[]).length;
-  if(String(n)!==lastCount){lastCount=String(n);setTimeout(reconcile,300);}
-},1500);
-setTimeout(reconcile,1000);
-setTimeout(reconcile,3000);
 })();
 </script>
 
