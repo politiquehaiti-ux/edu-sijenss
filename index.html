@@ -5586,13 +5586,8 @@ if(localYear) merged.anneeCourante=localYear;
             return (ef.access||[]).find(function(g){return String(g.profil||'').toLowerCase()===who&&g.active!==false;})||null;
         }
         function efacapCanEdit(key){
-            if(efacapIsDirector())return true;
-            var g=efacapGrant(); if(!g)return false;
-            var role=String(g.role||'');
-            if(role==='secretariat')return ['schools','staff','trainings','visits','resources','infrastructure','projects','reports','documents'].indexOf(key)!==-1;
-            if(role==='conseiller')return ['trainings','visits','resources','reports','documents'].indexOf(key)!==-1;
-            if(role==='ecole_associee')return false;
-            return false;
+            // Tout le module de gestion EFACAP est réservé au profil administrateur / Coordonnateur.
+            return efacapIsDirector();
         }
         function efacapTabLabel(t){return ({dashboard:'Tablo bò',schools:'Lekòl asosye yo',staff:'Pèsonèl EFACAP',trainings:'Fòmasyon kontinyèl',visits:'Vizit ak akonpayman',resources:'Resous pedagojik',infrastructure:'Enfrastrikti CAP',projects:'Finans ak pwojè',reports:'Rapò ak estatistik',documents:'Fòmilè ak dokiman',access:'Dwa aksè',information:'Enfòmasyon EFACAP'})[t]||t;}
         function efacapSpecs(){
@@ -5739,7 +5734,7 @@ if(localYear) merged.anneeCourante=localYear;
         }
         function efacapToggleAccess(i){if(!efacapIsDirector())return;var e=ensureEfacapState(),g=e.access[i];if(!g)return;g.active=g.active===false;saveState();renderEfacapModule();}
         function efacapRemoveAccess(i){if(!efacapIsDirector()||!confirm('Retire aksè EFACAP pou pwofil sa a?'))return;ensureEfacapState().access.splice(i,1);saveState();renderEfacapModule();}
-        function efacapExport(){var e=ensureEfacapState(),blob=new Blob([JSON.stringify(e,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EFACAP_SAINTE_SUZANNE_DONNEES.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
+        function efacapExport(){if(!efacapIsDirector())return;var e=ensureEfacapState(),blob=new Blob([JSON.stringify(e,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EFACAP_SAINTE_SUZANNE_DONNEES.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
 
 
         // ===== EFACAP V7 : espace EFACAP amélioré (rubriques guidées, Tablo bò, modèles de fòmilè estriktire) =====
@@ -5783,7 +5778,7 @@ if(localYear) merged.anneeCourante=localYear;
             if (!t) { t = document.createElement('div'); t.id = 'efxToast'; t.className = 'efx-toast'; document.body.appendChild(t); }
             t.textContent = msg; t.classList.add('show'); clearTimeout(efxToast._t); efxToast._t = setTimeout(function () { t.classList.remove('show'); }, 2600);
         }
-        function efxMember() { return efacapIsDirector() || !!efacapGrant(); }
+        function efxMember() { return efacapIsDirector(); }
         function efxCanForms() { return efacapCanEdit('documents'); }
         function efxDenied() { alert('Se Koòdonatè EFACAP la (oswa yon responsab otorize) ki ka ajoute, modifye oswa efase fòmilè.'); }
         function efxDownload(blob, name) {
@@ -5979,12 +5974,13 @@ if(localYear) merged.anneeCourante=localYear;
         function efxGo(id) { var el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         function efxInfoExtra() {
             var chips = [['efx-sec-1', '1 · Entwodiksyon'], ['efx-sec-2', '2 · Devlopman'], ['efx-sec-2-1', '2.1 · Definisyon'], ['efx-sec-2-2', '2.2 · Fonksyònman'], ['efx-sec-2-3', '2.3 · Wòl ak itilite'], ['efx-sec-2-4', '2.4 · Koòdonatè'], ['efx-sec-2-5', '2.5 · Reyisit'], ['efx-sec-3', '3 · Konklizyon'], ['efx-sec-annexe', 'Glosè']];
-            return '<section class="efacap-panel efx-docpanel"><h3>📘 Dokiman ofisyèl : Konprann EFACAP (VERSION FINALE)</h3><p>Tout eksplikasyon pou chak moun konprann sa EFACAP la ye, ki jan li fonksyone, wòl li, itilite li ak responsabilite Koòdonatè a. Modèl fòmilè yo pa nan paj sa a : yo nan onglè <b>« Fòmilè ak dokiman »</b>. <button type="button" class="efx-btn ghost sm" onclick="efacapSelectTab(\'documents\')">📋 Ale nan modèl fòmilè yo</button></p>' +
+            return '<section class="efacap-panel efx-docpanel"><h3>📘 Dokiman ofisyèl : Konprann EFACAP (VERSION FINALE)</h3><p>Tout eksplikasyon pou chak moun konprann sa EFACAP la ye, ki jan li fonksyone, wòl li, itilite li ak responsabilite Koòdonatè a.</p>' +
                 '<div class="efx-chipnav">' + chips.map(function (c) { return '<button type="button" onclick="efxGo(\'' + c[0] + '\')">' + c[1] + '</button>'; }).join('') + '</div></section>' +
                 '<article class="efx-doc" data-lang-lock="1">' + EFX_INFO + '</article>' +
-                '<section class="efx-dl-box"><h3>⬇ Telechaje dokiman an (VERSION FINALE avec formulaires)</h3><p>Menm dokiman an, ak tout fòmilè yo, pou enprime oswa pataje.</p><div class="efx-dl-btns"><button type="button" class="efx-btn light" onclick="efxDownloadDoc(\'pdf\')">📕 Telechaje PDF</button><button type="button" class="efx-btn light" onclick="efxDownloadDoc(\'docx\')">📘 Telechaje Word (.docx)</button></div></section>';
+                (efacapIsDirector() ? '<section class="efx-dl-box"><h3>⬇ Telechaje dokiman an (VERSION FINALE avec formulaires)</h3><p>Dokiman konplè a, ak fòmilè yo, pou enprime oswa pataje.</p><div class="efx-dl-btns"><button type="button" class="efx-btn light" onclick="efxDownloadDoc(\'pdf\')">📕 Telechaje PDF</button><button type="button" class="efx-btn light" onclick="efxDownloadDoc(\'docx\')">📘 Telechaje Word (.docx)</button></div></section>' : '');
         }
         function efxDownloadDoc(kind) {
+            if (!efacapIsDirector()) return;
             if (!canPrintOrExport('efacap')) return requireLogin('telechaje dokiman EFACAP la', 'efacap');
             var b64 = kind === 'pdf' ? EFX_PDF_B64 : EFX_DOCX_B64, bin = atob(b64), arr = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
             efxDownload(new Blob([arr], { type: kind === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }), 'EFACAP_Sainte-Suzanne_ENSS_VERSION_FINALE_avec_formulaires.' + kind);
@@ -6150,12 +6146,14 @@ if(localYear) merged.anneeCourante=localYear;
                 '<div class="pf-foot">EFACAP de Sainte-Suzanne · ' + efxEsc(def.code) + ' · imprimé le ' + efxFrDate(efxToday()) + '</div></body></html>';
         }
         function efxPrintDoc(def, d) {
+            if (!efacapIsDirector()) return;
             if (!canPrintOrExport('efacap')) return requireLogin('enprime fòmilè EFACAP la', 'efacap');
             var win = window.open('', '_blank');
             if (!win) { alert('Navigatè a bloke fenèt enpresyon an. Pèmèt pop-up pou platfòm nan epi eseye ankò.'); return; }
             win.document.open(); win.document.write(efxFormDoc(def, d).replace('</body>', '<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body>')); win.document.close();
         }
         function efxWordDoc(def, d) {
+            if (!efacapIsDirector()) return;
             if (!canPrintOrExport('efacap')) return requireLogin('telechaje fòmilè EFACAP Word la', 'efacap');
             efxDownload(new Blob(['\ufeff', efxFormDoc(def, d)], { type: 'application/msword' }), ('EFACAP_' + def.code).replace(/[^a-z0-9_.-]+/gi, '_') + '.doc');
         }
@@ -6173,7 +6171,7 @@ if(localYear) merged.anneeCourante=localYear;
 
 
         // ---------- page principale ----------
-        function efacapSelectTab(t) { var e = ensureEfacapState(); e.activeTab = t; EFX_UI.editing = null; EFX_UI.draft = null; saveState(); renderEfacapModule(); }
+        function efacapSelectTab(t) { if(!efacapIsDirector() && t!=='information')t='information'; var e = ensureEfacapState(); e.activeTab = t; EFX_UI.editing = null; EFX_UI.draft = null; saveState(); renderEfacapModule(); }
         function efxImportPick() {
             if (!efacapIsDirector()) return;
             var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
@@ -6194,8 +6192,8 @@ if(localYear) merged.anneeCourante=localYear;
         }
         function renderEfacapModule() {
             var e = ensureEfacapState(), host = document.getElementById('efacapModuleContent'); if (!host) return;
-                        var member = efxMember(), all = ['dashboard', 'schools', 'staff', 'trainings', 'visits', 'resources', 'infrastructure', 'projects', 'reports', 'documents', 'information', 'access'];
-            var tabs = member ? all : ['information', 'documents'];
+                        var member = efacapIsDirector(), all = ['dashboard', 'schools', 'staff', 'trainings', 'visits', 'resources', 'infrastructure', 'projects', 'reports', 'documents', 'information', 'access'];
+            var tabs = member ? all : ['information'];
             if (tabs.indexOf(e.activeTab) < 0) e.activeTab = member ? 'dashboard' : 'information';
             var t = e.activeTab, body = '';
             if (t !== 'documents') { EFX_UI.editing = null; EFX_UI.draft = null; }
@@ -16552,16 +16550,22 @@ if(localYear) merged.anneeCourante=localYear;
         window.renderCantine = renderCantine;
         window.renderInventaire = renderInventaire;
         window.renderParametres = renderParametres;
-        // ENSS: reglaj aksè pwofil yo li/sove nan tab santral school_role_access.
+        // ENSS: li sèlman drapo aksè piblik yo; koneksyon admin pa nesesè pou pwofil yo.
+        // Fonksyon Supabase la limite lekti a kat drapo lekòl ENSS la.
         async function enssGetRoleAccess(){
             var client=ensureCentralClient();
             if(!client) throw new Error('Konfigirasyon Supabase la manke.');
-            var session=await centralRefreshSession();
-            if(!session || !session.user) throw new Error('Konekte ak kont Supabase admin lan anvan.');
-            var cfg=getCentralConfig();
-            var r=await client.rpc('enss_get_role_access_v2',{p_school_id:cfg.schoolId});
+            var r=await client.rpc('enss_public_role_access');
             if(r.error) throw r.error;
-            return r.data || {secretaire:false,enseignants_1_6:false,enseignants_7_9:false,eleves:false};
+            var data=r.data;
+            if(typeof data==='string'){try{data=JSON.parse(data);}catch(parseError){}}
+            if(!data || typeof data!=='object' || Array.isArray(data)) throw new Error('Supabase pa retounen drapo aksè ENSS yo.');
+            return {
+                secretaire:data.secretaire===true,
+                enseignants_1_6:data.enseignants_1_6===true,
+                enseignants_7_9:data.enseignants_7_9===true,
+                eleves:data.eleves===true
+            };
         }
         async function enssSetRoleAccess(access){
             if(!requireAdmin('modifye aksè pwofil yo')) throw new Error('Se administratè a sèlman ki ka chanje aksè pwofil yo.');
