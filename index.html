@@ -23047,5 +23047,193 @@ window.__ENSS_V148_PRINT_TEST__={transform:transform,photoDataUrl:photoDataUrl};
 })();
 </script>
 
+<style id="enss-redesign-ui">
+:root{--enss-primary:#1D4ED8;--enss-primary-dark:#153E9A;--enss-ink:#0F172A;--enss-bg:#F5F7FB;--enss-card:#FFFFFF;--enss-line:#E2E8F0;--enss-success:#059669;--enss-warning:#D97706;--enss-danger:#DC2626;--enss-radius:14px;}
+body{background:var(--enss-bg)!important;color:var(--enss-ink)!important;}
+.card,.modal-box,.login-box,.toolbar,.quiz-shell,.efx-panel,.efacap-panel{background:var(--enss-card)!important;border:1px solid var(--enss-line)!important;border-radius:var(--enss-radius)!important;box-shadow:0 6px 18px rgba(15,23,42,.06)!important;}
+.accueil-menu{background:#fff!important;border:1px solid var(--enss-line)!important;}
+.accueil-menu .menu-item{background:#F1F5F9!important;color:#1E293B!important;border:1px solid #E2E8F0!important;box-shadow:none!important;}
+.accueil-menu .menu-item.active{background:var(--enss-primary)!important;color:#fff!important;border-color:var(--enss-primary)!important;}
+.direction-mini-band{background:#fff!important;border:1px solid var(--enss-line)!important;color:#1E293B!important;}
+.btn{background:var(--enss-primary)!important;border-color:var(--enss-primary)!important;color:#fff!important;border-radius:10px!important;font-weight:700!important;}
+.btn.btn-success{background:var(--enss-success)!important;border-color:var(--enss-success)!important;}
+.btn.btn-warning{background:var(--enss-warning)!important;border-color:var(--enss-warning)!important;}
+.btn.btn-danger{background:var(--enss-danger)!important;border-color:var(--enss-danger)!important;}
+.btn.btn-secondary{background:#64748B!important;border-color:#64748B!important;}
+#enssSidebar{position:fixed;top:0;left:0;bottom:0;width:272px;max-width:86vw;background:#0F2440;color:#E6EDF7;z-index:9990;transform:translateX(-102%);transition:transform .25s ease;display:flex;flex-direction:column;}
+#enssSidebar.open{transform:translateX(0);}
+#enssSidebarHead{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.10);}
+#enssSidebarNav{flex:1;overflow-y:auto;padding:10px 10px 8px;}
+#enssSidebarFoot{padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,.10);font-size:.62rem;line-height:1.45;color:#9DB4D0;}
+#enssSidebarFoot b{color:#fff;font-weight:800;}
+.enss-nav-group{margin:10px 4px 6px;font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:#8FA8C6;font-weight:800;}
+.enss-nav-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:#DCE7F5;font-size:.86rem;font-weight:650;cursor:pointer;}
+.enss-nav-item.active{background:var(--enss-primary);color:#fff;}
+#enssSidebarClose{position:absolute;top:12px;right:10px;background:rgba(255,255,255,.10);color:#fff;border:0;border-radius:8px;width:30px;height:30px;cursor:pointer;}
+#enssSidebarToggle{position:fixed;left:14px;bottom:18px;z-index:9989;width:54px;height:54px;border-radius:50%;border:0;background:var(--enss-primary);color:#fff;font-size:22px;cursor:pointer;}
+#enssSidebarBackdrop{position:fixed;inset:0;background:rgba(2,10,30,.42);z-index:9988;display:none;}
+#enssSidebarBackdrop.open{display:block;}
+@media(min-width:1100px){#enssSidebar{transform:translateX(0);}#mainContent{margin-left:272px!important;}#topbar{left:272px!important;}#enssSidebarToggle{display:none;}#enssSidebarBackdrop{display:none!important;}}
+@media print{#enssSidebar,#enssSidebarToggle,#enssSidebarBackdrop{display:none!important;}#mainContent{margin-left:0!important;}#topbar{left:0!important;}}
+</style>
+<style id="enss-redesign-v2">
+#page-preparation .flex-between .btn{min-height:34px;padding:.35rem .75rem!important;font-size:.8rem!important;}
+#enssCsvCard{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:.7rem!important;align-items:start;}
+#enssCsvCard>h4{grid-column:1/-1;margin:0 0 .2rem!important;}
+#enssCsvCard>#enssHistoricalYearImports,#enssCsvCard>.enss-csv-wide{grid-column:1/-1!important;}
+#enssCsvCard .form-group{margin-bottom:0!important;min-width:0;}
+@media(max-width:700px){#enssCsvCard{grid-template-columns:1fr!important;}}
+#securitePermissions .table-wrap{max-height:340px!important;}
+#enssPermAudit{display:none;margin:.5rem 0;padding:.55rem .7rem;border:1px solid #FCA5A5;background:#FEF2F2;color:#991B1B;border-radius:9px;font-size:.75rem;font-weight:700;}
+#enssPermAudit.show{display:block;}
+.enss-example-box{margin:.6rem 0;padding:.7rem;border:1px dashed #93C5FD;border-left:5px solid #1D4ED8;border-radius:10px;background:#EFF6FF;color:#1E3A8A;font-size:.78rem;line-height:1.55;}
+.enss-example-box b{color:#153E9A;}
+.enss-save-badge{display:inline-flex;align-items:center;gap:.35rem;margin:.35rem 0;padding:.3rem .6rem;border-radius:999px;font-size:.7rem;font-weight:800;}
+.enss-save-badge.ok{background:#DCFCE7;color:#166534;border:1px solid #86EFAC;}
+.enss-save-badge.pending{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;}
+.enss-save-badge.off{background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;}
+</style>
+<script id="enss-redesign-js">
+(function(){
+ var FOOT='⚖️ Plateforme de l’EFACAP de Sainte-Suzanne et de l’École Nationale de Sainte-Suzanne (ENSS) © 2017–2026 · Développée par Directeur Joseph Mary Charles. Tous droits réservés';
+ function build(){
+  var menu=document.querySelector('.accueil-menu');if(!menu||document.getElementById('enssSidebar'))return;
+  var groups=[['Navigasyon',[['accueil','🏠','Akeyi'],['dashboard','📊','Tablo bò']]],['Klas & Pedagoji',[['classes','🎓','Klas ak elèv'],['quiz','🧠','Quiz'],['evaluation','📝','Evalyasyon']]],['Direksyon',[['direction','🏛️','Direksyon']]],['Resous',[['library','📚','Bibliyotèk'],['videoLibrary','🎬','Videyo kou']]],['EFACAP',[['efacap','🏫','EFACAP']]],['Administrasyon',[['parametres','⚙️','Paramèt']]]];
+  var sb=document.createElement('aside');sb.id='enssSidebar';
+  sb.innerHTML='<div id="enssSidebarHead"><strong>ENSS</strong><span>Platfòm jesyon lekòl</span></div><button id="enssSidebarClose">✕</button><nav id="enssSidebarNav"></nav><div id="enssSidebarFoot">'+FOOT+'</div>';
+  var nav=sb.querySelector('#enssSidebarNav');
+  groups.forEach(function(g){var lab=document.createElement('div');lab.className='enss-nav-group';lab.textContent=g[0];nav.appendChild(lab);
+   g[1].forEach(function(it){var o=menu.querySelector('.menu-item[data-page="'+it[0]+'"]');if(!o)return;var b=document.createElement('button');b.className='enss-nav-item';b.innerHTML='<span>'+it[1]+'</span><span>'+it[2]+'</span>';
+   b.onclick=function(){o.click();document.querySelectorAll('.enss-nav-item').forEach(function(x){x.classList.remove('active')});b.classList.add('active');close();};nav.appendChild(b);});});
+  var back=document.createElement('div');back.id='enssSidebarBackdrop';var tg=document.createElement('button');tg.id='enssSidebarToggle';tg.textContent='☰';
+  function open(){sb.classList.add('open');back.classList.add('open');}
+  function close(){sb.classList.remove('open');back.classList.remove('open');}
+  tg.onclick=open;sb.querySelector('#enssSidebarClose').onclick=close;back.onclick=close;
+  document.body.appendChild(sb);document.body.appendChild(back);document.body.appendChild(tg);
+  var f=nav.querySelector('.enss-nav-item');if(f)f.classList.add('active');
+ }
+ function tagCsv(){var h=document.querySelector('#page-parametres h4[data-t="csv"]');if(h&&h.closest('.card'))h.closest('.card').id='enssCsvCard';}
+ function dedupe(){document.querySelectorAll('.accueil-menu .menu-item').forEach(function(el){var k=el.getAttribute('data-page');document.querySelectorAll('.accueil-menu .menu-item[data-page="'+k+'"]').forEach(function(d,j){if(j>0)d.style.display='none';});});
+  document.querySelectorAll('#page-classes .classe-section-card').forEach(function(el){var k=el.getAttribute('data-page')||el.textContent.trim();var s=el.parentNode.querySelectorAll('[data-enss-seen="'+CSS.escape(k)+'"]');if(s.length){el.style.display='none';}else{el.setAttribute('data-enss-seen',k);}});}
+ function auditPerms(){var host=document.getElementById('securitePermissions');if(!host)return;var banner=document.getElementById('enssPermAudit');if(!banner){banner=document.createElement('div');banner.id='enssPermAudit';host.parentNode.insertBefore(banner,host);}
+  var seen={},dups=[];host.querySelectorAll('tr').forEach(function(r){var n=(r.querySelector('td')||r).textContent.trim();if(!n)return;if(seen[n])dups.push(n);else seen[n]=1;});
+  if(dups.length){banner.textContent='⚠️ Doublon detekte nan otorizasyon yo: '+Array.from(new Set(dups)).join(', ');banner.classList.add('show');}else banner.classList.remove('show');}
+ function fixYear(){
+  try{
+   if(window.STATE&&STATE.anneeCourante==='2027-2028'){STATE.anneeCourante='2026-2027';if(typeof saveState==='function')saveState();}
+   if(window.STATE&&!STATE.anneeCourante){STATE.anneeCourante='2026-2027';if(typeof saveState==='function')saveState();}
+  }catch(e){}
+ }
+ function fixFooters(){
+  document.querySelectorAll('footer,.footer,[class*="footer"]').forEach(function(el){
+   if(el.id==='enssSidebarFoot')return;
+   if(/©\s*2017|Developed by|Développée par|Tous droits réservés/i.test(el.textContent)){
+     el.textContent=FOOT;el.style.fontSize='.72rem';el.style.lineHeight='1.5';el.style.color='#64748B';el.style.textAlign='center';el.style.padding='.8rem 1rem';
+   }
+  });
+ }
+ function init(){build();tagCsv();dedupe();auditPerms();fixYear();fixFooters();var h=document.getElementById('securitePermissions');if(h&&window.MutationObserver)new MutationObserver(auditPerms).observe(h,{childList:true,subtree:true});}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ setTimeout(init,400);setTimeout(init,1500);
+})();
+</script>
+<script id="enss-examples-js">
+(function(){
+ function fillIfEmpty(id,val){var el=document.getElementById(id);if(el&&!el.value)el.value=val;}
+ function prepExample(){
+  var d=new Date().toISOString().slice(0,10);
+  fillIfEmpty('prepEcole','ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)');
+  fillIfEmpty('prepDate',d);
+  fillIfEmpty('prepSousBranche','Addition et soustraction');
+  fillIfEmpty('prepDuree','45 minutes');
+  fillIfEmpty('prepTitre','Addition et soustraction des nombres de 1 à 100');
+  fillIfEmpty('prepCompetence','L’élève est capable de résoudre des problèmes simples d’addition et de soustraction dans la limite de 100.');
+  fillIfEmpty('prepObjectif','À la fin de la leçon, l’élève sera capable d’effectuer correctement des additions et des soustractions et de résoudre un problème simple.');
+  fillIfEmpty('prepMateriel','Tableau, marqueurs, cartes numériques, crayons, feuilles d’exercices, objets à compter (bouchons, cubes).');
+  fillIfEmpty('prepPrerequis','L’élève connaît les nombres de 1 à 100, reconnaît les signes + et -, et sait compter des objets.');
+ }
+ function exampleFor(title){
+  var t=(title||'').toLowerCase();
+  var base='EXEMPLE COMPLET — MODÈLE PAR DÉFAUT\n================================\nDate : '+new Date().toLocaleDateString('fr-FR')+'\nÉtablissement : EFACAP DE SAINTE-SUZANNE\nCoordonnateur : Joseph Mary CHARLES\n\n';
+  if(t.includes('pv')||t.includes('proces'))return base+'OBJET : RÉUNION / RÉUNION DU COMITÉ\n\n1. Présence : 7 membres sur 7 présents.\n2. Sujets : suivi des résultats des élèves, organisation des examens et suivi de la cantine.\n3. Décisions :\n   - Programmer une réunion des parents pour le 15 mai.\n   - Vérifier la présence des enseignants chaque semaine.\n   - Préparer le rapport mensuel pour la direction.\n4. Actions responsables : La secrétaire rédige le PV et l’envoie au coordonnateur.\n\nSignature responsable : __________________________\nVisa / Signature du coordonnateur EFACAP : ______________\n[SCEAU OFFICIEL : EFACAP DE SAINTE-SUZANNE]';
+  if(t.includes('rapor')||t.includes('rapò'))return base+'OBJET : RAPPORT MENSUEL EFACAP\n\n1. Activités : 12 leçons réalisées, 4 visites de classe, 2 réunions pédagogiques.\n2. Résultats : 85 % des élèves étaient réguliers ; 12 élèves ont reçu un soutien spécial.\n3. Difficultés : manque de matériel dans certaines classes.\n4. Recommandations : acheter du matériel, organiser une formation des enseignants et suivre les élèves en retard.\n\nSignature responsable : __________________________\nVisa / Signature du coordonnateur EFACAP : ______________\n[SCEAU OFFICIEL : EFACAP DE SAINTE-SUZANNE]';
+  if(t.includes('demann')||t.includes('let')||t.includes('lèt'))return base+'OBJET : DEMANDE OFFICIELLE\n\nNous vous prions de bien vouloir prendre note de cette demande.\n\nNous demandons l’autorisation d’organiser une activité pédagogique le 20 mai, dans l’enceinte de l’école.\n\nDétails : 60 élèves, 6 enseignants, 2 parents responsables.\n\nSignature responsable : __________________________\nVisa / Signature du coordonnateur EFACAP : ______________\n[SCEAU OFFICIEL : EFACAP DE SAINTE-SUZANNE]';
+  if(t.includes('evalyasyon')||t.includes('evaluasyon'))return base+'OBJET : ÉVALUATION PÉDAGOGIQUE\n\nClasse : 5e AF\nMatière : Mathématiques\n\n1. Compétence évaluée : résoudre des problèmes d’addition et de soustraction.\n2. Résultats : 24/30 élèves ont réussi ; 6 élèves nécessitent une remédiation.\n3. Observations : les élèves comprennent les opérations, mais ils ont besoin de plus d’exercices sur les problèmes verbaux.\n4. Actions : organiser 2 séances de remédiation et donner des exercices à la maison.\n\nSignature responsable : __________________________\nVisa / Signature du coordonnateur EFACAP : ______________\n[SCEAU OFFICIEL : EFACAP DE SAINTE-SUZANNE]';
+  return base+'OBJET : '+title.toUpperCase()+'\n\n1. Contexte : Cette activité s’inscrit dans le fonctionnement de l’EFACAP DE SAINTE-SUZANNE.\n2. Détails :\n   - Date : '+new Date().toLocaleDateString('fr-FR')+'\n   - Personnes concernées : enseignants, coordonnateur, élèves et parents.\n   - Description : l’activité est organisée pour améliorer le suivi pédagogique et la gestion de l’école.\n3. Résultats / Décisions :\n   - Programmer un suivi chaque mois.\n   - Documenter les résultats dans le dossier EFACAP.\n   - Envoyer le rapport au coordonnateur.\n4. Actions responsables : La secrétaire assure le suivi de l’application des décisions.\n\nSignature responsable : __________________________\nVisa / Signature du coordonnateur EFACAP : ______________\n[SCEAU OFFICIEL : EFACAP DE SAINTE-SUZANNE]';
+ }
+ function wrapEfacap(){
+  if(typeof window.efacapOpenTemplate!=='function')return false;
+  if(window.efacapOpenTemplate.__enssWrapped)return true;
+  var orig=window.efacapOpenTemplate;
+  window.efacapOpenTemplate=function(id){
+   orig(id);
+   setTimeout(function(){
+    var ta=document.getElementById('efacapTplContent');
+    var t=(window.efacapEnsureTemplates&&efacapEnsureTemplates().find(function(x){return String(x.id)===String(id);}))||{};
+    if(!ta)return;
+    var ex='\n\n'+exampleFor(t.title||'');
+    if(ta.value.indexOf('EXEMPLE COMPLET — MODÈLE PAR DÉFAUT')===-1)ta.value+=ex;
+    var note=document.createElement('div');note.className='enss-example-box';
+    note.innerHTML='<b>📌 Exemple complet ajouté</b><br>Le modèle original reste intact. L’exemple rempli apparaît ci-dessous et vous pouvez le modifier ou le supprimer avant d’enregistrer.';
+    ta.parentNode.insertBefore(note,ta);
+   },30);
+  };
+  window.efacapOpenTemplate.__enssWrapped=true;return true;
+ }
+ function prepNote(){
+  var page=document.getElementById('page-preparation');if(!page||page.querySelector('.enss-example-box'))return;
+  var card=page.querySelector('.card');if(!card)return;
+  var note=document.createElement('div');note.className='enss-example-box';
+  note.innerHTML='<b>📌 Exemple complet pour la préparation de cours / leçon</b><br>Cet exemple est un modèle par défaut. Vous pouvez modifier chaque champ, enregistrer la fiche, puis l’imprimer en PDF ou la télécharger en Word.';
+  card.insertBefore(note,card.firstChild);
+ }
+ function init(){prepExample();prepNote();if(!wrapEfacap())setTimeout(wrapEfacap,800);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ setTimeout(init,500);setTimeout(init,2000);
+})();
+</script>
+<script id="enss-quiz-french-js">
+(function(){
+ var D={'ak':'et','epi':'et','pou':'pour','nan':'dans','yo':'les','yon':'un','youn':'un','se':'est','li':'il/elle','nou':'nous','kòman':'comment','kisa':'quoi','kilè':'quand','kote':'où','poukisa':'pourquoi','ki':'quel','kèk':'quelques','anpil':'beaucoup','trè':'très','bon':'bon','move':'mauvais','gwo':'grand','pti':'petit','long':'long','kout':'court','fasil':'facile','difisil':'difficile','premye':'premier','dezyèm':'deuxième','twazyèm':'troisième','dènye':'dernier','chak':'chaque','tout':'tous','plis':'plus','mwens':'moins','menm':'même','oswa':'ou','men':'mais','paske':'parce que','kounye a':'maintenant','jodi a':'aujourd’hui','maten':'matin','aswè':'soir','lè':'heure','minit':'minute','segond':'seconde','jòrn':'jour','semèn':'semaine','mwa':'mois','ane':'année','lekòl':'école','klas':'classe','elèv':'élève','elèv yo':'les élèves','ansèyan':'enseignant','ansèyan yo':'les enseignants','pwofesè':'professeur','matyè':'matière','leson':'leçon','egzèsis':'exercice','devwa':'devoir','egzamen':'examen','nòt':'note','rezilta':'résultat','mwayèn':'moyenne','pwen':'point','kesyon':'question','repons':'réponse','chwa':'choix','opsyon':'option','kòrèk':'correct','fo':'faux','vrai':'vrai','fò':'faux','repons kòrèk':'réponse correcte','repons fo':'réponse fausse','chwazi':'choisir','ranpli':'remplir','ekri':'écrire','kalkile':'calculer','rezoud':'résoudre','konpare':'comparer','gade':'regarder','tcheke':'vérifier','konprann':'comprendre','aprann':'apprendre','pratike':'pratiquer','repete':'répéter','fini':'finir','kòmanse':'commencer','kontinye':'continuer','sispann':'arrêter','èd':'aide','egzanp':'exemple','modèl':'modèle','tablo':'tableau','liv':'livre','fèy':'feuille','krayon':'crayon','non':'non','wi':'oui','pa':'ne pas','pa gen':'il n’y a pas','gen':'il y a','fè':'faire','di':'dire','mande':'demander','reponn':'répondre','chwazi yon repons':'choisir une réponse','ranpli espas vid yo':'remplir les espaces vides','konplete':'compléter','konplete kolòn yo':'compléter les colonnes','ekri repons lan':'écrire la réponse','chwa miltip':'choix multiple','nivo':'niveau','difisilte':'difficulté','matematik':'mathématiques','franse':'français','kreyòl':'créole','syans':'sciences','istwa':'histoire','jeyografi':'géographie','anglè':'anglais','espayòl':'espagnol','mizik':'musique','desen':'dessin','edikasyon fizik':'éducation physique'};
+ function isCreoleSubject(){try{var s=document.getElementById('quizMatiere');if(s){var o=s.options[s.selectedIndex];if(o&&/kreyòl|creole/i.test(o.textContent))return true;}}catch(e){}return false;}
+ function fr(text){if(!text)return text;var out=String(text);Object.keys(D).forEach(function(k){var re=new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi');out=out.replace(re,D[k]);});return out;}
+ function translateNode(el){if(!el||isCreoleSubject())return;el.querySelectorAll('.quiz-question,.quiz-answer,.quiz-option,.quiz-option span,.quiz-option label').forEach(function(n){if(n.dataset.enssFr)return;n.dataset.enssFr='1';n.textContent=fr(n.textContent);});}
+ function hook(){['renderQuizQuestion','renderQuiz','loadQuizPage','startQuiz','showQuizResult','renderEvalQuestion'].forEach(function(fn){if(typeof window[fn]==='function'&&!window[fn].__enssFr){var o=window[fn];window[fn]=function(){var r=o.apply(this,arguments);setTimeout(function(){document.querySelectorAll('.quiz-shell,#page-evaluation').forEach(translateNode);},30);return r;};window[fn].__enssFr=true;}});}
+ function init(){hook();document.querySelectorAll('.quiz-shell,#page-evaluation').forEach(translateNode);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ setTimeout(init,600);setTimeout(init,2000);
+})();
+</script>
+<script id="enss-save-status-js">
+(function(){
+ function badgeFor(status){
+  if(status==='synced')return '<span class="enss-save-badge ok">✅ Foto/NISU anrejistre nan Supabase</span>';
+  if(status==='pending')return '<span class="enss-save-badge pending">⏳ An atant sync (ap anrejistre otomatikman)</span>';
+  return '<span class="enss-save-badge off">ℹ️ Foto/NISU: pa gen done pou sync kounye a</span>';
+ }
+ function wrapPhotoBlock(){
+  if(typeof window.enssPhotoBlockHtml!=='function')return false;
+  if(window.enssPhotoBlockHtml.__enssStatus)return true;
+  var orig=window.enssPhotoBlockHtml;
+  window.enssPhotoBlockHtml=function(ctx,nisu,editable){
+   var html=orig.apply(this,arguments);
+   var key=(typeof enssPhotoKey==='function')?enssPhotoKey(nisu):String(nisu||'');
+   var id='enssSaveStatus_'+String(key).replace(/[^a-zA-Z0-9_-]/g,'_');
+   html+='<div id="'+id+'" class="enss-save-badge off" data-nisu="'+String(nisu||'')+'">ℹ️ Foto/NISU: verifikasyon…</div>';
+   setTimeout(function(){
+    var el=document.getElementById(id);if(!el)return;
+    if(typeof enssPhotoSyncKey==='function'){
+     enssPhotoSyncKey(key).then(function(st){el.outerHTML=badgeFor(st&&st.status);}).catch(function(){el.outerHTML=badgeFor('pending');});
+    }else{el.outerHTML=badgeFor('off');}
+   },50);
+   return html;
+  };
+  window.enssPhotoBlockHtml.__enssStatus=true;return true;
+ }
+ function init(){if(!wrapPhotoBlock())setTimeout(wrapPhotoBlock,800);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ setTimeout(init,500);setTimeout(init,2000);
+})();
+</script>
 </body>
 </html>
