@@ -1662,7 +1662,7 @@ tr.ai-bad td{background:#fef2f2}.ai-err{color:#b91c1c}.ai-warn{color:#92400e;bac
                         </div>
                     </div>
                     <div id="fraisCategorySummary" class="grid grid-4 mb-1" style="gap:.5rem;"></div><div class="table-wrap scroll-horizontal scroll-vertical" id="fraisTableWrap">
-                        <table><thead><tr><th>NISU</th><th>Nom</th><th>Classe</th><th>Inscription</th><th>Scolarité</th><th>Cantine</th><th>Gratuité</th><th>Total Prévision</th><th>Total Perception</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="fraisTableBody"></tbody></table>
+                        <table><thead><tr><th>NISU</th><th>Nom</th><th>Classe</th><th>Inscription<br><label><input type="checkbox" onchange="bulkFraisPaid('inscription',this.checked)"> Tout cocher</label></th><th>Scolarité<br><label><input type="checkbox" onchange="bulkFraisPaid('scolarite',this.checked)"> Tout cocher</label></th><th>Cantine<br><label><input type="checkbox" onchange="bulkFraisPaid('cantine',this.checked)"> Tout cocher</label></th><th>Gratuité<br><label><input type="checkbox" onchange="bulkFraisPaid('gratuite',this.checked)"> Tout cocher</label></th><th>Total Prévision</th><th>Total Perception</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="fraisTableBody"></tbody></table>
                     </div>
                 </div>
                 <div class="finance-section" id="fraisDepensesSection" style="border-top:2px solid var(--border);padding-top:1rem;margin-top:1rem;">
@@ -3795,7 +3795,7 @@ if(localYear) merged.anneeCourante=localYear;
             },1200);
         });
         document.addEventListener('visibilitychange',function(){ if(!document.hidden && ENSS_CENTRAL.session) centralPullForAll(); });
-        setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden && !ENSS_CENTRAL.syncing) centralPullForAll(); },900000); // V120: sekou 15 min; Realtime rete prensipal la pou diminye requèt repete.
+        setInterval(function(){ if(ENSS_CENTRAL.session && !document.hidden && !ENSS_CENTRAL.syncing) centralPullForAll(); },2700000); // V147: sekou 45 min; Realtime + visibilitychange rete prensipal yo.
         function loadState() {
             ensureCustomClasses();
             try {
@@ -7314,6 +7314,16 @@ if(localYear) merged.anneeCourante=localYear;
             renderSchoolInfoHome();
             var container = document.getElementById('accueilBannerContainer');
             var storedBanners = STATE.parametres.accueilBanners || [];
+            // Evite de montrer plusieurs fois la même photo (URL identique ou data URI identique).
+            var bannerSeen = Object.create(null);
+            var uniqueBanners=[];
+            storedBanners.forEach(function(value){
+                var key=String(value||'').trim(); if(!key)return;
+                if(/^https?:/i.test(key)) key=key.split('#')[0].split('?')[0].toLowerCase();
+                if(bannerSeen[key])return; bannerSeen[key]=true; uniqueBanners.push(value);
+            });
+            if(uniqueBanners.length !== storedBanners.length){ STATE.parametres.accueilBanners=uniqueBanners; saveState(); }
+            storedBanners=uniqueBanners;
             var banners = storedBanners.length ? storedBanners : [ENSS_DEFAULT_HOME_BANNER];
             var width = STATE.parametres.bannerWidth || 800;
             var height = STATE.parametres.bannerHeight || 300;
@@ -7408,7 +7418,10 @@ if(localYear) merged.anneeCourante=localYear;
         }
 
         function removeAccueilBanner(index) {
-            STATE.parametres.accueilBanners.splice(index, 1);
+            var arr=STATE.parametres.accueilBanners||[];
+            if(index<0||index>=arr.length)return;
+            arr.splice(index,1);
+            STATE.parametres.accueilBanners=arr.slice();
             saveState();
             renderAccueil();
         }
@@ -8149,16 +8162,25 @@ if(localYear) merged.anneeCourante=localYear;
 
         function getClasseTeacherAssignments(classe) {
             ensureClassAssignments();
-            var rows=STATE.classAssignments[classe];
-            if(Array.isArray(rows) && rows.length) return rows;
             if(!STATE.classTeacherAssignments) STATE.classTeacherAssignments={};
-            var old=STATE.classTeacherAssignments[classe];
-            if(Array.isArray(old) && old.length){
-                rows=old.map(function(a){return {teacherId:String(a.teacherId||''),teacher:String(a.teacher||''),subject:String(a.subject||''),savedAt:a.savedAt||Date.now()};});
-                STATE.classAssignments[classe]=rows;
-                return rows;
-            }
-            return [];
+            var current=Array.isArray(STATE.classAssignments[classe])?STATE.classAssignments[classe]:[];
+            var legacy=Array.isArray(STATE.classTeacherAssignments[classe])?STATE.classTeacherAssignments[classe]:[];
+            // Fusionne les deux anciens formats : ne jamais perdre le second enseignant
+            // qui peut encore exister dans classTeacherAssignments.
+            var merged=[], seen={};
+            current.concat(legacy).forEach(function(a){
+                if(!a)return;
+                var teacher=String(a.teacher||'').trim();
+                if(!teacher)return;
+                var subject=String(a.subject||'').trim();
+                var id=String(a.teacherId||'').trim();
+                var key=(id||teacher.toLocaleLowerCase())+'|'+teacher.toLocaleLowerCase()+'|'+subject.toLocaleLowerCase();
+                if(seen[key])return;
+                seen[key]=true;
+                merged.push({teacherId:id,teacher:teacher,subject:subject,savedAt:a.savedAt||0});
+            });
+            STATE.classAssignments[classe]=merged;
+            return merged;
         }
 
 
@@ -9886,9 +9908,11 @@ if(localYear) merged.anneeCourante=localYear;
             return '';
         }
 
-        function printPrescolaireStudentPDF(nisu) {
+        async function printPrescolaireStudentPDF(nisu) {
             if (!canPrintOrExport('resultats')) return requireLogin('enprime/telechaje rezilta preskolè sa a', 'resultats');
             var s=getStudentByNISU(nisu); if(!s || !isPrescolaire(s.classe)) return;
+            var photoUrl=await enssPhotoUrl(nisu);
+            var photoHtml=photoUrl?'<img src="'+photoUrl+'" style="width:95px;height:115px;object-fit:cover;border:1px solid #333;border-radius:4px;float:right;margin:0 0 8px 12px;">':'';
             var matieres=STATE.matieresPrescolaire||[], rows='';
             matieres.forEach(function(m){
                 var vals=[]; for(var c=1;c<=4;c++) vals.push(getPrescolaireNote(s.classe,String(c),nisu,m.code)||'-');
@@ -9899,7 +9923,7 @@ if(localYear) merged.anneeCourante=localYear;
             if(finals.length){var tb=finals.filter(function(v){return v==='TB';}).length,b=finals.filter(function(v){return v==='B';}).length,ab=finals.filter(function(v){return v==='AB';}).length; overall=tb>=b&&tb>=ab?'TB':b>=ab?'B':'AB';}
             var win=window.open('','_blank');
             var decisionPs = s.sexe === 'F' ? 'ADMISE' : 'ADMIS';
-            win.document.write('<html><head><title>Rezilta Préscolaire - '+s.nom+' '+s.prenom+'</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px}.info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #333;padding:6px;text-align:center}th{background:#eee}.box{margin-top:15px;border:2px solid #333;padding:10px;text-align:center;font-size:15px}.decision{margin-top:10px;font-weight:700;text-align:center}</style></head><body>'+buildOfficialHeaderHtml()+'<h2>📊 Rezilta Préscolaire — Not Kalitatif</h2><div class="info"><div><strong>NISU:</strong> '+s.nisu+'</div><div><strong>Élève:</strong> '+s.nom+' '+s.prenom+'</div><div><strong>Classe:</strong> '+s.classe+'</div><div><strong>Responsable:</strong> '+(s.responsable||'-')+'</div></div><table><thead><tr><th>Matière</th><th>C1</th><th>C2</th><th>C3</th><th>C4</th><th>Not final</th></tr></thead><tbody>'+rows+'</tbody></table><div class="box">Appréciation qualitative finale: <strong>'+overall+'</strong><br><small>TB = Très Bien | B = Bien | AB = À améliorer</small></div><div class="decision">Décision annuelle : <strong>'+decisionPs+'</strong></div>'+buildSignatureBlockHtml()+'<script>window.onload=function(){window.print();}<\/script></body></html>');
+            win.document.write('<html><head><title>Rezilta Préscolaire - '+s.nom+' '+s.prenom+'</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px}.info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #333;padding:6px;text-align:center}th{background:#eee}.box{margin-top:15px;border:2px solid #333;padding:10px;text-align:center;font-size:15px}.decision{margin-top:10px;font-weight:700;text-align:center}</style></head><body>'+buildOfficialHeaderHtml()+'<h2>📊 Rezilta Préscolaire — Not Kalitatif</h2>'+photoHtml+'<div class="info"><div><strong>NISU:</strong> '+s.nisu+'</div><div><strong>Élève:</strong> '+s.nom+' '+s.prenom+'</div><div><strong>Classe:</strong> '+s.classe+'</div><div><strong>Responsable:</strong> '+(s.responsable||'-')+'</div></div><table><thead><tr><th>Matière</th><th>C1</th><th>C2</th><th>C3</th><th>C4</th><th>Not final</th></tr></thead><tbody>'+rows+'</tbody></table><div class="box">Appréciation qualitative finale: <strong>'+overall+'</strong><br><small>TB = Très Bien | B = Bien | AB = À améliorer</small></div><div class="decision">Décision annuelle : <strong>'+decisionPs+'</strong></div>'+buildSignatureBlockHtml()+'<script>window.onload=function(){window.print();}<\/script></body></html>');
             win.document.close();
         }
 
@@ -10206,10 +10230,12 @@ if(localYear) merged.anneeCourante=localYear;
             win.document.close();
         }
 
-        function printStudentControle(nisu, controle, classe) {
+        async function printStudentControle(nisu, controle, classe) {
             if (!canPrintOrExport('classes')) return requireLogin('enprime/telechaje dokiman sa a', 'classes');
             var s = getStudentByNISU(nisu);
             if (!s) return;
+            var photoUrl=await enssPhotoUrl(nisu);
+            var photoHtml=photoUrl?'<img src="'+photoUrl+'" style="width:95px;height:115px;object-fit:cover;border:1px solid #333;border-radius:4px;float:right;margin:0 0 8px 12px;">':'';
             var matieres = getMatieresForClasse(classe);
             var ctrl = (s.controles && s.controles[controle]) || {};
             var div = getDiviseur(classe);
@@ -11382,7 +11408,7 @@ if(localYear) merged.anneeCourante=localYear;
             var title = 'Fiche individuelle du personnel — ' + name;
             var html = '<!doctype html><html><head><meta charset="utf-8"><title>'+escapeHtml(title)+'</title>'+
                 '<style>body{font-family:Arial,sans-serif;color:#172b43;margin:28px;font-size:12pt}.school{text-align:center;border-bottom:2px solid #174a73;padding-bottom:12px;margin-bottom:18px}.school h1{font-size:17pt;margin:0 0 5px;color:#174a73}.school p{margin:3px}.report-title{text-align:center;font-size:15pt;margin:18px 0}table{width:100%;border-collapse:collapse}th,td{border:1px solid #b8c7d6;padding:8px;text-align:left;vertical-align:top}th{width:34%;background:#eaf2f8}footer{margin-top:20px;border-top:1px solid #cbd5e1;padding-top:8px;text-align:center;font-size:10pt;color:#64748b}@media print{body{margin:15mm}}</style></head><body>'+
-                '<div class="school"><h1>ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)</h1><p>Cite Richard, centre-ville, Sainte-Suzanne</p><p>Tél. +509 42825377 | ecolenationalesaintesuzanne@gmail.com</p><p>Code école : 043 290 100 808</p></div>'+
+                '<div class="school"><h1>ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)</h1><p>Cite Richard, centre-ville, Sainte-Suzanne | Tél : +50942825377</p><p>ecolenationalesaintesuzanne@gmail.com | Code école : 043 290 100 808</p></div>'+
                 '<div class="report-title">FICHE INDIVIDUELLE DU PERSONNEL</div><h2>'+escapeHtml(name)+'</h2><table>'+rows+'</table><footer>Document généré le '+escapeHtml(new Date().toLocaleDateString())+'</footer></body></html>';
             return {person:person, name:name, title:title, html:html};
         }
@@ -13148,15 +13174,17 @@ if(localYear) merged.anneeCourante=localYear;
             var eligible = niveau === 'preschool' || niveau === '1-3' || niveau === '4-6';
             var f = STATE.finance.frais[s.nisu];
             if (!f) {
-                f = { inscription:500, scolarite:is3eCycle?1500:0, cantine:1500, gratuite:eligible?1000:0, avance:0,
+                f = { inscription:500, scolarite:is3eCycle?1500:0, cantine:1000, gratuite:eligible?1000:0, avance:0,
                       paid:{inscription:false,scolarite:false,cantine:false,gratuite:false} };
                 STATE.finance.frais[s.nisu]=f;
             }
             if (Number(f.inscription||0) === 0) f.inscription = 500;
             if (f.scolarite === undefined || f.scolarite === null) f.scolarite = is3eCycle ? 1500 : 0;
-            if (f.cantine === undefined || f.cantine === null) f.cantine = 1500;
+            f.cantine = 1000;
+            f.inscription = 500;
+            f.scolarite = is3eCycle ? 1500 : 0;
             if (eligible) {
-                if (Number(f.gratuite||0) === 0) f.gratuite = 1000;
+                f.gratuite = 1000;
                 s.gratuite = true;
             } else {
                 f.gratuite = 0;
@@ -13167,6 +13195,23 @@ if(localYear) merged.anneeCourante=localYear;
             if (!f.paid) f.paid={inscription:false,scolarite:false,cantine:false,gratuite:false};
             ['inscription','scolarite','cantine','gratuite'].forEach(function(k){ if(f.paid[k]===undefined) f.paid[k]=false; });
             return f;
+        }
+
+        function bulkFraisPaid(key, checked) {
+            if (!canModifyData('finance')) return requireLogin('valider les paiements', 'finance');
+            var students=getStudents();
+            students.forEach(function(s){
+                var eligible=['preschool','1-3','4-6'].includes(getClasseNiveau(s.classe));
+                if(key==='gratuite'&&!eligible)return;
+                var f=ensureFraisStudent(s); if(!!f.paid[key]===!!checked)return;
+                f.paid[key]=!!checked;
+                STATE.finance.transactions=STATE.finance.transactions||[];
+                var pid='FRAIS-'+s.nisu+'-'+key;
+                if(checked && key!=='gratuite'){
+                    if(!STATE.finance.transactions.some(function(t){return t.sourceFeePayment===pid;})) STATE.finance.transactions.push({id:pid,date:new Date().toISOString().split('T')[0],description:'Paiement '+key+' — '+s.nom+' '+s.prenom,type:'entree',montant:Number(f[key]||0),categorie:key==='inscription'?'Inscription':key==='cantine'?'Cantine':'Scolarité',nisu:s.nisu,sourceFeePayment:pid});
+                } else if(!checked && key!=='gratuite') STATE.finance.transactions=STATE.finance.transactions.filter(function(t){return t.sourceFeePayment!==pid;});
+            });
+            saveState(); renderFinance();
         }
 
         function toggleFraisPaid(nisu, key) {
@@ -13190,8 +13235,8 @@ if(localYear) merged.anneeCourante=localYear;
                 ['inscription','scolarite','cantine'].forEach(function(k){ t.prevision[k]+=Number(f[k]||0); if(f.paid[k]) t.perception[k]+=Number(f[k]||0); });
                 t.prevision.gratuite+=Number(f.gratuite||0); t.perception.gratuite+=g;
             });
-            t.prevision.total=t.prevision.inscription+t.prevision.scolarite+t.prevision.cantine;
-            t.perception.total=t.perception.inscription+t.perception.scolarite+t.perception.cantine;
+            t.prevision.total=t.prevision.inscription+t.prevision.scolarite+t.prevision.cantine+t.prevision.gratuite;
+            t.perception.total=t.perception.inscription+t.perception.scolarite+t.perception.cantine+t.perception.gratuite;
             var deps=STATE.finance.fraisDepenses||[];
             deps.forEach(function(d){var k=(d.rubrique||'').toLowerCase(); if(k==='inscription')t.depenses.inscription+=Number(d.montant||0); else if(k==='scolarité'||k==='scolarite')t.depenses.scolarite+=Number(d.montant||0); else if(k==='cantine')t.depenses.cantine+=Number(d.montant||0); else if(k==='gratuité'||k==='gratuite')t.depenses.gratuite+=Number(d.montant||0);});
             t.depenses.total=t.depenses.inscription+t.depenses.scolarite+t.depenses.cantine+t.depenses.gratuite;
@@ -13210,7 +13255,7 @@ if(localYear) merged.anneeCourante=localYear;
                 [['Inscription',totals.prevision.inscription,totals.perception.inscription,totals.depenses.inscription],['Scolarité',totals.prevision.scolarite,totals.perception.scolarite,totals.depenses.scolarite],['Cantine',totals.prevision.cantine,totals.perception.cantine,totals.depenses.cantine],['Gratuité',totals.prevision.gratuite,totals.perception.gratuite,totals.depenses.gratuite]].map(function(x){var sol=x[1]-x[2]-x[3];return '<div class="fee-summary-card"><div class="fee-name">'+x[0]+'</div><div class="fee-lines"><span class="fee-forecast">Prévision: '+Number(x[1]).toLocaleString('fr-FR')+' HTG</span><span class="fee-paid">Perception: '+Number(x[2]).toLocaleString('fr-FR')+' HTG</span><span class="fee-expense-line" style="background:#f2d5f8;padding:.2rem .35rem;border-radius:5px;">Dépenses: '+Number(x[3]).toLocaleString('fr-FR')+' HTG</span><span style="background:#eef2f6;padding:.2rem .35rem;border-radius:5px;">Solde: '+Number(sol).toLocaleString('fr-FR')+' HTG</span></div></div>';}).join('')+
                 '<div class="fee-summary-card fee-total-card"><div class="fee-name">TOTAL GÉNÉRAL DES FRAIS</div><div class="fee-lines"><span class="fee-forecast">Prévision: '+totals.prevision.total.toLocaleString('fr-FR')+' HTG</span><span class="fee-paid">Perception: '+totals.perception.total.toLocaleString('fr-FR')+' HTG</span><span class="fee-expense-line" style="background:#f2d5f8;padding:.2rem .35rem;border-radius:5px;">Dépenses: '+totals.depenses.total.toLocaleString('fr-FR')+' HTG</span><span style="background:#eef2f6;padding:.2rem .35rem;border-radius:5px;">Solde: '+(totals.prevision.total-totals.perception.total-totals.depenses.total).toLocaleString('fr-FR')+' HTG</span></div></div></div>';}
             var body=document.getElementById('fraisTableBody');
-            if(body){body.innerHTML=students.map(function(s){var f=ensureFraisStudent(s);var eligible=getClasseNiveau(s.classe)==='preschool'||getClasseNiveau(s.classe)==='1-3'||getClasseNiveau(s.classe)==='4-6';var g=s.gratuite&&eligible?Number(f.gratuite||0):0;var prevision=Number(f.inscription||0)+Number(f.scolarite||0)+Number(f.cantine||0);var perception=(f.paid.inscription?Number(f.inscription||0):0)+(f.paid.scolarite?Number(f.scolarite||0):0)+(f.paid.cantine?Number(f.cantine||0):0);var balance=prevision-perception;var cell=function(k,val,disabled){return '<td class="fee-cell '+(f.paid[k]?'fee-paid-cell':'fee-forecast-cell')+'"><div>'+Number(val||0).toLocaleString('fr-FR')+' HTG</div><label class="fee-check '+(disabled?'disabled':'')+'"><input type="checkbox" '+(f.paid[k]?'checked ':'')+(disabled?'disabled ':'')+' onchange="event.stopPropagation();toggleFraisPaid(\''+s.nisu+'\',\''+k+'\')"> <span>'+ (f.paid[k]?'Payé':'Valider')+'</span></label></td>';}; return '<tr><td style="font-size:.55rem">'+s.nisu+'</td><td style="font-size:.55rem">'+s.nom+' '+s.prenom+'</td><td style="font-size:.55rem">'+s.classe+'</td>'+cell('inscription',f.inscription,false)+cell('scolarite',f.scolarite,false)+cell('cantine',f.cantine,false)+cell('gratuite',g,!eligible)+'<td class="fee-total forecast-total">'+prevision.toLocaleString('fr-FR')+' HTG</td><td class="fee-total paid-total">'+perception.toLocaleString('fr-FR')+' HTG</td><td class="fee-total balance-total">'+balance.toLocaleString('fr-FR')+' HTG</td><td onclick="event.stopPropagation()"><button class="btn" onclick="openFraisModal(\''+s.nisu+'\')">✏️</button><button class="btn" onclick="printQuittance(\''+s.nisu+'\')">🖨️</button></td></tr>';}).join('')||'<tr><td colspan="11" class="text-center text-muted">Aucun élève</td></tr>';}
+            if(body){body.innerHTML=students.map(function(s){var f=ensureFraisStudent(s);var eligible=getClasseNiveau(s.classe)==='preschool'||getClasseNiveau(s.classe)==='1-3'||getClasseNiveau(s.classe)==='4-6';var g=s.gratuite&&eligible?Number(f.gratuite||0):0;var prevision=Number(f.inscription||0)+Number(f.scolarite||0)+Number(f.cantine||0)+Number(f.gratuite||0);var perception=(f.paid.inscription?Number(f.inscription||0):0)+(f.paid.scolarite?Number(f.scolarite||0):0)+(f.paid.cantine?Number(f.cantine||0):0)+(s.gratuite&&f.paid.gratuite?Number(f.gratuite||0):0);var balance=prevision-perception;var cell=function(k,val,disabled){return '<td class="fee-cell '+(f.paid[k]?'fee-paid-cell':'fee-forecast-cell')+'"><div>'+Number(val||0).toLocaleString('fr-FR')+' HTG</div><label class="fee-check '+(disabled?'disabled':'')+'"><input type="checkbox" '+(f.paid[k]?'checked ':'')+(disabled?'disabled ':'')+' onchange="event.stopPropagation();toggleFraisPaid(\''+s.nisu+'\',\''+k+'\')"> <span>'+ (f.paid[k]?'Payé':'Valider')+'</span></label></td>';}; return '<tr><td style="font-size:.55rem">'+s.nisu+'</td><td style="font-size:.55rem">'+s.nom+' '+s.prenom+'</td><td style="font-size:.55rem">'+s.classe+'</td>'+cell('inscription',f.inscription,false)+cell('scolarite',f.scolarite,false)+cell('cantine',f.cantine,false)+cell('gratuite',g,!eligible)+'<td class="fee-total forecast-total">'+prevision.toLocaleString('fr-FR')+' HTG</td><td class="fee-total paid-total">'+perception.toLocaleString('fr-FR')+' HTG</td><td class="fee-total balance-total">'+balance.toLocaleString('fr-FR')+' HTG</td><td onclick="event.stopPropagation()"><button class="btn" onclick="openFraisModal(\''+s.nisu+'\')">✏️</button><button class="btn" onclick="printQuittance(\''+s.nisu+'\')">🖨️</button></td></tr>';}).join('')||'<tr><td colspan="11" class="text-center text-muted">Aucun élève</td></tr>';}
             initFraisDepenseForm(); renderFraisDepenses(); applyTranslations();
         }
 
@@ -13222,7 +13267,7 @@ if(localYear) merged.anneeCourante=localYear;
                 var niveau = getClasseNiveau(s.classe);
                 var is3eCycle = niveau === '7-9';
                 var scolarite = is3eCycle ? 1500 : 0;
-                var cantine = 1500;
+                var cantine = 1000;
                 var gratuite = (niveau === 'preschool' || niveau === '1-3' || niveau === '4-6') ? 1000 : 0;
                 STATE.finance.frais[nisu] = { inscription: 0, scolarite: scolarite, cantine: cantine,
                     gratuite: gratuite, avance: 0 };
@@ -13305,8 +13350,10 @@ if(localYear) merged.anneeCourante=localYear;
                 var f = STATE.finance.frais[s.nisu] || {};
                 if (Number(f.inscription||0) === 0) f.inscription = 500;
                 if (f.scolarite === undefined || f.scolarite === null) f.scolarite = is3eCycle ? 1500 : 0;
-                if (f.cantine === undefined || f.cantine === null) f.cantine = 1500;
-                if (eligible) { if (Number(f.gratuite||0)===0) f.gratuite=1000; s.gratuite=true; }
+                f.cantine = 1000;
+            f.inscription = 500;
+            f.scolarite = is3eCycle ? 1500 : 0;
+                if (eligible) { f.gratuite=1000; s.gratuite=true; }
                 else { f.gratuite=0; s.gratuite=false; if(f.paid) f.paid.gratuite=false; }
                 if (f.avance === undefined || f.avance === null) f.avance = 0;
                 if (!f.paid) f.paid={inscription:false,scolarite:false,cantine:false,gratuite:false};
