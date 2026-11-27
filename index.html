@@ -4769,7 +4769,7 @@ if(localYear) merged.anneeCourante=localYear;
         function hasAccess(page) {
             var __studyProfile=String((window.STATE&&STATE.utilisateur)||'').trim().toLowerCase();
             // Profils NISU et Ecole : espace pédagogique limité, mais retour Akèy toujours autorisé.
-            if (__studyProfile === 'nisu' || __studyProfile === 'ecole') {
+            if (__studyProfile === 'nisu' || __studyProfile === 'ecole' || __studyProfile === 'eleve' || __studyProfile === 'élève') {
                 return ['accueil','dashboard','quiz','library'].includes(page);
             }
             var role = getRole();
@@ -23567,7 +23567,7 @@ body{background:var(--enss-bg)!important;color:var(--enss-ink)!important;}
    if(Array.isArray(p.accueilBanners)){
     for(var i=0;i<p.accueilBanners.length;i++){
      var value=p.accueilBanners[i];if(!isDataImage(value))continue;
-     var url=await uploadImage(client,value,'home/banner-'+i+'.webp',1280,.76);
+     var url=await uploadImage(client,value,'home/banner-'+Date.now().toString(36)+'-'+i+'.webp',1280,.76);
      p.accueilBanners[i]=url;changed=true;
     }
    }
@@ -23593,7 +23593,7 @@ body{background:var(--enss-bg)!important;color:var(--enss-ink)!important;}
    var arr=Array.isArray(STATE.parametres.accueilBanners)?STATE.parametres.accueilBanners:[];
    box.innerHTML='<h4 style="margin:0 0 .6rem">Foto Akèy yo</h4><div style="display:flex;gap:.65rem;flex-wrap:wrap"></div>';
    var wrap=box.lastElementChild;
-   arr.forEach(function(src,i){if(typeof src!=='string')return;var item=document.createElement('div');item.style.cssText='width:145px;padding:.45rem;background:white;border:1px solid #d1d5db;border-radius:8px';var im=document.createElement('img');im.src=src;im.alt='Foto Akèy '+(i+1);im.style.cssText='width:100%;height:95px;object-fit:contain';var label=document.createElement('div');label.textContent='Foto '+(i+1);label.style.cssText='font-size:.75rem;margin:.3rem 0';var b=document.createElement('button');b.type='button';b.textContent='Efase foto';b.className='btn btn-danger';b.style.cssText='font-size:.7rem;padding:.25rem .4rem';b.addEventListener('click',function(){if(!confirm('Efase foto Akèy sa a?'))return;STATE.parametres.accueilBanners.splice(i,1);if(typeof saveState==='function')saveState();renderGallery();if(typeof renderAccueil==='function')renderAccueil();});item.appendChild(im);item.appendChild(label);item.appendChild(b);wrap.appendChild(item);});
+   arr.forEach(function(src,i){if(typeof src!=='string')return;var item=document.createElement('div');item.style.cssText='width:145px;padding:.45rem;background:white;border:1px solid #d1d5db;border-radius:8px';var im=document.createElement('img');im.src=src;im.alt='Foto Akèy '+(i+1);im.style.cssText='width:100%;height:95px;object-fit:contain';var label=document.createElement('div');label.textContent='Foto '+(i+1);label.style.cssText='font-size:.75rem;margin:.3rem 0';var b=document.createElement('button');b.type='button';b.textContent='Efase foto';b.className='btn btn-danger';b.style.cssText='font-size:.7rem;padding:.25rem .4rem';b.addEventListener('click',function(){if(!confirm('Efase foto Akèy sa a?'))return;window.removeAccueilBanner(i);renderGallery();if(typeof renderAccueil==='function')renderAccueil();});item.appendChild(im);item.appendChild(label);item.appendChild(b);wrap.appendChild(item);});
    if(!arr.length){var empty=document.createElement('p');empty.textContent='Pa gen lòt foto pèsonalize nan lis la.';wrap.appendChild(empty);}
   }catch(e){console.warn('ENSS gallery:',e);}
  }
@@ -23607,6 +23607,187 @@ body{background:var(--enss-bg)!important;color:var(--enss-ink)!important;}
  if(typeof oldRender==='function'&&!oldRender.__enssV145Wrapped){window.renderPage=function(page){var r=oldRender.apply(this,arguments);if(page==='parametres')setTimeout(renderGallery,100);return r;};window.renderPage.__enssV145Wrapped=true;}
  window.enssV145YearGuard=yearGuard;
 })();
+</script>
+<script id="enss-v150-rubriques-photos-espace">
+(function(){
+'use strict';
+var DEF=[['inscription','Inscription'],['scolarite','Scolarité'],['cantine','Cantine'],['gratuite','Gratuité']];
+function fin(){STATE.finance=STATE.finance||{};return STATE.finance;}
+function cats(){var f=fin();if(!Array.isArray(f.feeCategories)||!f.feeCategories.length)f.feeCategories=DEF.map(function(d){return{key:d[0],label:d[1],builtin:true};});return f.feeCategories;}
+function lab(c){return c.label||c.key;}
+function num(n){return Number(n||0).toLocaleString('fr-FR');}
+function nm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function E(v){v=String(v==null?'':v);return v.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function findC(k){return cats().filter(function(c){return c.key===k;})[0];}
+function amt(s,f,c){if(c.builtin)return Number(f[c.key]||0);var x=f.extra&&f.extra[c.key];return x===undefined?Number(c.amount||0):Number(x||0);}
+function isPaid(s,f,c){var p=!!(f.paid&&f.paid[c.key]);return(c.builtin&&c.key==='gratuite')?(p&&!!s.gratuite):p;}
+function defLabel(c){var d=DEF.filter(function(x){return x[0]===c.key;})[0];return d?d[1]:null;}
+function catOfDep(d){var r=nm(d.rubrique),cs=cats();for(var i=0;i<cs.length;i++){if(nm(lab(cs[i]))===r||(cs[i].builtin&&nm(defLabel(cs[i]))===r))return cs[i];}return null;}
+function stats(){
+ var cs=cats(),res={},byClass={},st=getStudents();
+ cs.forEach(function(c){res[c.key]={c:c,n:0,prev:0,perc:0,dep:0,deps:[]};});
+ st.forEach(function(s){var f=ensureFraisStudent(s),cl=s.classe||'—',bc=byClass[cl]=byClass[cl]||{n:0,v:{}};bc.n++;
+  cs.forEach(function(c){var a=amt(s,f,c),p=isPaid(s,f,c)?a:0,r=res[c.key];if(a>0)r.n++;r.prev+=a;r.perc+=p;var b=bc.v[c.key]=bc.v[c.key]||{a:0,p:0};b.a+=a;b.p+=p;});});
+ var other={deps:[],dep:0};
+ (ensureFraisDepensesState()||[]).forEach(function(d){var c=catOfDep(d),r=c?res[c.key]:other;r.deps.push(d);r.dep+=Number(d.montant||0);});
+ return{res:res,other:other,byClass:byClass,n:st.length,cs:cs};
+}
+/* ---------- Rapport imprimable détaillé ---------- */
+window.buildFraisDepensesReportHtml=function(){
+ var sel=getFraisDepenseReportRubrique(),S=stats(),all=!sel||sel==='Toutes';
+ var show=all?S.cs:S.cs.filter(function(c){return nm(lab(c))===nm(sel);});
+ var T={n:0,prev:0,perc:0,dep:0};
+ var syn=show.map(function(c){var r=S.res[c.key],reste=r.prev-r.perc,tx=r.prev?Math.round(r.perc*1000/r.prev)/10:0;T.prev+=r.prev;T.perc+=r.perc;T.dep+=r.dep;
+  return '<tr><td class="l"><b>'+E(lab(c))+'</b></td><td>'+r.n+'</td><td class="r">'+num(r.prev)+'</td><td class="r">'+num(r.perc)+'</td><td class="r">'+num(reste)+'</td><td>'+tx.toLocaleString('fr-FR')+' %</td><td class="r">'+num(r.dep)+'</td><td class="r"><b>'+num(r.perc-r.dep)+'</b></td></tr>';}).join('');
+ if(all&&S.other.deps.length){T.dep+=S.other.dep;syn+='<tr><td class="l"><b>Autres rubriques</b></td><td>—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td>—</td><td class="r">'+num(S.other.dep)+'</td><td class="r"><b>'+num(-S.other.dep)+'</b></td></tr>';}
+ var txT=T.prev?Math.round(T.perc*1000/T.prev)/10:0;
+ syn+='<tr class="tot"><td class="l">TOTAL GÉNÉRAL</td><td>'+S.n+' élèves</td><td class="r">'+num(T.prev)+'</td><td class="r">'+num(T.perc)+'</td><td class="r">'+num(T.prev-T.perc)+'</td><td>'+txT.toLocaleString('fr-FR')+' %</td><td class="r">'+num(T.dep)+'</td><td class="r">'+num(T.perc-T.dep)+'</td></tr>';
+ var det=show.map(function(c,i){var r=S.res[c.key],deps=r.deps.slice().sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''));});
+  var rows=deps.length?deps.map(function(d,k){return '<tr><td>'+(k+1)+'</td><td>'+E(d.date||'')+'</td><td class="l">'+E(d.description||'')+'</td><td class="r">'+num(d.montant)+' HTG</td></tr>';}).join(''):'<tr><td colspan="4"><i>Aucune dépense enregistrée pour cette rubrique.</i></td></tr>';
+  return '<div class="sec"><h3>'+(i+1)+'. '+E(lab(c))+'</h3><div class="kp"><span>Élèves concernés : <b>'+r.n+'</b></span><span>Prévision : <b>'+num(r.prev)+'</b></span><span>Perception : <b>'+num(r.perc)+'</b></span><span>Reste à percevoir : <b>'+num(r.prev-r.perc)+'</b></span><span>Dépenses : <b>'+num(r.dep)+'</b></span><span>Solde en caisse : <b>'+num(r.perc-r.dep)+' HTG</b></span></div>'+
+  '<table><thead><tr><th style="width:6%">N°</th><th style="width:16%">Date</th><th>Description de la dépense</th><th style="width:20%">Montant</th></tr></thead><tbody>'+rows+'<tr class="tot"><td colspan="3" class="r">Sous-total dépenses — '+E(lab(c))+'</td><td class="r">'+num(r.dep)+' HTG</td></tr></tbody></table></div>';}).join('');
+ if(all&&S.other.deps.length)det+='<div class="sec"><h3>Autres dépenses (rubrique non reconnue)</h3><table><tbody>'+S.other.deps.map(function(d,k){return '<tr><td>'+(k+1)+'</td><td>'+E(d.date||'')+'</td><td class="l">'+E(d.rubrique||'')+' — '+E(d.description||'')+'</td><td class="r">'+num(d.montant)+' HTG</td></tr>';}).join('')+'</tbody></table></div>';
+ var order=(typeof ALL_CLASSES!=='undefined'&&ALL_CLASSES.length)?ALL_CLASSES.filter(function(c){return S.byClass[c];}):Object.keys(S.byClass).sort();
+ Object.keys(S.byClass).forEach(function(c){if(order.indexOf(c)<0)order.push(c);});
+ var h1='<tr><th rowspan="2">Classe</th><th rowspan="2">Eff.</th>'+show.map(function(c){return '<th colspan="2">'+E(lab(c))+'</th>';}).join('')+'<th colspan="2">TOTAL</th></tr><tr>'+show.map(function(){return '<th>Prévu</th><th>Perçu</th>';}).join('')+'<th>Prévu</th><th>Perçu</th></tr>';
+ var G={};
+ var cr=order.map(function(cl){var b=S.byClass[cl],tp=0,tc=0;var cells=show.map(function(c){var v=b.v[c.key]||{a:0,p:0};tp+=v.a;tc+=v.p;G[c.key]=G[c.key]||{a:0,p:0};G[c.key].a+=v.a;G[c.key].p+=v.p;return '<td class="r">'+num(v.a)+'</td><td class="r">'+num(v.p)+'</td>';}).join('');G._t=G._t||{a:0,p:0};G._t.a+=tp;G._t.p+=tc;return '<tr><td class="l">'+E(cl)+'</td><td>'+b.n+'</td>'+cells+'<td class="r"><b>'+num(tp)+'</b></td><td class="r"><b>'+num(tc)+'</b></td></tr>';}).join('');
+ cr+='<tr class="tot"><td class="l">TOTAL</td><td>'+S.n+'</td>'+show.map(function(c){var g=G[c.key]||{a:0,p:0};return '<td class="r">'+num(g.a)+'</td><td class="r">'+num(g.p)+'</td>';}).join('')+'<td class="r">'+num((G._t||{a:0}).a)+'</td><td class="r">'+num((G._t||{p:0}).p)+'</td></tr>';
+ var title=all?'État général des frais — Toutes les rubriques':'État des frais — '+sel;
+ var css='@page{size:A4 landscape;margin:11mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Arial,Helvetica,sans-serif;color:#1c2b3a;font-size:11px;margin:0;padding:.4rem}h1{font-size:16px;text-align:center;margin:.5rem 0 .1rem;color:#1b3a5c;text-transform:uppercase;letter-spacing:.04em}.meta{text-align:center;color:#58708a;font-size:10px;margin-bottom:.6rem}h2{font-size:12.5px;background:#1b3a5c;color:#fff;padding:5px 9px;border-radius:4px;margin:.9rem 0 .35rem}h3{font-size:12px;color:#1b3a5c;border-left:4px solid #2a79b0;padding-left:7px;margin:.2rem 0 .35rem}table{width:100%;border-collapse:collapse;margin:.25rem 0 .5rem}th,td{border:1px solid #9fb3c6;padding:4px 6px;text-align:center}th{background:#dce9f4;color:#16405f}td.l{text-align:left}td.r{text-align:right}tbody tr:nth-child(even) td{background:#f6f9fc}tr.tot td{background:#e5eef7!important;font-weight:700}.sec{page-break-inside:avoid;margin-bottom:.7rem}.kp{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 .3rem}.kp span{background:#eef4fa;border:1px solid #cfdeeb;border-radius:12px;padding:2px 9px}.sig{display:flex;justify-content:space-around;margin-top:2.2rem;page-break-inside:avoid}.sig div{text-align:center;width:30%;border-top:1px solid #333;padding-top:4px}';
+ return '<!doctype html><html><head><meta charset="utf-8"><title>'+E(title)+'</title><style>'+css+'</style></head><body>'+(typeof buildOfficialHeaderHtml==='function'?buildOfficialHeaderHtml():'')+'<h1>'+E(title)+'</h1><div class="meta">Année scolaire '+E(getYear())+' — Édité le '+new Date().toLocaleDateString('fr-FR')+' — Montants en HTG</div>'+
+  '<h2>I. Synthèse par rubrique</h2><table><thead><tr><th>Rubrique</th><th>Élèves concernés</th><th>Prévision</th><th>Perception</th><th>Reste à percevoir</th><th>Taux de perception</th><th>Dépenses</th><th>Solde en caisse<br>(perception − dépenses)</th></tr></thead><tbody>'+syn+'</tbody></table>'+
+  '<h2>II. Détail des dépenses par rubrique</h2>'+det+'<h2>III. Prévision et perception par classe</h2><table><thead>'+h1+'</thead><tbody>'+cr+'</tbody></table>'+
+  '<div class="sig"><div>Ordonnateur des dépenses</div><div>Le Directeur</div><div>Vu et approuvé</div></div></body></html>';
+};
+/* ---------- Rubriques dynamiques ---------- */
+function opt(c){return '<option value="'+E(lab(c))+'">'+E(lab(c))+'</option>';}
+function fillSelects(){var cs=cats(),a=document.getElementById('fraisDepenseRubrique');
+ if(a){var v=a.value;a.innerHTML=cs.map(opt).join('');if(v)a.value=v;}
+ var r=document.getElementById('fraisDepenseReportRubrique');if(r){var v2=r.value||'Toutes';r.innerHTML='<option value="Toutes">Toutes les rubriques</option>'+cs.map(opt).join('');r.value=v2;}
+ var g=document.getElementById('financeCategoryFilter');if(g){var v3=g.value;g.innerHTML='<option value="">Toutes</option>'+cs.map(opt).join('')+'<option value="Dépenses">Dépenses</option><option value="Autres">Autres</option>';g.value=v3;}}
+function setPaid(s,c,val){var f=ensureFraisStudent(s);f.paid=f.paid||{};f.paid[c.key]=!!val;var pid='FRAIS-'+s.nisu+'-'+c.key;
+ STATE.finance.transactions=(STATE.finance.transactions||[]).filter(function(x){return x.sourceFeePayment!==pid;});
+ if(val)STATE.finance.transactions.push({id:pid,date:new Date().toISOString().split('T')[0],description:'Paiement '+lab(c)+' — '+s.nom+' '+s.prenom,type:'entree',montant:amt(s,f,c),categorie:lab(c),nisu:s.nisu,sourceFeePayment:pid});}
+window.enssExtraToggle=function(nisu,key){if(!canModifyData('finance'))return requireLogin('valider ce paiement','finance');var s=getStudentByNISU(nisu),c=findC(key);if(!s||!c)return;var f=ensureFraisStudent(s);setPaid(s,c,!(f.paid&&f.paid[key]));saveState();renderFinance();};
+window.enssExtraBulk=function(key,chk){if(!canModifyData('finance'))return requireLogin('valider les paiements','finance');var c=findC(key);if(!c)return;getStudents().forEach(function(s){setPaid(s,c,chk);});saveState();renderFinance();};
+window.enssExtraEdit=function(nisu,key){if(!canModifyData('finance'))return requireLogin('modifier ce montant','finance');var s=getStudentByNISU(nisu),c=findC(key);if(!s||!c)return;var f=ensureFraisStudent(s),v=prompt(lab(c)+' — montant pour '+s.nom+' '+s.prenom+' (HTG) :',amt(s,f,c));if(v===null)return;var n=parseFloat(String(v).replace(',','.'));if(isNaN(n)||n<0)return;f.extra=f.extra||{};f.extra[key]=n;if(f.paid&&f.paid[key])setPaid(s,c,true);saveState();renderFrais();};
+function patchFrais(){
+ fillSelects();var cs=cats(),cu=cs.filter(function(c){return!c.builtin;}),tbl=document.querySelector('#fraisTableWrap table');
+ if(tbl&&tbl.tHead&&tbl.tBodies[0]){var hr=tbl.tHead.rows[0],idx=-1;for(var i=0;i<hr.cells.length;i++){if(/Total\s*Pr/i.test(hr.cells[i].textContent)){idx=i;break;}}
+  if(idx>0&&cu.length){cu.forEach(function(c){var th=document.createElement('th');th.innerHTML=E(lab(c))+'<br><label style="font-weight:400"><input type="checkbox" onchange="enssExtraBulk(\''+c.key+'\',this.checked)"> Tout cocher</label>';hr.insertBefore(th,hr.cells[idx]);});
+   Array.prototype.forEach.call(tbl.tBodies[0].rows,function(tr){var nisu=((tr.cells[0]||{}).textContent||'').trim(),s=getStudentByNISU(nisu);if(!s||tr.cells.length<=idx)return;var f=ensureFraisStudent(s),ref=tr.cells[idx],pv=0,pc=0;
+    cu.forEach(function(c){var p=isPaid(s,f,c),td=document.createElement('td');td.className='fee-cell'+(p?' fee-paid-cell':'');td.innerHTML='<label style="cursor:pointer;white-space:nowrap"><input type="checkbox" '+(p?'checked ':'')+'onchange="enssExtraToggle(\''+E(nisu)+'\',\''+c.key+'\')"> <span title="Modifier le montant" onclick="event.preventDefault();enssExtraEdit(\''+E(nisu)+'\',\''+c.key+'\')" style="text-decoration:underline dotted">'+num(amt(s,f,c))+'</span></label>';tr.insertBefore(td,ref);});
+    cs.forEach(function(c){var a=amt(s,f,c);pv+=a;if(isPaid(s,f,c))pc+=a;});
+    var k=idx+cu.length;if(tr.cells[k])tr.cells[k].textContent=num(pv);if(tr.cells[k+1])tr.cells[k+1].textContent=num(pc);if(tr.cells[k+2])tr.cells[k+2].textContent=num(pv-pc);});}}
+ var S=stats(),grid=document.querySelector('#fraisCategorySummary .fee-summary-grid');
+ if(grid&&cu.length){var tot=grid.querySelector('.fee-total-card'),P=0,C=0,D=0;
+  cu.forEach(function(c){var r=S.res[c.key],d=document.createElement('div');d.className='fee-summary-card';d.innerHTML='<div class="fee-name">'+E(lab(c))+'</div><div class="fee-lines"><span class="fee-forecast">Prévision: '+num(r.prev)+' HTG</span><span class="fee-paid">Perception: '+num(r.perc)+' HTG</span><span class="fee-expense-line">Dépenses: '+num(r.dep)+' HTG</span><span>Solde: '+num(r.prev-r.perc-r.dep)+' HTG</span></div>';grid.insertBefore(d,tot);});
+  cs.forEach(function(c){var r=S.res[c.key];P+=r.prev;C+=r.perc;D+=r.dep;});
+  if(tot)tot.innerHTML='<div class="fee-name">TOTAL GÉNÉRAL DES FRAIS</div><div class="fee-lines"><span class="fee-forecast">Prévision: '+num(P)+' HTG</span><span class="fee-paid">Perception: '+num(C)+' HTG</span><span class="fee-expense-line">Dépenses: '+num(D)+' HTG</span><span>Solde: '+num(P-C-D)+' HTG</span></div>';}
+ var w=document.getElementById('fraisDepenseTotals');if(w){w.style.gridTemplateColumns='repeat(auto-fit,minmax(150px,1fr))';w.innerHTML=cs.map(function(c){return '<div class="fee-expense-card"><div class="fee-expense-name">Dépenses '+E(lab(c))+'</div><div style="font-size:.92rem;font-weight:900;">'+num(S.res[c.key].dep)+' HTG</div></div>';}).join('');}
+ addBtns();
+}
+function addBtns(){var t=document.querySelector('.frais-report-toolbar');if(t&&!t.querySelector('.enss-cat-btn')){var b=document.createElement('button');b.className='btn btn-primary enss-cat-btn';b.style.cssText='padding:.2rem .55rem;font-size:.68rem';b.textContent='⚙️ Rubriques';b.onclick=window.enssOpenFeeCats;t.appendChild(b);}
+ var g=document.querySelector('#fraisSection .toolbar');if(g&&!g.querySelector('.enss-cat-btn')){var b2=document.createElement('button');b2.className='btn enss-cat-btn';b2.style.cssText='padding:.2rem .6rem;font-size:.75rem';b2.textContent='⚙️ Gérer les rubriques / colonnes';b2.onclick=window.enssOpenFeeCats;g.appendChild(b2);}}
+var oRF=window.renderFrais;window.renderFrais=function(){var r=oRF.apply(this,arguments);try{patchFrais();}catch(e){console.warn('ENSS rubriques',e);}return r;};
+var draft=[];
+function drawDraft(){var el=document.getElementById('enssFeeCatList');if(!el)return;
+ el.innerHTML='<table style="width:100%;font-size:.75rem"><thead><tr><th>Rubrique</th><th>Montant par élève (HTG)</th><th></th></tr></thead><tbody>'+draft.map(function(c,i){return '<tr><td><input type="text" value="'+E(lab(c))+'" oninput="enssFeeSet('+i+',\'label\',this.value)" style="width:100%;padding:.2rem"></td><td>'+(c.builtin?'<span class="text-muted">selon les règles de l\'école</span>':'<input type="number" min="0" value="'+Number(c.amount||0)+'" oninput="enssFeeSet('+i+',\'amount\',this.value)" style="width:110px;padding:.2rem">')+'</td><td>'+(c.builtin?'':'<button class="btn btn-danger" onclick="enssFeeDel('+i+')" style="padding:.1rem .4rem;font-size:.65rem">🗑</button>')+'</td></tr>';}).join('')+'</tbody></table>';}
+window.enssFeeSet=function(i,k,v){if(draft[i])draft[i][k]=k==='amount'?(parseFloat(v)||0):v;};
+window.enssFeeDel=function(i){if(draft[i]&&!draft[i].builtin&&confirm('Retirer cette rubrique ? Les dépenses déjà saisies resteront dans la liste « autres rubriques ».')){draft.splice(i,1);drawDraft();}};
+window.enssFeeAdd=function(){draft.push({key:'c'+Date.now().toString(36),label:'Nouvelle rubrique',amount:0,custom:true});drawDraft();};
+window.enssFeeSave=function(){var seen={},old=cats();for(var i=0;i<draft.length;i++){var l=String(draft[i].label||'').trim();if(!l||seen[nm(l)]){alert('Chaque rubrique doit avoir un nom unique.');return;}seen[nm(l)]=1;draft[i].label=l;}
+ draft.forEach(function(n){var o=old.filter(function(c){return c.key===n.key;})[0];if(o&&nm(lab(o))!==nm(n.label)){(ensureFraisDepensesState()||[]).forEach(function(d){if(nm(d.rubrique)===nm(lab(o))||(o.builtin&&nm(d.rubrique)===nm(defLabel(o))))d.rubrique=n.label;});}});
+ fin().feeCategories=JSON.parse(JSON.stringify(draft));saveState();closeModal();renderFrais();renderFinance();};
+window.enssOpenFeeCats=function(){if(!canModifyData('finance'))return requireLogin('modifier les rubriques','finance');draft=JSON.parse(JSON.stringify(cats()));
+ openModal('⚙️ Rubriques des frais','<p style="font-size:.72rem;margin-bottom:.4rem">Renommez une rubrique ou ajoutez-en une nouvelle : une colonne apparaît dans <b>Frais Élèves</b>, dans les dépenses et dans l\'état imprimé. Le montant s\'applique à tous les élèves (modifiable élève par élève en cliquant sur le montant).</p><div id="enssFeeCatList"></div><div style="display:flex;gap:.4rem;justify-content:flex-end;margin-top:.6rem"><button class="btn" onclick="enssFeeAdd()">+ Ajouter une rubrique</button><button class="btn btn-primary" onclick="enssFeeSave()">💾 Enregistrer</button></div>');drawDraft();};
+/* ---------- Photos Akèy : doublons + vraie suppression ---------- */
+function bkey(u){u=String(u||'');return/^https?:/i.test(u)?u.split('#')[0].split('?')[0].toLowerCase():'d:'+u.length+':'+u.slice(-60);}
+function dropStorage(u){try{var m=String(u).match(/\/object\/public\/([^\/]+)\/(.+)$/);if(m&&typeof ensureCentralClient==='function'){var c=ensureCentralClient();if(c)c.storage.from(m[1]).remove([decodeURIComponent(m[2].split('?')[0])]).catch(function(){});}}catch(e){}}
+window.removeAccueilBanner=function(i){var p=STATE.parametres=STATE.parametres||{},arr=(p.accueilBanners||[]).slice();
+ if(typeof i!=='number')i=arr.length-1;
+ if(!arr.length){p.accueilDefaultHidden=true;}
+ else if(i>=0&&i<arr.length){var u=arr.splice(i,1)[0];p.accueilBanners=arr;if(/^https?:/i.test(u)){var d=p.accueilBannersDeleted=p.accueilBannersDeleted||[],k=bkey(u);if(d.indexOf(k)<0)d.push(k);dropStorage(u);}}
+ saveState();renderAccueil();};
+window.enssRestoreDefaultBanner=function(){STATE.parametres.accueilDefaultHidden=false;saveState();renderAccueil();defCtl();};
+function defCtl(){var inp=document.getElementById('paramAccueilBanner'),card=inp&&inp.closest('.card');if(!card)return;var b=document.getElementById('enssDefBanner');if(!b){b=document.createElement('div');b.id='enssDefBanner';b.style.cssText='margin-top:.5rem;font-size:.72rem';card.appendChild(b);}
+ var p=STATE.parametres||{},has=(p.accueilBanners||[]).length;
+ b.innerHTML=has?'':(p.accueilDefaultHidden?'La photo par défaut est supprimée de l\'Akèy. <button class="btn" onclick="enssRestoreDefaultBanner()" style="padding:.1rem .4rem;font-size:.68rem">↩ Remettre</button>':'Aucune photo ajoutée : la photo par défaut s\'affiche. <button class="btn btn-danger" onclick="removeAccueilBanner()" style="padding:.1rem .4rem;font-size:.68rem">🗑 Supprimer la photo par défaut</button>');}
+function fixBanners(){var p=STATE.parametres||{},c=document.getElementById('accueilBannerContainer');if(!c)return;
+ if(!(p.accueilBanners||[]).length&&p.accueilDefaultHidden)c.innerHTML='';
+ var seen={};Array.prototype.slice.call(c.querySelectorAll('.accueil-banner-wrapper')).forEach(function(w){var im=w.querySelector('img'),k=im?bkey(im.getAttribute('src')):'';if(k&&seen[k])w.remove();else seen[k]=1;});
+ var n=c.querySelectorAll('.accueil-banner-wrapper').length;c.style.gridTemplateColumns=n>1?'repeat(2,minmax(0,1fr))':'minmax(0,1fr)';defCtl();}
+var oRA=window.renderAccueil;window.renderAccueil=function(){var p=STATE.parametres=STATE.parametres||{},del=p.accueilBannersDeleted||[],seen={},src=p.accueilBanners||[];
+ var arr=src.filter(function(b){var k=bkey(b);if(!b||seen[k]||del.indexOf(k)>=0)return false;seen[k]=1;return true;});if(arr.length!==src.length)p.accueilBanners=arr;
+ var r=oRA.apply(this,arguments);setTimeout(fixBanners,80);return r;};
+/* ---------- Espace école : présentation inspirée de l'EFACAP, palette bleue ---------- */
+var css=document.createElement('style');css.id='enss-espace-ecole';css.textContent='#page-direction{background:linear-gradient(180deg,#f3f7fb 0%,#f8fafc 45%,#eef3f8 100%);padding:clamp(.5rem,2vw,1.1rem);border-radius:18px}'+
+'.sp-hero{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;gap:1.2rem;padding:clamp(1.1rem,3vw,2rem);margin:0 0 1rem;border-radius:20px;color:#fff;background:linear-gradient(115deg,#1b3a5c 0%,#2a5f8f 55%,#3a82b4 100%);box-shadow:0 14px 32px #1b3a5c26}'+
+'.sp-hero:before{content:"";position:absolute;width:290px;height:290px;right:6%;top:-175px;border:1px solid #ffffff22;border-radius:50%;box-shadow:0 0 0 22px #ffffff08,0 0 0 48px #ffffff06;pointer-events:none}'+
+'.sp-kicker{display:inline-block;padding:.3rem .7rem;border:1px solid #ffffff45;border-radius:999px;background:#ffffff14;font-size:.64rem;letter-spacing:.13em;font-weight:800;color:#f6d990}'+
+'.sp-hero h2{font-size:clamp(1.25rem,3.4vw,2rem);line-height:1.15;margin:.7rem 0 .35rem;color:#fff;font-weight:900}.sp-hero p{margin:0;font-size:.85rem;color:#e3eef8;max-width:640px;line-height:1.5}'+
+'.sp-seal{flex:0 0 92px;width:92px;height:92px;border:2px solid #e8d29a;border-radius:50%;display:grid;place-content:center;text-align:center;font-weight:900;font-size:1.4rem;color:#f7e7bd;background:radial-gradient(circle,#ffffff20,#ffffff05 68%);transform:rotate(-7deg)}.sp-seal small{font-size:.55rem;letter-spacing:.25em;color:#fff}'+
+'#page-direction>.card,#page-direction .excellence-card{border-radius:16px!important;border:1px solid #e0e9ee!important;box-shadow:0 7px 20px #18324708!important;background:#fff}'+
+'#page-direction .direction-mini-bands{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem}'+
+'#page-direction .direction-mini-band{min-height:58px;padding:.6rem .8rem;gap:.65rem;border-radius:12px;background:#f8fbfd!important;color:#1d4a6e!important;border:1px solid #d6e4ee!important;box-shadow:0 4px 14px #17324a0d;font-weight:700!important}'+
+'#page-direction .direction-mini-band .icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:#e3eef7;font-size:1rem}'+
+'#page-direction .direction-mini-band strong{font-size:.76rem;color:#1d4a6e!important}'+
+'#page-direction .direction-mini-band:hover{background:#eaf4fb!important;border-color:#8fb7d4!important;box-shadow:0 8px 20px #2876a622}'+
+'#directionDashStats>*{border-radius:15px!important;border:1px solid #e0e9ee!important;box-shadow:0 7px 20px #1832470a}';
+document.head.appendChild(css);
+function hero(){var pg=document.getElementById('page-direction');if(!pg)return;var h=document.getElementById('spHero');if(!h){h=document.createElement('div');h.id='spHero';h.className='sp-hero';pg.insertBefore(h,pg.firstChild);}
+ var n=(document.getElementById('persistentSchoolName')||{}).textContent||'ECOLE NATIONALE DE SAINTE-SUZANNE (ENSS)',y='';try{y=getYear();}catch(e){}
+ h.innerHTML='<div><span class="sp-kicker">ESPACE ÉCOLE · DIRECTION</span><h2>'+E(n)+'</h2><p>Pilotage administratif, financier et pédagogique de l\'établissement'+(y?' — année scolaire '+E(y):'')+'.</p></div><div class="sp-seal">ENSS<small>DIRECTION</small></div>';}
+var oN=window.navigateTo;if(typeof oN==='function')window.navigateTo=function(p){var r=oN.apply(this,arguments);if(p==='direction')setTimeout(hero,40);if(p==='parametres')setTimeout(defCtl,200);return r;};
+hero();
+})();
+
+</script>
+<script id="enss-v151-login-fiable">
+(function(){
+'use strict';
+if(window.__ENSS_V151_LOGIN__)return;window.__ENSS_V151_LOGIN__=true;
+function nm(v){return String(v==null?'':v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+var STUDY=['nisu','ecole','eleve'];            /* profils partagés : Akèy, Tableau de bord, Quiz, Bibliyotèk sèlman (hasAccess) */
+function users(){return(window.STATE&&STATE.securite&&STATE.securite.users)||[];}
+function msg(t,c){var m=document.getElementById('inlineLoginMsg');if(m){m.style.color=c||'#475569';m.textContent=t;}}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+async function fetchGrants(){var last;for(var i=0;i<3;i++){try{return await window.enssGetRoleAccess();}catch(e){last=e;await sleep(700);}}throw last;}
+function cached(){var p=(STATE&&STATE.parametres)||{},t=Date.parse(p.centralRoleAccessVerifiedAt||'');
+ if(!t||Date.now()-t>14*864e5)return null;var g=p.centralRoleAccess||{};
+ return{secretaire:g.secretaire===true,enseignants_1_6:g.enseignants_1_6===true,enseignants_7_9:g.enseignants_7_9===true,eleves:g.eleves===true};}
+var prev=window.inlineLogin;
+window.inlineLogin=async function(){
+ var uEl=document.getElementById('accueilLoginUser'),pEl=document.getElementById('accueilLoginPass');
+ if(!uEl||!pEl||!window.STATE)return prev?prev.apply(this,arguments):undefined;
+ var name=String(uEl.value||'').trim(),pass=String(pEl.value||'').trim();
+ var list=users(),u=list.filter(function(x){return x&&x.profil===name&&String(x.mdp||'')===pass;})[0];
+ if(!u){ /* tolérance majuscules/accents/espaces sur le NOM du profil (clavier mobile) — mot de passe toujours exact */
+  var c=list.filter(function(x){return x&&nm(x.profil)===nm(name)&&String(x.mdp||'')===pass;});
+  if(c.length===1){u=c[0];uEl.value=u.profil;}}
+ if(!u||nm(u.role)==='admin')return prev?prev.apply(this,arguments):undefined;
+ /* NISU / École / Élève : espace limité (Akèy, Tableau de bord, Quiz, Bibliyotèk) → pa depann de Supabase */
+ if(STUDY.indexOf(nm(u.profil))>=0){
+  STATE.utilisateur=u.profil;try{localStorage.setItem('ENSS_LOGIN',u.profil);}catch(e){}
+  try{if(typeof syncUserAccess==='function')syncUserAccess(u);}catch(e){}
+  try{saveState();}catch(e){}
+  msg('✓ Konekte kòm '+u.profil+' (Quiz ak Bibliyotèk)','#27ae60');pEl.value='';
+  try{initApp();}catch(e){}try{if(typeof spawnHearts==='function')spawnHearts();}catch(e){}
+  return;}
+ /* Sekretarya, anseyan, elèv pèsonèl : rafrechi drapo aksè Supabase la ANVAN verifikasyon an */
+ msg('Verifikasyon aksè…');
+ var grants=null,p=STATE.parametres=STATE.parametres||{};
+ try{grants=await fetchGrants();p.centralRoleAccessVerifiedAt=new Date().toISOString();}
+ catch(e){grants=cached();if(!grants){msg('Nou pa kapab verifye aksè a nan Supabase. Verifye entènèt la epi eseye ankò.','#b91c1c');return;}}
+ p.centralRoleAccess=grants;p.enseignantsAccessDisabledByAdmin=!(grants.enseignants_1_6||grants.enseignants_7_9);
+ var orig=window.enssGetRoleAccess;window.enssGetRoleAccess=function(){return Promise.resolve(grants);};
+ try{return await(prev?prev.apply(this,arguments):undefined);}finally{window.enssGetRoleAccess=orig;}
+};
+function tune(){['accueilLoginUser','accueilLoginPass'].forEach(function(id){var e=document.getElementById(id);if(e){e.setAttribute('autocapitalize','off');e.setAttribute('autocorrect','off');e.setAttribute('spellcheck','false');e.setAttribute('autocomplete',id==='accueilLoginPass'?'current-password':'username');}});}
+tune();document.addEventListener('DOMContentLoaded',tune);
+})();
+
 </script>
 </body>
 </html>
