@@ -23391,17 +23391,14 @@ body{background:var(--enss-bg)!important;color:var(--enss-ink)!important;}
   var cu=currentUserStudent();
   if(cu){
    var label=vc.parentNode.querySelector('.label');
-   /* V157: n'ekri sèlman si tèks la chanje (sinon MutationObserver la rele fonksyon an san fen = paj la jele pou elèv yo). */
-   var __nm=cu.student.prenom+' '+cu.student.nom;
-   if(vc.textContent!==__nm)vc.textContent=__nm;
-   var __lb='👤 Elèv konekte · NISU '+cu.student.nisu;
-   if(label&&label.textContent!==__lb)label.textContent=__lb;
+   vc.textContent=cu.student.prenom+' '+cu.student.nom;
+   if(label)label.textContent='👤 Elèv konekte · NISU '+cu.student.nisu;
   }
  }
  function hookAccueil(){
   if(typeof window.renderAccueil==='function'&&!window.renderAccueil.__enssIdentity){var o=window.renderAccueil;window.renderAccueil=function(){var r=o.apply(this,arguments);setTimeout(updateAccueilIdentity,50);return r;};window.renderAccueil.__enssIdentity=true;}
   var vc=document.getElementById('visitorCount');
-  if(vc&&window.MutationObserver&&!vc.__enssIdObs){vc.__enssIdObs=true;new MutationObserver(updateAccueilIdentity).observe(vc,{childList:true,characterData:true,subtree:true});}
+  if(vc&&window.MutationObserver)new MutationObserver(updateAccueilIdentity).observe(vc,{childList:true,characterData:true,subtree:true});
  }
  function init(){if(!wrapAccess())setTimeout(wrapAccess,500);hookQuiz();hookAccueil();updateAccueilIdentity();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
@@ -23947,8 +23944,8 @@ tune();document.addEventListener('DOMContentLoaded',tune);
 })();
 </script>
 
-<script id="enss-v157-student-login-fix">
-/* V157: koneksyon elèv (pwofil klas + NISU kòm modpas) — fiabilite 100 %.
+<script id="enss-v156-student-login-fix">
+/* V156: koneksyon elèv (pwofil klas + NISU kòm modpas) — fiabilite 100 %.
    - Idantifikasyon dirèk sou kont elèv la (oswa sou lis elèv yo si kont lan manke), san espas/majiskil/tirè ki twonpe.
    - Pa gen blokaj sou yon drapo aksè ki rete nan kachè: sèvè a verifye an aryè-plan.
    - Chajman lejè pou elèv (pa re-dessine tout aplikasyon an), epi endikatè a rive 100 % tout bon.
@@ -23956,7 +23953,7 @@ tune();document.addEventListener('DOMContentLoaded',tune);
    - Lòt pwofil yo (admin, sekretarya, anseyan, pwofil NISU jenerik) pa chanje: yo pase sou ansyen lojik la. */
 (function(){
 'use strict';
-if(window.__ENSS_V157_STUDENT_LOGIN__)return;window.__ENSS_V157_STUDENT_LOGIN__=true;
+if(window.__ENSS_V156_STUDENT_LOGIN__)return;window.__ENSS_V156_STUDENT_LOGIN__=true;
 var previous=window.inlineLogin, busy=false, session=null;
 var STUDENT_ROLES=['eleve','student','etudiant','pupil'];
 function clean(v){return String(v==null?'':v).normalize('NFC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,' ').trim();}
@@ -24015,15 +24012,9 @@ window.getCurrentUserObj=function(){
 var origLogout=window.logout;
 if(typeof origLogout==='function'){window.logout=function(){var r=origLogout.apply(this,arguments);try{if(!window.STATE.utilisateur)clearSession();}catch(e){}return r;};}
 function lightInit(){
- /* Sèlman sa ki ra: meni akèy la (pa gen navigateTo ni renderAccueil sou chemen kritik la). */
- try{window.STATE.currentPage='accueil';}catch(e){}
- try{if(typeof window.renderAccueilMenu==='function')window.renderAccueilMenu();}catch(e){console.warn('ENSS V157 menu',e);}
-}
-function deferredRefresh(u){
- /* Apre 100 %: rafrechi akèy la pi ta, san bloke koneksyon an. */
- setTimeout(function(){
-  try{if(!window.STATE||window.STATE.utilisateur!==u.profil)return;if(typeof window.renderAccueil==='function')window.renderAccueil();}catch(e){console.warn('ENSS V157 renderAccueil',e);}
- },400);
+ var calls=['syncSelectedSchoolYearUI','renderAccueilMenu','renderAccueil'];
+ calls.forEach(function(n){try{if(typeof window[n]==='function')window[n]();}catch(e){console.warn('ENSS V156',n,e);}});
+ try{window.STATE.currentPage='accueil';if(typeof window.navigateTo==='function')window.navigateTo('accueil',false);}catch(e){console.warn('ENSS V156 navigateTo',e);}
 }
 function kickStudent(msg){
  try{window.STATE.utilisateur=null;window.STATE.currentPage='accueil';}catch(e){}
@@ -24040,13 +24031,13 @@ function backgroundCheck(u){
   if(!g||typeof g!=='object')return;
   /* Sèlman yon repons sèvè ki di eksplisitman eleves=false kanpe elèv la (kachè lokal pa bloke anyen ankò). */
   if(g.eleves===false&&window.STATE&&window.STATE.utilisateur===u.profil)kickStudent('Aksè elèv yo dezaktive pa administratè ENSS la. Kontakte administrasyon an.');
- }).catch(function(e){console.warn('ENSS V157 central check postponed:',e&&e.message);});
+ }).catch(function(e){console.warn('ENSS V156 central check postponed:',e&&e.message);});
 }
 window.inlineLogin=async function(){
  var ue=el('accueilLoginUser'),pe=el('accueilLoginPass');
  if(!ue||!pe||!window.STATE)return previous?previous.apply(this,arguments):undefined;
  var name=clean(ue.value),pass=clean(pe.value),u=null;
- if(name){try{u=findStudentAccount(name,pass);}catch(e){console.warn('ENSS V157 find',e);}}
+ if(name){try{u=findStudentAccount(name,pass);}catch(e){console.warn('ENSS V156 find',e);}}
  if(!u)return previous?previous.apply(this,arguments):undefined;   /* pa yon kont elèv: lojik ansyen an */
  if(busy)return;busy=true;
  try{
@@ -24054,16 +24045,15 @@ window.inlineLogin=async function(){
   window.STATE.utilisateur=u.profil;setSession(u);
   setProgress(40,'Ouvèti sesyon elèv la…',false);
   pe.value='';await paint();
-  setProgress(75,'Ouvèti meni elèv la…',false);await paint();
+  setProgress(75,'Chajman paj akèy la…',false);await paint();
   lightInit();
   var st=studentOf(u),who=st?(' — '+[st.prenom,st.nom].filter(Boolean).join(' ')):'';
   say((navigator.onLine?'✓ Konekte kòm ':'✓ Konekte lokalman kòm ')+u.profil+who+'.','#16803c');
+  try{if(typeof window.spawnHearts==='function')window.spawnHearts();}catch(e){}
   setProgress(100,'Koneksyon fini',true);hideProgressLater(2200);
-  try{if(typeof window.spawnHearts==='function')setTimeout(function(){try{window.spawnHearts();}catch(e){}},600);}catch(e){}
-  deferredRefresh(u);
   backgroundCheck(u);
  }catch(err){
-  console.error('ENSS V157 student login',err);
+  console.error('ENSS V156 student login',err);
   try{if(window.STATE.utilisateur===u.profil){setProgress(100,'Koneksyon fini',true);hideProgressLater(2200);return;}}catch(e){}
   setProgress(0,'Koneksyon an pa reyisi',true);say('Pwoblèm teknik pandan koneksyon an. Eseye ankò.','#b91c1c');
  }finally{
