@@ -23391,14 +23391,17 @@ body{background:var(--enss-bg)!important;color:var(--enss-ink)!important;}
   var cu=currentUserStudent();
   if(cu){
    var label=vc.parentNode.querySelector('.label');
-   vc.textContent=cu.student.prenom+' '+cu.student.nom;
-   if(label)label.textContent='👤 Elèv konekte · NISU '+cu.student.nisu;
+   /* V157: n'ekri sèlman si tèks la chanje (sinon MutationObserver la rele fonksyon an san fen = paj la jele pou elèv yo). */
+   var __nm=cu.student.prenom+' '+cu.student.nom;
+   if(vc.textContent!==__nm)vc.textContent=__nm;
+   var __lb='👤 Elèv konekte · NISU '+cu.student.nisu;
+   if(label&&label.textContent!==__lb)label.textContent=__lb;
   }
  }
  function hookAccueil(){
   if(typeof window.renderAccueil==='function'&&!window.renderAccueil.__enssIdentity){var o=window.renderAccueil;window.renderAccueil=function(){var r=o.apply(this,arguments);setTimeout(updateAccueilIdentity,50);return r;};window.renderAccueil.__enssIdentity=true;}
   var vc=document.getElementById('visitorCount');
-  if(vc&&window.MutationObserver)new MutationObserver(updateAccueilIdentity).observe(vc,{childList:true,characterData:true,subtree:true});
+  if(vc&&window.MutationObserver&&!vc.__enssIdObs){vc.__enssIdObs=true;new MutationObserver(updateAccueilIdentity).observe(vc,{childList:true,characterData:true,subtree:true});}
  }
  function init(){if(!wrapAccess())setTimeout(wrapAccess,500);hookQuiz();hookAccueil();updateAccueilIdentity();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
@@ -23907,7 +23910,9 @@ tune();document.addEventListener('DOMContentLoaded',tune);
   var u=list.find(function(x){return x&&norm(x.profil)===norm(name)&&String(x.mdp==null?'':x.mdp).trim()===pass;});
   if(!u){setProgress(0,'Idantifyan/modpas pa valab',true);say('Idantifyan oswa mo de pase pa kòrèk.','#b91c1c');return;}
   setProgress(25,'Pwofil la verifye…',false);
-  var group=roleGroup(u),params=STATE.parametres=STATE.parametres||{};
+  var group=roleGroup(u),isStudentProfile=group==='eleves',params=STATE.parametres=STATE.parametres||{};
+  /* Cache drapo aksè yo apa: pa modifye gwo STATE lekòl la pou yon senp koneksyon. */
+  if(!params.centralRoleAccessVerifiedAt){try{var roleCache=JSON.parse(localStorage.getItem('ENSS_ROLE_ACCESS_CACHE_V1')||'null');if(roleCache&&roleCache.access&&roleCache.verifiedAt){params.centralRoleAccess=roleCache.access;params.centralRoleAccessVerifiedAt=roleCache.verifiedAt;}}catch(cacheError){}}
   /* Yon dènye desizyon administratè ki deja anrejistre lokalman rete respekte. */
   var cached=params.centralRoleAccess||{},verifiedAt=Date.parse(params.centralRoleAccessVerifiedAt||''),cacheFresh=!!verifiedAt&&(Date.now()-verifiedAt)<14*864e5;
   if(group&&cacheFresh&&cached[group]===false){setProgress(0,'Aksè dezaktive',true);say('Aksè gwoup sa a dezaktive pa administratè ENSS la. Kontakte administrasyon an.','#b91c1c');return;}
@@ -23915,7 +23920,8 @@ tune();document.addEventListener('DOMContentLoaded',tune);
   STATE.utilisateur=u.profil;
   try{localStorage.setItem('ENSS_LOGIN',u.profil);}catch(e){}
   try{if(typeof window.syncUserAccess==='function')window.syncUserAccess(u);}catch(e){console.warn('ENSS syncUserAccess',e);}
-  try{if(typeof window.saveState==='function')window.saveState();}catch(e){console.warn('ENSS saveState',e);}
+  /* Elèv yo se kont lekti: konekte yo pa dwe lanse syncStudentAccounts() ni yon upsert 8+ MB sou school_state. */
+  if(!isStudentProfile){try{if(typeof window.saveState==='function')window.saveState();}catch(e){console.warn('ENSS saveState',e);}}
   pe.value='';
   setProgress(82,'Chajman espas travay la…',false);
   try{if(typeof window.initApp==='function')window.initApp();}catch(e){console.error('ENSS initApp',e);}
@@ -23930,11 +23936,141 @@ tune();document.addEventListener('DOMContentLoaded',tune);
     if(!g||typeof g!=='object')return;
     params.centralRoleAccess=g;params.centralRoleAccessVerifiedAt=new Date().toISOString();
     params.enseignantsAccessDisabledByAdmin=!(g.enseignants_1_6===true||g.enseignants_7_9===true);
-    try{if(typeof window.saveState==='function')window.saveState();}catch(e){}
+    /* Cache aksè a apa. Pou elèv, pa rele saveState(): sa ta ekri tout STATE lekòl la. */
+    try{localStorage.setItem('ENSS_ROLE_ACCESS_CACHE_V1',JSON.stringify({access:g,verifiedAt:params.centralRoleAccessVerifiedAt}));}catch(cacheWriteError){}
+    if(!isStudentProfile){try{if(typeof window.saveState==='function')window.saveState();}catch(e){}}
     try{if(typeof window.syncUserAccess==='function')window.syncUserAccess(u);}catch(e){}
     if(g[group]===false)say('Ou konekte lokalman, men administratè a dezaktive aksè gwoup sa a. Kontakte administrasyon ENSS la.','#b45309');
    }).catch(function(e){console.warn('ENSS central access check postponed:',e);});
   }
  };
+})();
+</script>
+
+<script id="enss-v157-student-login-fix">
+/* V157: koneksyon elèv (pwofil klas + NISU kòm modpas) — fiabilite 100 %.
+   - Idantifikasyon dirèk sou kont elèv la (oswa sou lis elèv yo si kont lan manke), san espas/majiskil/tirè ki twonpe.
+   - Pa gen blokaj sou yon drapo aksè ki rete nan kachè: sèvè a verifye an aryè-plan.
+   - Chajman lejè pou elèv (pa re-dessine tout aplikasyon an), epi endikatè a rive 100 % tout bon.
+   - Chak elèv rete idantifye pa NISU li menm si anpil elèv pataje menm pwofil klas la.
+   - Lòt pwofil yo (admin, sekretarya, anseyan, pwofil NISU jenerik) pa chanje: yo pase sou ansyen lojik la. */
+(function(){
+'use strict';
+if(window.__ENSS_V157_STUDENT_LOGIN__)return;window.__ENSS_V157_STUDENT_LOGIN__=true;
+var previous=window.inlineLogin, busy=false, session=null;
+var STUDENT_ROLES=['eleve','student','etudiant','pupil'];
+function clean(v){return String(v==null?'':v).normalize('NFC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,' ').trim();}
+function nProfil(v){return clean(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\s+/g,'');}
+function nNisu(v){return clean(v).toUpperCase().replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\s+/g,'');}
+function el(id){return document.getElementById(id);}
+function say(t,c){var m=el('inlineLoginMsg');if(m){m.style.color=c||'#475569';m.textContent=t;}}
+function setProgress(n,label,finished){
+ var box=el('inlineLoginProgress'),ring=el('inlineLoginRing'),pct=el('inlineLoginPercent'),stage=el('inlineLoginStage'),btn=el('inlineLoginButton');
+ if(box)box.style.display='inline-flex';if(ring)ring.style.setProperty('--login-progress',n+'%');
+ if(pct)pct.textContent=n+'%';if(stage)stage.textContent=label;
+ if(btn){btn.disabled=!finished;btn.textContent=finished?'🔐 Konekte':'⏳ Koneksyon…';}
+}
+function hideProgressLater(ms){setTimeout(function(){var b=el('inlineLoginProgress');if(b)b.style.display='none';},ms||2000);}
+function paint(){return new Promise(function(res){var done=false;function fin(){if(!done){done=true;res();}}
+ try{if(window.requestAnimationFrame)window.requestAnimationFrame(function(){setTimeout(fin,0);});}catch(e){}
+ setTimeout(fin,80);});}
+function usersList(){var s=window.STATE;if(!s.securite)s.securite={users:[],permissions:{}};if(!Array.isArray(s.securite.users))s.securite.users=[];return s.securite.users;}
+function findStudentAccount(name,pass){
+ var np=nProfil(name),nn=nNisu(pass);if(!np||!nn)return null;
+ var users=usersList();
+ var u=users.find(function(x){return x&&STUDENT_ROLES.indexOf(nProfil(x.role))>=0&&(x.studentNisu||x.nisu)&&nProfil(x.profil)===np&&nNisu(x.mdp)===nn;});
+ if(u)return u;
+ /* Si kont lan manke nan sekirite a, rekonstwi li dapre lis elèv yo (menm règ ak syncStudentAccounts). */
+ if(typeof window.getStudentLoginProfile!=='function'||!Array.isArray(window.STATE.students))return null;
+ var s=window.STATE.students.find(function(st){try{return st&&st.nisu&&nNisu(st.nisu)===nn&&nProfil(window.getStudentLoginProfile(st))===np;}catch(e){return false;}});
+ if(!s)return null;
+ var acct={profil:window.getStudentLoginProfile(s),mdp:String(s.nisu),role:'eleve',studentNisu:String(s.nisu),nisu:String(s.nisu)};
+ if(s._enssStudentId)acct.studentId=s._enssStudentId;
+ users.push(acct);return acct;
+}
+function studentOf(u){var n=String(u.studentNisu||u.nisu||'');return (window.STATE.students||[]).find(function(s){return s&&String(s.nisu)===n;})||null;}
+function setSession(u){
+ session={profil:u.profil,nisu:String(u.studentNisu||u.nisu||u.mdp)};
+ window.__enssStudentSession=session;
+ try{localStorage.setItem('ENSS_LOGIN',u.profil);localStorage.setItem('ENSS_LOGIN_NISU',session.nisu);}catch(e){}
+}
+function clearSession(){session=null;window.__enssStudentSession=null;try{localStorage.removeItem('ENSS_LOGIN_NISU');}catch(e){}}
+/* Chak elèv = pwòp kont li (pwofil la pataje, NISU a se kle a). */
+var origCur=window.getCurrentUserObj;
+window.getCurrentUserObj=function(){
+ try{
+  var S=window.STATE;
+  if(S&&S.utilisateur){
+   var ses=session;
+   if(!ses){var n=null,p=null;try{n=localStorage.getItem('ENSS_LOGIN_NISU');p=localStorage.getItem('ENSS_LOGIN');}catch(e){}
+    if(n&&p&&p===S.utilisateur)ses=session={profil:p,nisu:n};}
+   if(ses&&ses.profil===S.utilisateur){
+    var u=usersList().find(function(x){return x&&x.profil===ses.profil&&nNisu(x.mdp)===nNisu(ses.nisu);});
+    if(u)return u;
+   }
+  }
+ }catch(e){}
+ return origCur?origCur.apply(this,arguments):null;
+};
+var origLogout=window.logout;
+if(typeof origLogout==='function'){window.logout=function(){var r=origLogout.apply(this,arguments);try{if(!window.STATE.utilisateur)clearSession();}catch(e){}return r;};}
+function lightInit(){
+ /* Sèlman sa ki ra: meni akèy la (pa gen navigateTo ni renderAccueil sou chemen kritik la). */
+ try{window.STATE.currentPage='accueil';}catch(e){}
+ try{if(typeof window.renderAccueilMenu==='function')window.renderAccueilMenu();}catch(e){console.warn('ENSS V157 menu',e);}
+}
+function deferredRefresh(u){
+ /* Apre 100 %: rafrechi akèy la pi ta, san bloke koneksyon an. */
+ setTimeout(function(){
+  try{if(!window.STATE||window.STATE.utilisateur!==u.profil)return;if(typeof window.renderAccueil==='function')window.renderAccueil();}catch(e){console.warn('ENSS V157 renderAccueil',e);}
+ },400);
+}
+function kickStudent(msg){
+ try{window.STATE.utilisateur=null;window.STATE.currentPage='accueil';}catch(e){}
+ try{localStorage.removeItem('ENSS_LOGIN');}catch(e){}clearSession();
+ try{if(typeof window.renderAccueilMenu==='function')window.renderAccueilMenu();}catch(e){}
+ try{if(typeof window.renderAccueil==='function')window.renderAccueil();}catch(e){}
+ try{if(typeof window.navigateTo==='function')window.navigateTo('accueil',false);}catch(e){}
+ say(msg,'#b91c1c');
+}
+function backgroundCheck(u){
+ if(typeof window.enssGetRoleAccess!=='function'||!navigator.onLine)return;
+ var timer=new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},8000);});
+ Promise.race([Promise.resolve().then(function(){return window.enssGetRoleAccess();}),timer]).then(function(g){
+  if(!g||typeof g!=='object')return;
+  /* Sèlman yon repons sèvè ki di eksplisitman eleves=false kanpe elèv la (kachè lokal pa bloke anyen ankò). */
+  if(g.eleves===false&&window.STATE&&window.STATE.utilisateur===u.profil)kickStudent('Aksè elèv yo dezaktive pa administratè ENSS la. Kontakte administrasyon an.');
+ }).catch(function(e){console.warn('ENSS V157 central check postponed:',e&&e.message);});
+}
+window.inlineLogin=async function(){
+ var ue=el('accueilLoginUser'),pe=el('accueilLoginPass');
+ if(!ue||!pe||!window.STATE)return previous?previous.apply(this,arguments):undefined;
+ var name=clean(ue.value),pass=clean(pe.value),u=null;
+ if(name){try{u=findStudentAccount(name,pass);}catch(e){console.warn('ENSS V157 find',e);}}
+ if(!u)return previous?previous.apply(this,arguments):undefined;   /* pa yon kont elèv: lojik ansyen an */
+ if(busy)return;busy=true;
+ try{
+  setProgress(10,'Pwofil elèv la jwenn…',false);await paint();
+  window.STATE.utilisateur=u.profil;setSession(u);
+  setProgress(40,'Ouvèti sesyon elèv la…',false);
+  pe.value='';await paint();
+  setProgress(75,'Ouvèti meni elèv la…',false);await paint();
+  lightInit();
+  var st=studentOf(u),who=st?(' — '+[st.prenom,st.nom].filter(Boolean).join(' ')):'';
+  say((navigator.onLine?'✓ Konekte kòm ':'✓ Konekte lokalman kòm ')+u.profil+who+'.','#16803c');
+  setProgress(100,'Koneksyon fini',true);hideProgressLater(2200);
+  try{if(typeof window.spawnHearts==='function')setTimeout(function(){try{window.spawnHearts();}catch(e){}},600);}catch(e){}
+  deferredRefresh(u);
+  backgroundCheck(u);
+ }catch(err){
+  console.error('ENSS V157 student login',err);
+  try{if(window.STATE.utilisateur===u.profil){setProgress(100,'Koneksyon fini',true);hideProgressLater(2200);return;}}catch(e){}
+  setProgress(0,'Koneksyon an pa reyisi',true);say('Pwoblèm teknik pandan koneksyon an. Eseye ankò.','#b91c1c');
+ }finally{
+  busy=false;var b=el('inlineLoginButton');if(b){b.disabled=false;b.textContent='🔐 Konekte';}
+ }
+};
+function tune(){['accueilLoginUser','accueilLoginPass'].forEach(function(id){var e=el(id);if(e){e.setAttribute('autocapitalize','off');e.setAttribute('autocorrect','off');e.setAttribute('spellcheck','false');}});}
+tune();document.addEventListener('DOMContentLoaded',tune);
 })();
 </script>
